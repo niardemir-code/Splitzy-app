@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Splitzy</string>
+    <string name="app_subtitle">Control inteligente de suscripciones</string>
+    <string name="default_web_client_id">345750792662-6bel6qbkrkmgcodbq5qvrpaiughmv66f.apps.googleusercontent.com</string>
+    
+    <!-- General -->
+    <string name="cancel">Cancelar</string>
+    <string name="save">Guardar</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
+    <string name="accept">Aceptar</string>
+    <string name="close">Cerrar</string>
+    <string name="back">Volver</string>
+    <string name="copy">Copiar</string>
+    <string name="share">Compartir</string>
+    <string name="optional">opcional</string>
+    
+    <!-- Settings -->
+    <string name="settings">Configuración</string>
+    <string name="appearance">Apariencia</string>
+    <string name="appearance_desc">Elige el tema visual de la aplicación</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_light_desc">Fondo luminoso con contraste optimizado</string>
+    <string name="theme_dark">Oscuro</string>
+    <string name="theme_dark_desc">Fondo oscuro de alto contraste y ahorro de energía</string>
+    <string name="theme_system">Usar configuración del sistema</string>
+    <string name="theme_system_desc">Se adapta automáticamente al tema de tu dispositivo Android</string>
+    <string name="language">Idioma</string>
+    <string name="language_auto">Automático (Idioma del sistema)</string>
+    <string name="language_auto_desc">Sincronizado con el idioma de tu teléfono o tablet</string>
+</resources>
