@@ -144,10 +144,10 @@ class FirebaseAuthService(
                 val init = try { com.google.firebase.FirebaseApp.initializeApp(ctx) } catch (_: Throwable) { null }
                 if (init == null) {
                     val options = com.google.firebase.FirebaseOptions.Builder()
-                        .setApplicationId("1:345750792662:android:7123300d38bec1521f1c77")
-                        .setApiKey("AIzaSyD5S5DI2FSp-LHWmdEhId-5zGETcrqsm78")
-                        .setProjectId("splitzy-8ceb1")
-                        .setStorageBucket("splitzy-8ceb1.firebasestorage.app")
+                        .setApplicationId("1:498651324948:android:1cacae6d0919a7a78dbd01")
+                        .setApiKey("AIzaSyAfdb5NIJtcratWCAebPD41hvWGTe5FSNA")
+                        .setProjectId("apleq-76e0a")
+                        .setStorageBucket("apleq-76e0a.firebasestorage.app")
                         .build()
                     com.google.firebase.FirebaseApp.initializeApp(ctx, options)
                 }
