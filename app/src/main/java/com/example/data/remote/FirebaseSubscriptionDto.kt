@@ -29,7 +29,6 @@ data class FirebaseSubscriptionDto(
     val alarmDaysBefore: Int = 3,
     val notes: String = "",
     val platformPricing: String = "",
-    val archived: Boolean = false,
     val createdAt: String = "",
     val updatedAt: String = "",
     val members: List<FirebaseMemberDto> = emptyList()
