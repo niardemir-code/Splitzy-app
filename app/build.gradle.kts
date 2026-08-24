@@ -10,11 +10,11 @@ plugins {
 }
 
 android {
-  namespace = "com.example"
+  namespace = "com.apleq.app"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.sharedsubs.vqyrtm"
+    applicationId = "com.apleq.app"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
