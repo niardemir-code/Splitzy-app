@@ -489,7 +489,7 @@ fun AddEditMemberDialog(
                         ) {
                             val currItem = CurrencyManager.findCurrency(selectedCurrencyCode)
                             OutlinedTextField(
-                                value = "${currItem.flag} ${currItem.code}",
+                                value = "${currItem.flag} ${currItem.code} (${currItem.symbol})",
                                 onValueChange = {},
                                 readOnly = true,
                                 textStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),

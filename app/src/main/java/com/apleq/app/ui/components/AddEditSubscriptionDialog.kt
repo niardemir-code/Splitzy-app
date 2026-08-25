@@ -438,7 +438,7 @@ fun AddEditSubscriptionDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // 4. Dinero que me cuesta a mí (con selector de divisas y conversión a euros)
+                // 4. Dinero que me cuesta a mí (con selector de divisas y conversión a euros en la misma línea)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -458,7 +458,7 @@ fun AddEditSubscriptionDialog(
                             { Text("Introduce un importe numérico") }
                         } else null,
                         modifier = Modifier
-                            .weight(0.58f)
+                            .weight(0.50f)
                             .testTag("input_sub_cost"),
                         singleLine = true,
                         maxLines = 1,
@@ -469,10 +469,10 @@ fun AddEditSubscriptionDialog(
                     ExposedDropdownMenuBox(
                         expanded = currencyDropdownExpanded,
                         onExpandedChange = { currencyDropdownExpanded = !currencyDropdownExpanded },
-                        modifier = Modifier.weight(0.42f)
+                        modifier = Modifier.weight(0.50f)
                     ) {
                         OutlinedTextField(
-                            value = "${selectedCurrency.flag} ${selectedCurrency.code}",
+                            value = "${selectedCurrency.flag} ${selectedCurrency.code} (${selectedCurrency.symbol})",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Moneda") },
@@ -490,7 +490,7 @@ fun AddEditSubscriptionDialog(
                         ExposedDropdownMenu(
                             expanded = currencyDropdownExpanded,
                             onDismissRequest = { currencyDropdownExpanded = false },
-                            modifier = Modifier.widthIn(min = 220.dp)
+                            modifier = Modifier.widthIn(min = 180.dp)
                         ) {
                             CurrencyManager.currencies.forEach { curr ->
                                 DropdownMenuItem(
@@ -1382,92 +1382,95 @@ fun AddEditSubscriptionDialog(
                         }
                     }
 
-                    // 2. Precio que paga la plataforma por usuario
-                    Column {
-                        Text(
-                            text = "Precio por usuario / slot *",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = editModalPriceText,
-                            onValueChange = { editModalPriceText = it },
-                            placeholder = { Text("0.00") },
-                            leadingIcon = {
-                                Text(
-                                    text = editModalCurrency.symbol,
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(start = 12.dp)
-                                )
-                            },
-                            trailingIcon = {
-                                Text(
-                                    text = editModalBillingPeriod.suffix,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(end = 12.dp)
-                                )
-                            },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            singleLine = true,
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("input_modal_platform_price")
-                        )
-                    }
-
-                    // 3. Moneda con la que paga la plataforma (Desplegable independiente)
-                    Column {
-                        Text(
-                            text = "Moneda con la que paga la plataforma *",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        ExposedDropdownMenuBox(
-                            expanded = editModalCurrencyDropdownExpanded,
-                            onExpandedChange = { editModalCurrencyDropdownExpanded = it }
-                        ) {
-                            OutlinedTextField(
-                                value = "${editModalCurrency.flag} ${editModalCurrency.name} (${editModalCurrency.symbol} - ${editModalCurrency.code})",
-                                onValueChange = {},
-                                readOnly = true,
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editModalCurrencyDropdownExpanded) },
-                                modifier = Modifier
-                                    .menuAnchor()
-                                    .fillMaxWidth()
-                                    .testTag("dropdown_modal_platform_currency"),
-                                shape = RoundedCornerShape(10.dp)
+                    // 2. Precio y Moneda en la misma línea
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column(modifier = Modifier.weight(0.50f)) {
+                            Text(
+                                text = "Precio / slot *",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
                             )
-
-                            ExposedDropdownMenu(
-                                expanded = editModalCurrencyDropdownExpanded,
-                                onDismissRequest = { editModalCurrencyDropdownExpanded = false }
-                            ) {
-                                CurrencyManager.currencies.forEach { currencyItem ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(currencyItem.flag, fontSize = 16.sp)
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Text(currencyItem.name)
-                                                Spacer(modifier = Modifier.weight(1f))
-                                                Text(
-                                                    text = "${currencyItem.symbol} (${currencyItem.code})",
-                                                    style = MaterialTheme.typography.labelMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        },
-                                        onClick = {
-                                            editModalCurrency = currencyItem
-                                            editModalCurrencyDropdownExpanded = false
-                                        }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            OutlinedTextField(
+                                value = editModalPriceText,
+                                onValueChange = { editModalPriceText = it },
+                                placeholder = { Text("0.00") },
+                                leadingIcon = {
+                                    Text(
+                                        text = editModalCurrency.symbol,
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(start = 12.dp)
                                     )
+                                },
+                                trailingIcon = {
+                                    Text(
+                                        text = editModalBillingPeriod.suffix,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(end = 12.dp)
+                                    )
+                                },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                singleLine = true,
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("input_modal_platform_price")
+                            )
+                        }
+
+                        Column(modifier = Modifier.weight(0.50f)) {
+                            Text(
+                                text = "Moneda *",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            ExposedDropdownMenuBox(
+                                expanded = editModalCurrencyDropdownExpanded,
+                                onExpandedChange = { editModalCurrencyDropdownExpanded = it },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                OutlinedTextField(
+                                    value = "${editModalCurrency.flag} ${editModalCurrency.code} (${editModalCurrency.symbol})",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editModalCurrencyDropdownExpanded) },
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth()
+                                        .testTag("dropdown_modal_platform_currency"),
+                                    shape = RoundedCornerShape(10.dp),
+                                    singleLine = true
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = editModalCurrencyDropdownExpanded,
+                                    onDismissRequest = { editModalCurrencyDropdownExpanded = false }
+                                ) {
+                                    CurrencyManager.currencies.forEach { currencyItem ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = "${currencyItem.flag} ${currencyItem.code} (${currencyItem.symbol})",
+                                                    maxLines = 1,
+                                                    softWrap = false,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = if (currencyItem.code == editModalCurrency.code) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            },
+                                            onClick = {
+                                                editModalCurrency = currencyItem
+                                                editModalCurrencyDropdownExpanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
