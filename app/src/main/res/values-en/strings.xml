@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Splitzy</string>
     <string name="app_subtitle">Smart subscription tracking</string>
-    <string name="default_web_client_id">345750792662-6bel6qbkrkmgcodbq5qvrpaiughmv66f.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">498651324948-18qocdi9iqatn6kc4isaof5d0bhate0q.apps.googleusercontent.com</string>
     
     <!-- General -->
     <string name="cancel">Cancel</string>

@@ -163,7 +163,7 @@ class FirebaseAuthService(
     suspend fun signInWithGoogle(): Result<FirebaseUser> = withContext(Dispatchers.IO) {
         _authState.value = AuthState.Loading
         try {
-            val serverClientId = getWebClientId() ?: "345750792662-6bel6qbkrkmgcodbq5qvrpaiughmv66f.apps.googleusercontent.com"
+            val serverClientId = getWebClientId() ?: "498651324948-18qocdi9iqatn6kc4isaof5d0bhate0q.apps.googleusercontent.com"
 
             val signInWithGoogleOption = GetSignInWithGoogleOption.Builder(serverClientId)
                 .build()
@@ -1787,9 +1787,9 @@ class FirebaseAuthService(
     private fun getWebClientId(): String? {
         return try {
             val resId = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
-            if (resId != 0) context.getString(resId) else "345750792662-6bel6qbkrkmgcodbq5qvrpaiughmv66f.apps.googleusercontent.com"
+            if (resId != 0) context.getString(resId) else "498651324948-18qocdi9iqatn6kc4isaof5d0bhate0q.apps.googleusercontent.com"
         } catch (_: Exception) {
-            "345750792662-6bel6qbkrkmgcodbq5qvrpaiughmv66f.apps.googleusercontent.com"
+            "498651324948-18qocdi9iqatn6kc4isaof5d0bhate0q.apps.googleusercontent.com"
         }
     }
 
