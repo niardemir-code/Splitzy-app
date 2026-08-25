@@ -577,16 +577,30 @@ class FirebaseAuthService(
         val user = auth?.currentUser ?: return@withContext
         val db = firestore ?: return@withContext
         try {
-            db.collection("users").document(user.uid)
+            val userSubDoc = db.collection("users").document(user.uid)
                 .collection("subscriptions").document(subscriptionId.toString())
-                .delete().await()
+            try {
+                val subMembersSnap = userSubDoc.collection("members").get().await()
+                for (doc in subMembersSnap.documents) {
+                    doc.reference.delete().await()
+                }
+            } catch (e: Exception) {
+                Log.w("FirebaseAuthService", "Error deleting sub members from user collection: ${e.message}")
+            }
+            userSubDoc.delete().await()
         } catch (e: Exception) {
             Log.w("FirebaseAuthService", "Error deleting sub from user collection: ${e.message}")
         }
         // Limpieza de seguridad en caso de existir en raíz
         try {
-            db.collection("subscriptions").document(subscriptionId.toString())
-                .delete().await()
+            val rootSubDoc = db.collection("subscriptions").document(subscriptionId.toString())
+            try {
+                val rootMembersSnap = rootSubDoc.collection("members").get().await()
+                for (doc in rootMembersSnap.documents) {
+                    doc.reference.delete().await()
+                }
+            } catch (_: Exception) {}
+            rootSubDoc.delete().await()
         } catch (_: Exception) {}
     }
 
