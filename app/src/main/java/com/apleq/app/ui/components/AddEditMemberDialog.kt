@@ -107,7 +107,7 @@ fun AddEditMemberDialog(
     var memberName by remember {
         mutableStateOf(memberToEdit?.memberName ?: "")
     }
-    val initialSharingPlatform = memberToEdit?.sharingPlatform ?: (platformPrices.firstOrNull()?.platformName ?: "")
+    val initialSharingPlatform = memberToEdit?.sharingPlatform ?: ""
     val initialMatchedPlatformPrice = platformPrices.find { it.platformName.equals(initialSharingPlatform, ignoreCase = true) }
 
     var sharingPlatform by remember {
@@ -404,6 +404,27 @@ fun AddEditMemberDialog(
                                 expanded = platformDropdownExpanded,
                                 onDismissRequest = { platformDropdownExpanded = false }
                             ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = "Sin plataforma",
+                                            fontWeight = if (sharingPlatform.isBlank()) FontWeight.Bold else FontWeight.Normal,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(12.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.outlineVariant)
+                                        )
+                                    },
+                                    onClick = {
+                                        sharingPlatform = ""
+                                        platformDropdownExpanded = false
+                                    }
+                                )
                                 platformPrices.forEach { pItem ->
                                     val pInfo = SharingPlatforms.getInfo(pItem.platformName, availablePlatforms)
                                     val isSelected = sharingPlatform.equals(pItem.platformName, ignoreCase = true)
