@@ -450,13 +450,10 @@ fun AddEditSubscriptionDialog(
                             costText = it
                             costError = it.replace(',', '.').toDoubleOrNull() == null
                         },
-                        label = { Text("Precio (${selectedCurrency.symbol}${billingPeriod.suffix}) *") },
-                        placeholder = { Text(if (billingPeriod == BillingPeriod.YEARLY) "119.99" else "17.99") },
+                        label = { Text("Precio") },
+                        placeholder = { Text("0.00") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        isError = costError,
-                        supportingText = if (costError) {
-                            { Text("Introduce un importe numérico") }
-                        } else null,
+                        isError = costError && costText.isNotBlank(),
                         modifier = Modifier
                             .weight(0.50f)
                             .testTag("input_sub_cost"),
@@ -1145,6 +1142,13 @@ fun AddEditSubscriptionDialog(
                         Text("Cancelar")
                     }
 
+                    val parsedCurrentCost = costText.replace(',', '.').toDoubleOrNull()
+                    val isFormValid = platformName.isNotBlank() &&
+                            mainUserName.isNotBlank() &&
+                            category.isNotBlank() &&
+                            parsedCurrentCost != null &&
+                            parsedCurrentCost > 0.0
+
                     Button(
                         onClick = {
                             val cost = costText.replace(',', '.').toDoubleOrNull()
@@ -1209,6 +1213,7 @@ fun AddEditSubscriptionDialog(
                             )
                             onSave(entity)
                         },
+                        enabled = isFormValid,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.testTag("save_sub_btn")
                     ) {
