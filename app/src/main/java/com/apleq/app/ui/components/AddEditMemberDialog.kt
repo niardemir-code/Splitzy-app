@@ -1251,7 +1251,7 @@ fun AddEditMemberDialog(
                                 id = memberToEdit?.id ?: 0,
                                 subscriptionId = sub.id,
                                 memberName = trimmedName,
-                                sharingPlatform = sharingPlatform.ifBlank { "Sharesub" },
+                                sharingPlatform = sharingPlatform.trim(),
                                 memberContact = memberContact.trim(),
                                 joinedDate = joinedDateTimestamp,
                                 joinedDateStr = isoJoined,

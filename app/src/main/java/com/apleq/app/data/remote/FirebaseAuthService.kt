@@ -403,9 +403,9 @@ class FirebaseAuthService(
                         "memberName" to m.memberName,
                         "member_name" to m.memberName,
                         "name" to m.memberName,
-                        "sharingPlatform" to m.sharingPlatform.ifBlank { "Sharesub" },
-                        "sharing_platform" to m.sharingPlatform.ifBlank { "Sharesub" },
-                        "platform" to m.sharingPlatform.ifBlank { "Sharesub" },
+                        "sharingPlatform" to m.sharingPlatform,
+                        "sharing_platform" to m.sharingPlatform,
+                        "platform" to m.sharingPlatform,
                         "memberContact" to m.memberContact,
                         "member_contact" to m.memberContact,
                         "contact" to m.memberContact,
@@ -841,9 +841,9 @@ class FirebaseAuthService(
                         "memberName" to m.memberName,
                         "member_name" to m.memberName,
                         "name" to m.memberName,
-                        "sharingPlatform" to m.sharingPlatform.ifBlank { "Sharesub" },
-                        "sharing_platform" to m.sharingPlatform.ifBlank { "Sharesub" },
-                        "platform" to m.sharingPlatform.ifBlank { "Sharesub" },
+                        "sharingPlatform" to m.sharingPlatform,
+                        "sharing_platform" to m.sharingPlatform,
+                        "platform" to m.sharingPlatform,
                         "memberContact" to m.memberContact,
                         "member_contact" to m.memberContact,
                         "contact" to m.memberContact,
@@ -1301,7 +1301,7 @@ class FirebaseAuthService(
                 ?: (rawItem["platform"] as? String)?.trim()
                 ?: (rawItem["sharing_platform"] as? String)?.trim()
                 ?: (rawItem["service"] as? String)?.trim()
-                ?: "Sharesub"
+                ?: ""
 
             val mContact = (rawItem["memberContact"] as? String)?.trim()
                 ?: (rawItem["contact"] as? String)?.trim()

@@ -22,7 +22,7 @@ data class MemberEntity(
     val id: Long = 0,
     val subscriptionId: Long,
     val memberName: String,
-    val sharingPlatform: String = "Sharesub", // Sharesub, Together Price, Spliiit, Sharingful
+    val sharingPlatform: String = "", // Sharesub, Together Price, Spliiit, Sharingful
     val memberContact: String = "", // Email o teléfono para avisos / recordatorios
     val joinedDate: Long = System.currentTimeMillis(), // Timestamp en milisegundos
     val joinedDateStr: String = "", // Formato YYYY-MM-DD
