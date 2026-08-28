@@ -32,7 +32,7 @@ fun SplitzyLogo(
         modifier = modifier.size(size),
         contentAlignment = Alignment.Center
     ) {
-        val painter = runCatching { painterResource(id = R.drawable.ic_launcher_foreground) }
+        val painter = runCatching { painterResource(id = R.drawable.ic_apleq_logo) }
             .getOrNull()
             ?: runCatching { painterResource(id = R.drawable.ic_splitzy_app_logo) }
                 .getOrNull()
@@ -40,7 +40,7 @@ fun SplitzyLogo(
         if (painter != null) {
             Image(
                 painter = painter,
-                contentDescription = "Splitzy Logo",
+                contentDescription = "Apleq Logo",
                 modifier = Modifier
                     .size(size)
                     .clip(RoundedCornerShape(cornerRadius)),
@@ -59,7 +59,7 @@ fun SplitzyLogo(
             ) {
                 Icon(
                     imageVector = Icons.Default.Group,
-                    contentDescription = "Splitzy Logo",
+                    contentDescription = "Apleq Logo",
                     tint = Color.White,
                     modifier = Modifier.size(size * 0.6f)
                 )

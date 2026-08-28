@@ -138,7 +138,7 @@ fun HomeScreen(
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Splitzy",
+                                    text = "Apleq",
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 22.sp,
@@ -156,7 +156,7 @@ fun HomeScreen(
                             }
                             Text(
                                 text = if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
-                                    (authState as com.apleq.app.data.remote.AuthState.Authenticated).user.email ?: "Splitzy"
+                                    (authState as com.apleq.app.data.remote.AuthState.Authenticated).user.email ?: "Apleq"
                                 } else {
                                     I18n.appSubtitle
                                 },

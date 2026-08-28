@@ -1,5 +1,5 @@
 {
-  "name": "Splitzy",
+  "name": "Apleq",
   "description": "Gestor de suscripciones compartidas con control de miembros, aportes, periodos de cobro y balance neto.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

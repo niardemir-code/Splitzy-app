@@ -32,7 +32,7 @@ object I18n {
     // ==========================================
     // GENERAL & COMMON
     // ==========================================
-    val appName: String get() = "Splitzy"
+    val appName: String get() = "Apleq"
     val appSubtitle: String get() = when {
         isSpanish -> "Control inteligente de suscripciones"
         isCatalan -> "Control intel·ligent de subscripcions"

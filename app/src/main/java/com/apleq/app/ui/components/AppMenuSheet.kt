@@ -88,7 +88,7 @@ fun AppMenuSheet(
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Splitzy",
+                            text = "Apleq",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 22.sp,
@@ -219,7 +219,7 @@ fun AppMenuSheet(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Splitzy • Privacidad local y sincronización segura",
+                    text = "Apleq • Privacidad local y sincronización segura",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

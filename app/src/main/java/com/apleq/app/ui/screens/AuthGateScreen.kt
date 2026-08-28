@@ -112,7 +112,7 @@ fun AuthGateScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Splitzy",
+                    text = "Apleq",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = (-0.5).sp
