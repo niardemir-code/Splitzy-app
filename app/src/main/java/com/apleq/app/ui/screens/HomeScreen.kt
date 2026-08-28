@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.apleq.app.ui.theme.Quicksand
 import com.apleq.app.data.local.SubscriptionEntity
 import com.apleq.app.ui.components.AddEditMemberDialog
 import com.apleq.app.ui.components.AddEditSubscriptionDialog
@@ -140,7 +141,8 @@ fun HomeScreen(
                                 Text(
                                     text = "Apleq",
                                     style = MaterialTheme.typography.titleLarge.copy(
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontFamily = Quicksand,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 22.sp,
                                         letterSpacing = (-0.5).sp
                                     ),

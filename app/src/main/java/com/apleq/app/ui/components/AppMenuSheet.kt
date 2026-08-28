@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apleq.app.ui.theme.Quicksand
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +91,8 @@ fun AppMenuSheet(
                         Text(
                             text = "Apleq",
                             style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.ExtraBold,
+                                fontFamily = Quicksand,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 22.sp,
                                 letterSpacing = (-0.5).sp
                             ),

@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apleq.app.data.remote.AuthState
 import com.apleq.app.ui.components.SplitzyLogo
+import com.apleq.app.ui.theme.Quicksand
 import com.apleq.app.ui.viewmodel.SubscriptionViewModel
 
 @Composable
@@ -114,7 +115,8 @@ fun AuthGateScreen(
                 Text(
                     text = "Apleq",
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = Quicksand,
+                        fontWeight = FontWeight.Bold,
                         letterSpacing = (-0.5).sp
                     ),
                     color = MaterialTheme.colorScheme.onBackground
