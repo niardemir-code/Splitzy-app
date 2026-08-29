@@ -1536,7 +1536,8 @@ fun AddEditSubscriptionDialog(
                         onValueChange = { editModalDefaultMethod = it },
                         label = { Text("Método habitual por defecto (opcional)") },
                         placeholder = { Text("Ej. Bizum, Sharesub Wallet, Joiin...") },
-                        singleLine = true,
+                        singleLine = false,
+                        maxLines = 3,
                         modifier = Modifier.fillMaxWidth()
                     )
 

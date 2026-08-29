@@ -570,8 +570,8 @@ fun AddEditMemberDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("input_member_payment_method"),
-                        singleLine = true,
-                        maxLines = 1,
+                        singleLine = false,
+                        maxLines = 3,
                         shape = RoundedCornerShape(12.dp)
                     )
 
