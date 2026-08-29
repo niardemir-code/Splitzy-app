@@ -246,7 +246,7 @@ object BackupManager {
                         id = 0, // Auto-generate new primary key
                         subscriptionId = newSubId,
                         memberName = obj.optString("memberName", "Usuario"),
-                        sharingPlatform = obj.optString("sharingPlatform", "Sharesub"),
+                        sharingPlatform = obj.optString("sharingPlatform", ""),
                         memberContact = obj.optString("memberContact", ""),
                         joinedDate = obj.optLong("joinedDate", System.currentTimeMillis()),
                         joinedDateStr = obj.optString("joinedDateStr", ""),

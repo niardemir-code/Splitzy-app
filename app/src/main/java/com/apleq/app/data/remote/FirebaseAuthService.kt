@@ -342,11 +342,31 @@ class FirebaseAuthService(
             val now = System.currentTimeMillis()
 
             for (sub in subs) {
-                val imageBase64 = if ((sub.iconType == "CUSTOM_IMAGE" || sub.customImageUri.isNotBlank()) && sub.customImageUri.isNotBlank()) {
-                    ImageStorageHelper.imageToBase64(context, sub.customImageUri) ?: ""
-                } else {
-                    ""
+                // --- Imagen personalizada: subir a Storage y guardar URL (en vez de base64) ---
+                val hasCustomImage = (sub.iconType == "CUSTOM_IMAGE" || sub.customImageUri.isNotBlank()) && sub.customImageUri.isNotBlank()
+                val alreadyRemote = sub.customImageUri.startsWith("http://") || sub.customImageUri.startsWith("https://")
+
+                var remoteImageUrl = ""
+                var imageBase64 = ""
+                if (alreadyRemote) {
+                    remoteImageUrl = sub.customImageUri
+                } else if (hasCustomImage) {
+                    val uploaded = ImageStorageHelper.uploadImageToStorage(
+                        context,
+                        sub.customImageUri,
+                        "users/${user.uid}/subscriptions/${sub.id}/custom_logo.jpg"
+                    )
+                    if (uploaded != null) {
+                        remoteImageUrl = uploaded
+                        // Actualiza la entidad local para no re-subir en cada sincronización
+                        try { dao.updateSubscription(sub.copy(customImageUri = uploaded)) } catch (_: Exception) {}
+                    } else {
+                        // Fallback: si Storage falla, mantenemos base64 para no perder la imagen
+                        imageBase64 = ImageStorageHelper.imageToBase64(context, sub.customImageUri) ?: ""
+                    }
                 }
+                val dataUriString = if (imageBase64.isNotBlank()) "data:image/jpeg;base64,$imageBase64" else ""
+                val imageFieldValue = if (remoteImageUrl.isNotBlank()) remoteImageUrl else dataUriString
 
                 val subMembers = membersBySubId[sub.id] ?: emptyList()
                 val isoCreatedAt = formatIsoTimestamp(sub.createdAt)
@@ -368,7 +388,6 @@ class FirebaseAuthService(
                     else -> "MONTHLY"
                 }
 
-                val dataUriString = if (imageBase64.isNotBlank()) "data:image/jpeg;base64,$imageBase64" else ""
                 val effectiveSlots = if (sub.maxSlots > 0) sub.maxSlots else if (subMembers.size + 1 > 4) subMembers.size + 1 else 4
 
                 val parsedPricingList = PlatformPricingHelper.parse(sub.platformPricing).map {
@@ -486,12 +505,12 @@ class FirebaseAuthService(
                     "icon_key" to sub.iconKey.ifBlank { "Netflix" },
                     "iconColorHex" to sub.iconColorHex.ifBlank { "#6366F1" },
                     "icon_color_hex" to sub.iconColorHex.ifBlank { "#6366F1" },
-                    "customImageUri" to sub.customImageUri,
+                    "customImageUri" to (if (remoteImageUrl.isNotBlank()) remoteImageUrl else sub.customImageUri),
                     "customImageBase64" to imageBase64,
                     "custom_image_base64" to imageBase64,
-                    "customImage" to (if (dataUriString.isNotBlank()) dataUriString else sub.customImageUri),
-                    "logo" to (if (dataUriString.isNotBlank()) dataUriString else sub.customImageUri),
-                    "image" to (if (dataUriString.isNotBlank()) dataUriString else sub.customImageUri),
+                    "customImage" to (if (imageFieldValue.isNotBlank()) imageFieldValue else sub.customImageUri),
+                    "logo" to (if (imageFieldValue.isNotBlank()) imageFieldValue else sub.customImageUri),
+                    "image" to (if (imageFieldValue.isNotBlank()) imageFieldValue else sub.customImageUri),
                     "enableAlarm" to sub.enableAlarm,
                     "enable_alarm" to sub.enableAlarm,
                     "alarmValue" to sub.alarmValue,
@@ -891,13 +910,31 @@ class FirebaseAuthService(
                     )
                 }
 
-                val imageBase64 = if ((sub.iconType == "CUSTOM_IMAGE" || sub.customImageUri.isNotBlank()) && sub.customImageUri.isNotBlank()) {
-                    ImageStorageHelper.imageToBase64(context, sub.customImageUri) ?: ""
-                } else {
-                    ""
-                }
+                // --- Imagen personalizada: subir a Storage y guardar URL (en vez de base64) ---
+                val hasCustomImage = (sub.iconType == "CUSTOM_IMAGE" || sub.customImageUri.isNotBlank()) && sub.customImageUri.isNotBlank()
+                val alreadyRemote = sub.customImageUri.startsWith("http://") || sub.customImageUri.startsWith("https://")
 
+                var remoteImageUrl = ""
+                var imageBase64 = ""
+                if (alreadyRemote) {
+                    remoteImageUrl = sub.customImageUri
+                } else if (hasCustomImage) {
+                    val uploaded = ImageStorageHelper.uploadImageToStorage(
+                        context,
+                        sub.customImageUri,
+                        "users/${user.uid}/subscriptions/${sub.id}/custom_logo.jpg"
+                    )
+                    if (uploaded != null) {
+                        remoteImageUrl = uploaded
+                        // Actualiza la entidad local para no re-subir en cada sincronización
+                        try { dao.updateSubscription(sub.copy(customImageUri = uploaded)) } catch (_: Exception) {}
+                    } else {
+                        // Fallback: si Storage falla, mantenemos base64 para no perder la imagen
+                        imageBase64 = ImageStorageHelper.imageToBase64(context, sub.customImageUri) ?: ""
+                    }
+                }
                 val dataUriString = if (imageBase64.isNotBlank()) "data:image/jpeg;base64,$imageBase64" else ""
+                val imageFieldValue = if (remoteImageUrl.isNotBlank()) remoteImageUrl else dataUriString
                 val effectiveSlots = if (sub.maxSlots > 0) sub.maxSlots else if (mems.size + 1 > 4) mems.size + 1 else 4
 
                 val cleanMap = mapOf(
@@ -933,12 +970,12 @@ class FirebaseAuthService(
                     "icon_key" to sub.iconKey.ifBlank { "Netflix" },
                     "iconColorHex" to sub.iconColorHex.ifBlank { "#6366F1" },
                     "icon_color_hex" to sub.iconColorHex.ifBlank { "#6366F1" },
-                    "customImageUri" to sub.customImageUri,
+                    "customImageUri" to (if (remoteImageUrl.isNotBlank()) remoteImageUrl else sub.customImageUri),
                     "customImageBase64" to imageBase64,
                     "custom_image_base64" to imageBase64,
-                    "customImage" to (if (dataUriString.isNotBlank()) dataUriString else sub.customImageUri),
-                    "logo" to (if (dataUriString.isNotBlank()) dataUriString else sub.customImageUri),
-                    "image" to (if (dataUriString.isNotBlank()) dataUriString else sub.customImageUri),
+                    "customImage" to (if (imageFieldValue.isNotBlank()) imageFieldValue else sub.customImageUri),
+                    "logo" to (if (imageFieldValue.isNotBlank()) imageFieldValue else sub.customImageUri),
+                    "image" to (if (imageFieldValue.isNotBlank()) imageFieldValue else sub.customImageUri),
                     "enableAlarm" to sub.enableAlarm,
                     "enable_alarm" to sub.enableAlarm,
                     "alarmValue" to sub.alarmValue,

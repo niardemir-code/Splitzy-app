@@ -5,6 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
+import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -13,6 +16,41 @@ object ImageStorageHelper {
 
     private const val MAX_ICON_DIMENSION = 256
     private const val COMPRESSION_QUALITY = 85
+
+    /**
+     * Sube una imagen personalizada a Firebase Storage y devuelve su URL de descarga.
+     */
+    suspend fun uploadImageToStorage(
+        context: Context,
+        imagePathOrUri: String,
+        storagePath: String,
+        maxDim: Int = MAX_ICON_DIMENSION,
+        quality: Int = COMPRESSION_QUALITY
+    ): String? {
+        return try {
+            if (imagePathOrUri.isBlank()) return null
+            val bitmap = if (imagePathOrUri.startsWith("content://") || imagePathOrUri.startsWith("file://")) {
+                decodeSampledBitmapFromUri(context, Uri.parse(imagePathOrUri), maxDim, maxDim)
+            } else {
+                val file = File(imagePathOrUri)
+                if (!file.exists()) return null
+                decodeSampledBitmapFromFile(file.absolutePath, maxDim, maxDim)
+            } ?: return null
+
+            val byteStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteStream)
+            val bytes = byteStream.toByteArray()
+            bitmap.recycle()
+
+            val ref = FirebaseStorage.getInstance().reference.child(storagePath)
+            val metadata = StorageMetadata.Builder().setContentType("image/jpeg").build()
+            ref.putBytes(bytes, metadata).await()
+            ref.downloadUrl.await().toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 
     /**
      * Guarda una imagen seleccionada desde la galería optimizándola a resolución mínima
