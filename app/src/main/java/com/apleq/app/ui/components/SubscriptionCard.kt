@@ -739,11 +739,26 @@ private fun calculateMemberNextCycle(member: com.apleq.app.data.local.MemberEnti
     val cal = java.util.Calendar.getInstance()
     cal.timeInMillis = baseMillis
     val value = if (member.paymentFrequencyValue > 0) member.paymentFrequencyValue else 1
-    when (member.paymentFrequencyUnit.lowercase()) {
-        "days", "dias", "día", "días" -> cal.add(java.util.Calendar.DAY_OF_MONTH, value)
-        "weeks", "semanas", "semana" -> cal.add(java.util.Calendar.WEEK_OF_YEAR, value)
-        "years", "anos", "años", "año", "ano" -> cal.add(java.util.Calendar.YEAR, value)
-        else -> cal.add(java.util.Calendar.MONTH, value)
+
+    fun addOnePeriod() {
+        when (member.paymentFrequencyUnit.lowercase()) {
+            "days", "dias", "día", "días" -> cal.add(java.util.Calendar.DAY_OF_MONTH, value)
+            "weeks", "semanas", "semana" -> cal.add(java.util.Calendar.WEEK_OF_YEAR, value)
+            "years", "anos", "años", "año", "ano" -> cal.add(java.util.Calendar.YEAR, value)
+            else -> cal.add(java.util.Calendar.MONTH, value)
+        }
+    }
+
+    val todayMillis = java.util.Calendar.getInstance().apply {
+        set(java.util.Calendar.HOUR_OF_DAY, 0); set(java.util.Calendar.MINUTE, 0)
+        set(java.util.Calendar.SECOND, 0); set(java.util.Calendar.MILLISECOND, 0)
+    }.timeInMillis
+
+    addOnePeriod()
+    var safety = 0
+    while (cal.timeInMillis < todayMillis && safety < 1200) {
+        safety++
+        addOnePeriod()
     }
     return cal.timeInMillis
 }
