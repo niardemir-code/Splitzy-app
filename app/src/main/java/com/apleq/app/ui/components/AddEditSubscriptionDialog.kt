@@ -106,7 +106,8 @@ data class ConfiguredPlatformUi(
     val platformName: String,
     val price: String,
     val currency: String = "EUR",
-    val billingPeriod: BillingPeriod = BillingPeriod.MONTHLY
+    val billingPeriod: BillingPeriod = BillingPeriod.MONTHLY,
+    val defaultPaymentMethod: String = ""
 )
 
 val availableCategories = listOf(
@@ -168,7 +169,8 @@ fun AddEditSubscriptionDialog(
                             platformName = it.platformName,
                             price = if (it.pricePerUser > 0) String.format(Locale.US, "%.2f", it.pricePerUser) else "",
                             currency = it.currency,
-                            billingPeriod = BillingPeriod.fromKey(it.billingPeriod)
+                            billingPeriod = BillingPeriod.fromKey(it.billingPeriod),
+                            defaultPaymentMethod = it.defaultPaymentMethod
                         )
                     }
                 } else if (subscriptionToEdit.defaultContributionPerUser > 0) {
@@ -201,6 +203,7 @@ fun AddEditSubscriptionDialog(
     var editModalCustomPlatformInput by remember { mutableStateOf(false) }
     var editModalCustomPlatformName by remember { mutableStateOf("") }
     var editModalError by remember { mutableStateOf(false) }
+    var editModalDefaultMethod by remember { mutableStateOf("") }
 
     var billingDayText by remember {
         mutableStateOf(
@@ -943,6 +946,7 @@ fun AddEditSubscriptionDialog(
                                 onClick = {
                                     editModalPlatformName = ""
                                     editModalPriceText = ""
+                                    editModalDefaultMethod = ""
                                     editModalCurrency = CurrencyManager.findCurrency("EUR")
                                     editModalBillingPeriod = BillingPeriod.MONTHLY
                                     editModalCustomPlatformInput = false
@@ -1004,6 +1008,7 @@ fun AddEditSubscriptionDialog(
                                         .clickable {
                                             editModalPlatformName = item.platformName
                                             editModalPriceText = item.price
+                                            editModalDefaultMethod = item.defaultPaymentMethod
                                             editModalCurrency = itemCurrency
                                             editModalBillingPeriod = itemPeriod
                                             editModalCustomPlatformInput = false
@@ -1055,6 +1060,7 @@ fun AddEditSubscriptionDialog(
                                             onClick = {
                                                 editModalPlatformName = item.platformName
                                                 editModalPriceText = item.price
+                                                editModalDefaultMethod = item.defaultPaymentMethod
                                                 editModalCurrency = itemCurrency
                                                 editModalBillingPeriod = itemPeriod
                                                 editModalCustomPlatformInput = false
@@ -1172,7 +1178,8 @@ fun AddEditSubscriptionDialog(
                                         platformName = item.platformName.trim(),
                                         pricePerUser = p,
                                         currency = item.currency.trim().uppercase(),
-                                        billingPeriod = item.billingPeriod.key
+                                        billingPeriod = item.billingPeriod.key,
+                                        defaultPaymentMethod = item.defaultPaymentMethod
                                     )
                                 } else null
                             }
@@ -1523,6 +1530,16 @@ fun AddEditSubscriptionDialog(
                         }
                     }
 
+                    // Método habitual por defecto (opcional)
+                    OutlinedTextField(
+                        value = editModalDefaultMethod,
+                        onValueChange = { editModalDefaultMethod = it },
+                        label = { Text("Método habitual por defecto (opcional)") },
+                        placeholder = { Text("Ej. Bizum, Sharesub Wallet, Joiin...") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     // 5. Tarjeta de vista previa
                     Surface(
                         shape = RoundedCornerShape(10.dp),
@@ -1561,7 +1578,8 @@ fun AddEditSubscriptionDialog(
                             platformName = editModalPlatformName.trim(),
                             price = editModalPriceText.trim(),
                             currency = editModalCurrency.code,
-                            billingPeriod = editModalBillingPeriod
+                            billingPeriod = editModalBillingPeriod,
+                            defaultPaymentMethod = editModalDefaultMethod.trim().replace(":", "").replace("|", "")
                         )
                         if (isNew) {
                             if (configuredPlatforms.size < 3) {

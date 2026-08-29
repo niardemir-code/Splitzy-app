@@ -30,7 +30,7 @@ data class MemberEntity(
     val paymentFrequencyValue: Int = 1, // Periodicidad numérica (1, 2, 3, 6, 12...)
     val paymentFrequencyUnit: String = "months", // "days", "weeks", "months", "years"
     val autoRepeatPayment: Boolean = true, // Avance automático de ciclo
-    val paymentMethod: String = "Bizum", // Método de pago habitual ("Bizum", "Transferencia", "PayPal", etc.)
+    val paymentMethod: String = "", // Método de pago habitual ("Bizum", "Transferencia", "PayPal", etc.)
     val lastPaymentDate: String = "", // Fecha del último pago YYYY-MM-DD
     val enableAlarm: Boolean = false, // Recordatorio / alarma previa
     val alarmValue: Int = 3, // Antelación numérica

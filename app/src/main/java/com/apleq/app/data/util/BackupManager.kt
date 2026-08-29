@@ -254,7 +254,7 @@ object BackupManager {
                         paymentFrequencyValue = obj.optInt("paymentFrequencyValue", 1),
                         paymentFrequencyUnit = obj.optString("paymentFrequencyUnit", "months"),
                         autoRepeatPayment = obj.optBoolean("autoRepeatPayment", true),
-                        paymentMethod = obj.optString("paymentMethod", "Bizum"),
+                        paymentMethod = obj.optString("paymentMethod", ""),
                         lastPaymentDate = obj.optString("lastPaymentDate", ""),
                         enableAlarm = obj.optBoolean("enableAlarm", false),
                         alarmValue = obj.optInt("alarmValue", 3),

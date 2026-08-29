@@ -6,7 +6,8 @@ data class PlatformPriceItem(
     val platformName: String,
     val pricePerUser: Double,
     val currency: String = "EUR",
-    val billingPeriod: String = "MONTHLY"
+    val billingPeriod: String = "MONTHLY",
+    val defaultPaymentMethod: String = ""
 ) {
     val currencyItem: CurrencyItem
         get() = CurrencyManager.findCurrency(currency)
@@ -45,7 +46,8 @@ object PlatformPricingHelper {
                 val rawCurr = if (parts.size >= 3 && parts[2].isNotBlank()) parts[2].trim() else "EUR"
                 val currency = CurrencyManager.findCurrency(rawCurr).code
                 val billingPeriod = if (parts.size >= 4 && parts[3].isNotBlank()) parts[3].trim().uppercase() else "MONTHLY"
-                if (name.isNotEmpty()) PlatformPriceItem(name, price, currency, billingPeriod) else null
+                val method = if (parts.size >= 5 && parts[4].isNotBlank()) parts[4].trim() else ""
+                if (name.isNotEmpty()) PlatformPriceItem(name, price, currency, billingPeriod, method) else null
             } else null
         }
     }
@@ -68,7 +70,8 @@ object PlatformPricingHelper {
                         val currency = if (currRaw.isNotBlank()) CurrencyManager.findCurrency(currRaw).code else "EUR"
                         val periodRaw = (item["billingPeriod"] ?: item["billing_period"] ?: item["period"])?.toString()?.trim().orEmpty()
                         val billingPeriod = if (periodRaw.isNotBlank()) periodRaw.uppercase() else "MONTHLY"
-                        if (name.isNotBlank()) PlatformPriceItem(name, price, currency, billingPeriod) else null
+                        val methodRaw = (item["defaultPaymentMethod"] ?: item["default_payment_method"] ?: item["paymentMethod"] ?: item["method"])?.toString()?.trim().orEmpty()
+                        if (name.isNotBlank()) PlatformPriceItem(name, price, currency, billingPeriod, methodRaw) else null
                     }
                     is String -> {
                         parse(item).firstOrNull()
@@ -93,7 +96,8 @@ object PlatformPricingHelper {
                         val currency = if (currRaw.isNotBlank()) CurrencyManager.findCurrency(currRaw).code else "EUR"
                         val periodRaw = (value["billingPeriod"] ?: value["billing_period"] ?: value["period"])?.toString()?.trim().orEmpty()
                         val billingPeriod = if (periodRaw.isNotBlank()) periodRaw.uppercase() else "MONTHLY"
-                        PlatformPriceItem(name, price, currency, billingPeriod)
+                        val methodRaw = (value["defaultPaymentMethod"] ?: value["default_payment_method"] ?: value["paymentMethod"] ?: value["method"])?.toString()?.trim().orEmpty()
+                        PlatformPriceItem(name, price, currency, billingPeriod, methodRaw)
                     }
                     is Number -> PlatformPriceItem(name, value.toDouble(), "EUR", "MONTHLY")
                     is String -> {
@@ -111,7 +115,8 @@ object PlatformPricingHelper {
         return items
             .filter { it.platformName.isNotBlank() }
             .joinToString("|") { item ->
-                "${item.platformName.trim()}:${item.pricePerUser}:${item.currency.trim().uppercase()}:${item.billingPeriod.trim().uppercase()}"
+                val method = item.defaultPaymentMethod.replace(":", "").replace("|", "").trim()
+                "${item.platformName.trim()}:${item.pricePerUser}:${item.currency.trim().uppercase()}:${item.billingPeriod.trim().uppercase()}:${method}"
             }
     }
 

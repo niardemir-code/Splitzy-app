@@ -1378,7 +1378,7 @@ class FirebaseAuthService(
             val mPaymentMethod = (rawItem["paymentMethod"] as? String)?.trim()
                 ?: (rawItem["payment_method"] as? String)?.trim()
                 ?: (rawItem["method"] as? String)?.trim()
-                ?: "Bizum"
+                ?: ""
 
             val mLastPaymentDate = (rawItem["lastPaymentDate"] as? String)?.trim()
                 ?: (rawItem["last_payment_date"] as? String)?.trim()

@@ -153,7 +153,7 @@ fun AddEditMemberDialog(
 
     // Payment Method
     var paymentMethod by remember {
-        mutableStateOf(memberToEdit?.paymentMethod ?: "Bizum")
+        mutableStateOf(memberToEdit?.paymentMethod ?: "")
     }
 
     // 2. Joined Date
@@ -458,6 +458,9 @@ fun AddEditMemberDialog(
                                         },
                                         onClick = {
                                             sharingPlatform = pItem.platformName
+                                            if (paymentMethod.isBlank() && pItem.defaultPaymentMethod.isNotBlank()) {
+                                                paymentMethod = pItem.defaultPaymentMethod
+                                            }
                                             if (pItem.pricePerUser > 0) {
                                                 contributionText = String.format(Locale.US, "%.2f", pItem.pricePerUser)
                                             }
@@ -1280,7 +1283,7 @@ fun AddEditMemberDialog(
                                 paymentFrequencyValue = paymentFrequencyValue,
                                 paymentFrequencyUnit = paymentFrequencyUnit,
                                 autoRepeatPayment = true,
-                                paymentMethod = paymentMethod.trim().ifBlank { "Bizum" },
+                                paymentMethod = paymentMethod.trim(),
                                 lastPaymentDate = memberToEdit?.lastPaymentDate ?: "",
                                 enableAlarm = enableAlarm,
                                 alarmValue = alarmValue,
