@@ -1,4 +1,6 @@
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
   alias(libs.plugins.android.application)
@@ -8,6 +10,14 @@ plugins {
   alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
 }
+
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+  if (keystorePropsFile.exists()) {
+    FileInputStream(keystorePropsFile).use { load(it) }
+  }
+}
+val hasReleaseKeystore = keystoreProps.getProperty("storeFile")?.let { file(it).exists() } == true
 
 android {
   namespace = "com.apleq.app"
@@ -24,12 +34,13 @@ android {
   }
 
   signingConfigs {
-    create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD")
-      keyAlias = "upload"
-      keyPassword = System.getenv("KEY_PASSWORD")
+    if (hasReleaseKeystore) {
+      create("release") {
+        storeFile = file(keystoreProps.getProperty("storeFile"))
+        storePassword = keystoreProps.getProperty("storePassword")
+        keyAlias = keystoreProps.getProperty("keyAlias") ?: "apleq-upload"
+        keyPassword = keystoreProps.getProperty("keyPassword")
+      }
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
@@ -44,7 +55,7 @@ android {
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      signingConfig = signingConfigs.getByName("release")
+      signingConfig = signingConfigs.findByName("release")
     }
     debug { signingConfig = signingConfigs.getByName("debugConfig") }
   }
