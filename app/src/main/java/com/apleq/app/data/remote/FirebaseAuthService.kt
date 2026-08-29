@@ -621,6 +621,15 @@ class FirebaseAuthService(
             } catch (_: Exception) {}
             rootSubDoc.delete().await()
         } catch (_: Exception) {}
+
+        // Borrar el logo personalizado de Storage si existe (ignorar si no hay)
+        try {
+            FirebaseStorage.getInstance().reference
+                .child("users/${user.uid}/subscriptions/$subscriptionId/custom_logo.jpg")
+                .delete().await()
+        } catch (_: Exception) {
+            // No existe o ya estaba borrado: ignorar
+        }
     }
 
     /**
