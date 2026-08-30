@@ -120,6 +120,16 @@ fun SubscriptionCard(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
+        // Franja de color superior (coherencia con la web)
+        val accentColor = runCatching {
+            Color(android.graphics.Color.parseColor(sub.iconColorHex))
+        }.getOrDefault(Color(0xFF1285FA))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .background(accentColor)
+        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
