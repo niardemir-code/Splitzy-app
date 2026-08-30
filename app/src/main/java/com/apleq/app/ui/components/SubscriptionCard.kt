@@ -424,7 +424,7 @@ fun SubscriptionCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    members.forEach { member ->
+                    members.sortedWith(compareBy(nullsLast<String>()) { m -> m.nextPaymentDate.takeIf { it.isNotBlank() } }).forEach { member ->
                         val chipBgColor = when {
                             member.isPendingRemoval -> Color(0xFFFFE4E6)
                             member.isPendingRegistration -> Color(0xFFDBEAFE)
