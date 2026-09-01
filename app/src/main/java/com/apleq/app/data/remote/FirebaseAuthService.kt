@@ -440,6 +440,8 @@ class FirebaseAuthService(
                         "auto_repeat_payment" to m.autoRepeatPayment,
                         "paymentMethod" to m.paymentMethod,
                         "payment_method" to m.paymentMethod,
+                        "linkedUid" to m.linkedUid,
+                        "linked_uid" to m.linkedUid,
                         "lastPaymentDate" to m.lastPaymentDate,
                         "last_payment_date" to m.lastPaymentDate,
                         "enableAlarm" to m.enableAlarm,
@@ -888,6 +890,8 @@ class FirebaseAuthService(
                         "auto_repeat_payment" to m.autoRepeatPayment,
                         "paymentMethod" to m.paymentMethod,
                         "payment_method" to m.paymentMethod,
+                        "linkedUid" to m.linkedUid,
+                        "linked_uid" to m.linkedUid,
                         "lastPaymentDate" to m.lastPaymentDate,
                         "last_payment_date" to m.lastPaymentDate,
                         "enableAlarm" to m.enableAlarm,
@@ -1384,6 +1388,8 @@ class FirebaseAuthService(
                 ?: (rawItem["method"] as? String)?.trim()
                 ?: ""
 
+            val mLinkedUid = (rawItem["linkedUid"] as? String)?.trim() ?: (rawItem["linked_uid"] as? String)?.trim()
+
             val mLastPaymentDate = (rawItem["lastPaymentDate"] as? String)?.trim()
                 ?: (rawItem["last_payment_date"] as? String)?.trim()
                 ?: ""
@@ -1499,6 +1505,7 @@ class FirebaseAuthService(
                 paymentFrequencyUnit = mPaymentFrequencyUnit,
                 autoRepeatPayment = mAutoRepeatPayment,
                 paymentMethod = mPaymentMethod,
+                linkedUid = mLinkedUid,
                 lastPaymentDate = mLastPaymentDate,
                 enableAlarm = mEnableAlarm,
                 alarmValue = mAlarmValue,
