@@ -205,6 +205,9 @@ fun AddEditSubscriptionDialog(
     var editModalError by remember { mutableStateOf(false) }
     var editModalDefaultMethod by remember { mutableStateOf("") }
 
+    var freeSlotsText by remember {
+        mutableStateOf(subscriptionToEdit?.freeSlots?.toString() ?: "0")
+    }
     var billingDayText by remember {
         mutableStateOf(
             if (subscriptionToEdit != null) {
@@ -738,6 +741,24 @@ fun AddEditSubscriptionDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // 6.2. Huecos libres (plazas para otros)
+                OutlinedTextField(
+                    value = freeSlotsText,
+                    onValueChange = { freeSlotsText = it.filter { ch -> ch.isDigit() }.take(3) },
+                    label = { Text("Huecos libres (plazas para otros)") },
+                    placeholder = { Text("0") },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("input_free_slots"),
+                    singleLine = true,
+                    maxLines = 1,
+                    shape = RoundedCornerShape(12.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 // 6.5. Alarma de aviso para el cobro de la suscripción
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -1186,6 +1207,7 @@ fun AddEditSubscriptionDialog(
                             val platformPricingString = PlatformPricingHelper.serialize(finalPlatformItems)
                             val defaultContribution = finalPlatformItems.firstOrNull()?.pricePerUser ?: 0.0
                             val billingDay = billingDayText.toIntOrNull()?.coerceIn(1, 31) ?: 1
+                            val freeSlots = freeSlotsText.toIntOrNull()?.coerceAtLeast(0) ?: 0
 
                             val finalIconType = if (iconType == "CUSTOM_IMAGE" && customImageUri.isNotBlank()) {
                                 "CUSTOM_IMAGE"
@@ -1202,6 +1224,7 @@ fun AddEditSubscriptionDialog(
                                 cost = cost,
                                 billingPeriod = billingPeriod.key,
                                 billingDay = billingDay,
+                                freeSlots = freeSlots,
                                 billingMonth = billingMonth ?: 1,
                                 currency = selectedCurrency.code,
                                 defaultContributionPerUser = defaultContribution,

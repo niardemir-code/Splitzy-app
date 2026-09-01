@@ -14,6 +14,7 @@ data class SubscriptionEntity(
     val cost: Double, // Dinero que me cuesta a mí la suscripción completa
     val billingPeriod: String = "MONTHLY", // MONTHLY, QUARTERLY, SEMI_ANNUAL, YEARLY
     val billingDay: Int = 1, // Día del mes en que se factura (1-31)
+    val freeSlots: Int = 0, // Nº de huecos libres. Capacidad = 1 (gestor) + freeSlots
     val billingMonth: Int = 1, // Mes de cobro/inicio del ciclo (1-12) para periodos no mensuales
     val currency: String = "€",
     val defaultContributionPerUser: Double = 0.0, // Aporte sugerido / esperado por usuario

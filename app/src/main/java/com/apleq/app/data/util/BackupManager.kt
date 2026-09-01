@@ -62,6 +62,7 @@ object BackupManager {
                 put("cost", sub.cost)
                 put("billingPeriod", sub.billingPeriod)
                 put("billingDay", sub.billingDay)
+                put("freeSlots", sub.freeSlots)
                 put("billingMonth", sub.billingMonth)
                 put("currency", sub.currency)
                 put("defaultContributionPerUser", sub.defaultContributionPerUser)
@@ -207,6 +208,7 @@ object BackupManager {
                     cost = obj.optDouble("cost", 0.0),
                     billingPeriod = obj.optString("billingPeriod", "MONTHLY"),
                     billingDay = obj.optInt("billingDay", 1),
+                    freeSlots = obj.optInt("freeSlots", 0),
                     billingMonth = obj.optInt("billingMonth", 1),
                     currency = obj.optString("currency", "EUR"),
                     defaultContributionPerUser = obj.optDouble("defaultContributionPerUser", 0.0),

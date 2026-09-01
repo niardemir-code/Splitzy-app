@@ -494,6 +494,8 @@ class FirebaseAuthService(
                     "max_slots" to effectiveSlots,
                     "billingDay" to sub.billingDay,
                     "billing_day" to sub.billingDay,
+                    "freeSlots" to sub.freeSlots,
+                    "free_slots" to sub.freeSlots,
                     "billingMonth" to sub.billingMonth,
                     "billing_month" to sub.billingMonth,
                     "defaultContributionPerUser" to sub.defaultContributionPerUser,
@@ -968,6 +970,8 @@ class FirebaseAuthService(
                     "max_slots" to effectiveSlots,
                     "billingDay" to sub.billingDay,
                     "billing_day" to sub.billingDay,
+                    "freeSlots" to sub.freeSlots,
+                    "free_slots" to sub.freeSlots,
                     "billingMonth" to sub.billingMonth,
                     "billing_month" to sub.billingMonth,
                     "defaultContributionPerUser" to sub.defaultContributionPerUser,
@@ -1191,6 +1195,7 @@ class FirebaseAuthService(
             else -> "MONTHLY"
         }
         val billingDay = parseSafeInt(data["billingDay"], parseSafeInt(data["day"], 1))
+        val freeSlots = parseSafeInt(data["freeSlots"] ?: data["free_slots"], 0)
         val billingMonth = parseSafeInt(data["billingMonth"], parseSafeInt(data["month"], 1))
         val rawCurrency = (data["currency"] as? String)?.trim() ?: "€"
         val currency = when (rawCurrency.uppercase()) {
@@ -1309,6 +1314,7 @@ class FirebaseAuthService(
             cost = cost,
             billingPeriod = billingPeriod,
             billingDay = billingDay,
+            freeSlots = freeSlots,
             billingMonth = billingMonth,
             currency = currency,
             defaultContributionPerUser = defaultContributionPerUser,
@@ -1719,6 +1725,7 @@ class FirebaseAuthService(
                                         cost = (rawSub["cost"] as? Number)?.toDouble() ?: (rawSub["price"] as? Number)?.toDouble() ?: 0.0,
                                         billingPeriod = (rawSub["billingPeriod"] as? String)?.trim() ?: "MONTHLY",
                                         billingDay = (rawSub["billingDay"] as? Number)?.toInt() ?: 1,
+                                        freeSlots = (rawSub["freeSlots"] as? Number)?.toInt() ?: (rawSub["free_slots"] as? Number)?.toInt() ?: 0,
                                         billingMonth = (rawSub["billingMonth"] as? Number)?.toInt() ?: 1,
                                         currency = (rawSub["currency"] as? String)?.trim() ?: "€",
                                         defaultContributionPerUser = (rawSub["defaultContributionPerUser"] as? Number)?.toDouble() ?: 0.0,
