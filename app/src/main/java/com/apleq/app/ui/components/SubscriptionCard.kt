@@ -630,8 +630,11 @@ fun SubscriptionCard(
             Spacer(modifier = Modifier.height(14.dp))
 
             // Action Button: + Añadir usuario
+            val capacity = sub.freeSlots
+            val isFull = capacity > 0 && members.size >= capacity
             OutlinedButton(
                 onClick = onAddMemberClick,
+                enabled = !isFull,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
@@ -649,6 +652,14 @@ fun SubscriptionCard(
                     text = I18n.addUser,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     maxLines = 1
+                )
+            }
+            if (isFull) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Has alcanzado los $capacity huecos. Aumenta los huecos para añadir más.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
