@@ -331,7 +331,6 @@ class FirebaseAuthService(
         val user = auth?.currentUser ?: return@withContext false
         val db = firestore ?: return@withContext false
         _isSyncing.value = true
-        _syncStatus.value = "☁️ Sincronizando datos con la nube..."
         try {
             val subs = dao.getAllSubscriptionsDirect()
             val members = dao.getAllMembersDirect()
@@ -574,7 +573,6 @@ class FirebaseAuthService(
                 }
             } catch (_: Exception) {}
 
-            _syncStatus.value = "✅ Datos sincronizados con la nube"
             _isSyncing.value = false
             true
         } catch (e: Exception) {
