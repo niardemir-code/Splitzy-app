@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -94,6 +95,7 @@ fun SubscriptionCard(
     modifier: Modifier = Modifier
 ) {
     val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    val context = androidx.compose.ui.platform.LocalContext.current
     val sub = subscriptionWithMembers.subscription
     val members = subscriptionWithMembers.members
     val totalContributed = subscriptionWithMembers.totalContributed
@@ -549,19 +551,49 @@ fun SubscriptionCard(
                                     member.inviteCode?.let { code ->
                                         val prettyCode = if (code.length == 6) "${code.substring(0, 3)}-${code.substring(3)}" else code
                                         Spacer(modifier = Modifier.height(4.dp))
-                                        Surface(
-                                            onClick = { clipboard.setText(androidx.compose.ui.text.AnnotatedString(prettyCode)) },
-                                            shape = RoundedCornerShape(6.dp),
-                                            color = MaterialTheme.colorScheme.primaryContainer
-                                        ) {
-                                            Text(
-                                                text = prettyCode,
-                                                style = MaterialTheme.typography.labelMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                letterSpacing = 2.sp,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                            )
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Surface(
+                                                onClick = { clipboard.setText(androidx.compose.ui.text.AnnotatedString(prettyCode)) },
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.primaryContainer
+                                            ) {
+                                                Text(
+                                                    text = prettyCode,
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    letterSpacing = 2.sp,
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = {
+                                                    val webUrl = ""   // TODO Fase B: URL de registro en la web
+                                                    val appUrl = ""   // TODO Fase B: URL de descarga (Google Play)
+                                                    val lines = mutableListOf(
+                                                        "Te invito a compartir gastos en Apleq.",
+                                                        "Únete con este código: $prettyCode"
+                                                    )
+                                                    if (appUrl.isNotBlank()) lines.add("Descarga la app: $appUrl")
+                                                    if (webUrl.isNotBlank()) lines.add("O regístrate en la web: $webUrl")
+                                                    val sendIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                                        type = "text/plain"
+                                                        putExtra(android.content.Intent.EXTRA_SUBJECT, "Invitación a Apleq")
+                                                        putExtra(android.content.Intent.EXTRA_TEXT, lines.joinToString("\n"))
+                                                    }
+                                                    context.startActivity(
+                                                        android.content.Intent.createChooser(sendIntent, "Compartir invitación")
+                                                    )
+                                                },
+                                                modifier = Modifier.size(30.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Share,
+                                                    contentDescription = "Compartir invitación",
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
                                         }
                                     }
                                     if (member.sharingPlatform.isNotBlank() || member.notes.isNotBlank()) {
