@@ -109,6 +109,7 @@ object BackupManager {
                 put("autoRepeatPayment", member.autoRepeatPayment)
                 put("paymentMethod", member.paymentMethod)
                 put("linkedUid", member.linkedUid)
+                put("inviteCode", member.inviteCode)
                 put("lastPaymentDate", member.lastPaymentDate)
                 put("enableAlarm", member.enableAlarm)
                 put("alarmValue", member.alarmValue)
@@ -259,6 +260,7 @@ object BackupManager {
                         autoRepeatPayment = obj.optBoolean("autoRepeatPayment", true),
                         paymentMethod = obj.optString("paymentMethod", ""),
                         linkedUid = obj.optString("linkedUid").takeIf { it.isNotBlank() },
+                        inviteCode = obj.optString("inviteCode").takeIf { it.isNotBlank() },
                         lastPaymentDate = obj.optString("lastPaymentDate", ""),
                         enableAlarm = obj.optBoolean("enableAlarm", false),
                         alarmValue = obj.optInt("alarmValue", 3),

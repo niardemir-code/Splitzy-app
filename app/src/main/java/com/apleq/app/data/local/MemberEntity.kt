@@ -32,6 +32,7 @@ data class MemberEntity(
     val autoRepeatPayment: Boolean = true, // Avance automático de ciclo
     val paymentMethod: String = "", // Método de pago habitual ("Bizum", "Transferencia", "PayPal", etc.)
     val linkedUid: String? = null, // UID del usuario real que ocupa esta plaza (null = miembro manual)
+    val inviteCode: String? = null, // Código si es una plaza reservada pendiente de aceptar
     val lastPaymentDate: String = "", // Fecha del último pago YYYY-MM-DD
     val enableAlarm: Boolean = false, // Recordatorio / alarma previa
     val alarmValue: Int = 3, // Antelación numérica
