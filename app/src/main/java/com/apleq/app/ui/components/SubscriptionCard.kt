@@ -548,14 +548,21 @@ fun SubscriptionCard(
                                     }
                                     member.inviteCode?.let { code ->
                                         val prettyCode = if (code.length == 6) "${code.substring(0, 3)}-${code.substring(3)}" else code
-                                        Text(
-                                            text = "Código: $prettyCode (tocar para copiar)",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.clickable {
-                                                clipboard.setText(androidx.compose.ui.text.AnnotatedString(prettyCode))
-                                            }
-                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Surface(
+                                            onClick = { clipboard.setText(androidx.compose.ui.text.AnnotatedString(prettyCode)) },
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer
+                                        ) {
+                                            Text(
+                                                text = prettyCode,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 2.sp,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                            )
+                                        }
                                     }
                                     if (member.sharingPlatform.isNotBlank() || member.notes.isNotBlank()) {
                                         Spacer(modifier = Modifier.height(3.dp))
