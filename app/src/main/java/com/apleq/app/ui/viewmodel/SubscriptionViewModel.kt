@@ -376,11 +376,31 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun generateInvite(subscriptionWithMembers: SubscriptionWithMembers) {
+        viewModelScope.launch {
+            val subId = subscriptionWithMembers.subscription.id
+            val code = authService.generateInviteCode()
+            val newMemberId = System.currentTimeMillis() * 1000 + (0..999).random()
+            val reservedMember = MemberEntity(
+                id = newMemberId,
+                subscriptionId = subId,
+                memberName = "Invitado (pendiente)",
+                isPendingRegistration = true,
+                inviteCode = code
+            )
+            repository.insertMember(reservedMember)
+            if (authState.value is AuthState.Authenticated) {
+                authService.createInvite(code, subId, newMemberId)
+                authService.syncToCloud()
+            }
+        }
+    }
+
     fun deleteMember(member: MemberEntity) {
         viewModelScope.launch {
             repository.deleteMember(member)
-            // Sincronización automática a la nube en segundo plano si el usuario está autenticado
             if (authState.value is AuthState.Authenticated) {
+                member.inviteCode?.let { authService.deleteInvite(it) }
                 authService.deleteMemberFromCloud(member)
             }
         }

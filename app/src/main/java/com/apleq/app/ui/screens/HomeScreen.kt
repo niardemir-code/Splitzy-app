@@ -487,6 +487,7 @@ fun HomeScreen(
                         searchQuery = searchQuery,
                         availablePlatforms = sharingPlatforms,
                         onAddMemberClick = { viewModel.openAddMember(item) },
+                        onGenerateInvite = { viewModel.generateInvite(item) },
                         onEditClick = { viewModel.openEditSubscription(item.subscription) },
                         onDeleteClick = { subscriptionToDelete = item.subscription },
                         onMemberClick = { member -> viewModel.openEditMember(member, item) }

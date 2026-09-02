@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -84,6 +85,7 @@ import java.util.Locale
 fun SubscriptionCard(
     subscriptionWithMembers: SubscriptionWithMembers,
     onAddMemberClick: () -> Unit,
+    onGenerateInvite: () -> Unit = {},
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onMemberClick: (com.apleq.app.data.local.MemberEntity) -> Unit = {},
@@ -91,6 +93,7 @@ fun SubscriptionCard(
     availablePlatforms: List<SharingPlatformEntity> = emptyList(),
     modifier: Modifier = Modifier
 ) {
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
     val sub = subscriptionWithMembers.subscription
     val members = subscriptionWithMembers.members
     val totalContributed = subscriptionWithMembers.totalContributed
@@ -543,6 +546,17 @@ fun SubscriptionCard(
                                             }
                                         }
                                     }
+                                    member.inviteCode?.let { code ->
+                                        val prettyCode = if (code.length == 6) "${code.substring(0, 3)}-${code.substring(3)}" else code
+                                        Text(
+                                            text = "Código: $prettyCode (tocar para copiar)",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.clickable {
+                                                clipboard.setText(androidx.compose.ui.text.AnnotatedString(prettyCode))
+                                            }
+                                        )
+                                    }
                                     if (member.sharingPlatform.isNotBlank() || member.notes.isNotBlank()) {
                                         Spacer(modifier = Modifier.height(3.dp))
                                         Row(
@@ -653,6 +667,25 @@ fun SubscriptionCard(
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     maxLines = 1
                 )
+            }
+            if (!isFull && capacity > 0) {
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = onGenerateInvite,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Invitar a un hueco")
+                }
             }
             if (isFull) {
                 Spacer(modifier = Modifier.height(6.dp))

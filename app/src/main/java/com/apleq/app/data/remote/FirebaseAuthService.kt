@@ -323,6 +323,46 @@ class FirebaseAuthService(
         }
     }
 
+    fun generateInviteCode(): String {
+        val alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+        return (1..6).map { alphabet.random() }.joinToString("")
+    }
+
+    fun formatInviteCode(code: String): String =
+        if (code.length == 6) "${code.substring(0, 3)}-${code.substring(3)}" else code
+
+    suspend fun createInvite(code: String, groupId: Long, memberId: Long): Boolean = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext false
+        val uid = auth?.currentUser?.uid ?: com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: return@withContext false
+        try {
+            val now = System.currentTimeMillis()
+            val sevenDays = 7L * 24 * 60 * 60 * 1000
+            db.collection("invites").document(code).set(
+                mapOf(
+                    "code" to code,
+                    "groupId" to groupId.toString(),
+                    "memberId" to memberId.toString(),
+                    "ownerUid" to uid,
+                    "consumed" to false,
+                    "createdAt" to java.time.Instant.ofEpochMilli(now).toString(),
+                    "expiresAt" to java.time.Instant.ofEpochMilli(now + sevenDays).toString()
+                )
+            ).await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace(); false
+        }
+    }
+
+    suspend fun deleteInvite(code: String) = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext
+        try {
+            db.collection("invites").document(code).delete().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     /**
      * Sube todos los datos locales a Firestore de manera limpia y unificada en users/{uid}/subscriptions/{sub.id}
      * y en la subcolección granular users/{uid}/subscriptions/{sub.id}/members/{member.id}
