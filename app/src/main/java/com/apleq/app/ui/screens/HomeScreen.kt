@@ -269,22 +269,22 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 ExtendedFloatingActionButton(
                     onClick = { showJoinDialog = true },
-                    icon = { Icon(Icons.Default.GroupAdd, contentDescription = "Unirse a una suscripción") },
-                    text = { Text("Unirse", fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Default.GroupAdd, contentDescription = "Unirse", modifier = Modifier.size(18.dp)) },
+                    text = { Text("Unirse", fontWeight = FontWeight.Bold, fontSize = 13.sp) },
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     shape = RoundedCornerShape(16.dp)
                 )
                 ExtendedFloatingActionButton(
                     onClick = { viewModel.openAddSubscription() },
-                    icon = { Icon(Icons.Default.Add, contentDescription = I18n.newSubscription) },
-                    text = { Text(I18n.newSubscription, fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Default.Add, contentDescription = I18n.newSubscription, modifier = Modifier.size(18.dp)) },
+                    text = { Text(I18n.newSubscription, fontWeight = FontWeight.Bold, fontSize = 13.sp) },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
                     shape = RoundedCornerShape(16.dp),
