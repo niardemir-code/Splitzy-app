@@ -63,6 +63,7 @@ fun JoinGroupDialog(
                     onJoin(code) { ok, msg ->
                         loading = false
                         message = ok to msg
+                        if (ok) onDismiss()
                     }
                 }
             ) { Text(if (loading) "Uniéndote..." else "Unirse") }
