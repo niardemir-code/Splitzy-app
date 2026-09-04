@@ -119,6 +119,14 @@ fun HomeScreen(
     val backupStatusMessage by viewModel.backupStatusMessage.collectAsStateWithLifecycle()
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val showAuthDialog by viewModel.showAuthDialog.collectAsStateWithLifecycle()
+
+    LaunchedEffect(authState) {
+        if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
+            viewModel.closeAuthDialog()
+            viewModel.closeAppMenu()
+        }
+    }
+
     val showAppMenu by viewModel.showAppMenu.collectAsStateWithLifecycle()
     val sharingPlatforms by viewModel.sharingPlatforms.collectAsStateWithLifecycle()
     val isSyncing by viewModel.isSyncing.collectAsStateWithLifecycle()
