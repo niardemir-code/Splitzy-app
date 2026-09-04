@@ -269,15 +269,28 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { viewModel.openAddSubscription() },
-                icon = { Icon(Icons.Default.Add, contentDescription = I18n.newSubscription) },
-                text = { Text(I18n.newSubscription, fontWeight = FontWeight.Bold) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.testTag("fab_add_subscription")
-            )
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = { showJoinDialog = true },
+                    icon = { Icon(Icons.Default.GroupAdd, contentDescription = "Unirse a una suscripción") },
+                    text = { Text("Unirse", fontWeight = FontWeight.Bold) },
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                ExtendedFloatingActionButton(
+                    onClick = { viewModel.openAddSubscription() },
+                    icon = { Icon(Icons.Default.Add, contentDescription = I18n.newSubscription) },
+                    text = { Text(I18n.newSubscription, fontWeight = FontWeight.Bold) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.testTag("fab_add_subscription")
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier.fillMaxSize()
