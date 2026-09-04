@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Subscriptions
@@ -78,6 +79,7 @@ import com.apleq.app.data.local.SubscriptionEntity
 import com.apleq.app.ui.components.AddEditMemberDialog
 import com.apleq.app.ui.components.AddEditSubscriptionDialog
 import com.apleq.app.ui.components.FinancialSummaryCard
+import com.apleq.app.ui.components.JoinGroupDialog
 import com.apleq.app.ui.components.ReminderMessageDialog
 import com.apleq.app.ui.components.SplitzyLogo
 import com.apleq.app.ui.components.SubscriptionCard
@@ -108,6 +110,7 @@ fun HomeScreen(
     val reminderData by viewModel.reminderMemberData.collectAsStateWithLifecycle()
 
     var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
+    var showJoinDialog by remember { mutableStateOf(false) }
 
     val rawCategories = listOf("Todas", "Streaming", "Música", "Productividad", "Gaming", "Educación", "Salud")
 
@@ -169,6 +172,16 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = { showJoinDialog = true },
+                        modifier = Modifier.testTag("btn_top_join_group")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.GroupAdd,
+                            contentDescription = "Unirse a un grupo"
+                        )
+                    }
+
                     // Cloud Download / Sync Button (to the left of Settings)
                     IconButton(
                         onClick = {
@@ -469,6 +482,18 @@ fun HomeScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(16.dp))
+                            androidx.compose.material3.OutlinedButton(
+                                onClick = { showJoinDialog = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.GroupAdd,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Unirse a un grupo")
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
                             Button(
                                 onClick = { viewModel.openAddSubscription() },
                                 shape = RoundedCornerShape(12.dp)
@@ -606,6 +631,13 @@ fun HomeScreen(
             onSyncFromCloud = { viewModel.syncFromCloud() },
             onCleanAndPruneDatabase = { viewModel.cleanAndPruneFirebaseDatabase() },
             onClearError = { viewModel.clearAuthError() }
+        )
+    }
+
+    if (showJoinDialog) {
+        JoinGroupDialog(
+            onDismiss = { showJoinDialog = false },
+            onJoin = { code, cb -> viewModel.claimInvite(code, cb) }
         )
     }
 

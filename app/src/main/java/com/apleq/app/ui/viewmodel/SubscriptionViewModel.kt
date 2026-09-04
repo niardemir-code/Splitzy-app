@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 data class FinancialOverview(
     val totalCost: Double = 0.0,
@@ -392,6 +393,26 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             if (authState.value is AuthState.Authenticated) {
                 authService.createInvite(code, subId, newMemberId)
                 authService.syncToCloud()
+            }
+        }
+    }
+
+    fun claimInvite(code: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            val cleaned = code.uppercase().filter { it.isLetterOrDigit() }
+            if (cleaned.length != 6) {
+                onResult(false, "El código no es válido.")
+                return@launch
+            }
+            try {
+                val functions = com.google.firebase.functions.FirebaseFunctions.getInstance()
+                functions.getHttpsCallable("claimSlot")
+                    .call(hashMapOf("code" to cleaned))
+                    .await()
+                onResult(true, "¡Te has unido al grupo!")
+            } catch (e: Exception) {
+                val msg = e.message ?: "No se pudo unir. Revisa el código."
+                onResult(false, msg)
             }
         }
     }
