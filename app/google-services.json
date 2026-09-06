@@ -14,19 +14,19 @@
       },
       "oauth_client": [
         {
+          "client_id": "498651324948-a7lbhku0q8o4pbieeand0mm4j8tbca4l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apleq.app",
+            "certificate_hash": "552b0e37f4d84541d73665a27c09e6a2fdfecb45"
+          }
+        },
+        {
           "client_id": "498651324948-f5eu7r5d1p785tt6klbepgnqde007edn.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.apleq.app",
             "certificate_hash": "d3d31d930922cd9e189faf713cdd2794a8b21528"
-          }
-        },
-        {
-          "client_id": "498651324948-jt446ffqdd9uo61d06r6ufokhud4c4n5.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.apleq.app",
-            "certificate_hash": "552b0e37f4d84541073665a27c09e6a2fdfecb45"
           }
         },
         {
