@@ -1961,10 +1961,16 @@ class FirebaseAuthService(
     fun startListeningParticipatingGroups() {
         val uid = auth?.currentUser?.uid ?: return
         val db = firestore ?: return
+        android.util.Log.d("ParticipatingGroups", "Iniciando listener para uid=$uid")
         val listener = db.collectionGroup("subscriptions")
             .whereArrayContains("memberUids", uid)
             .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null) return@addSnapshotListener
+                if (error != null) {
+                    android.util.Log.e("ParticipatingGroups", "ERROR: ${error.message}", error)
+                    return@addSnapshotListener
+                }
+                if (snapshot == null) return@addSnapshotListener
+                android.util.Log.d("ParticipatingGroups", "Documentos encontrados: ${snapshot.size()}")
                 val groups = snapshot.documents.mapNotNull { doc ->
                     val data = doc.data?.toMutableMap() ?: return@mapNotNull null
                     data["_docId"] = doc.id
