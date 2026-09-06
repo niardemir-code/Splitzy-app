@@ -93,6 +93,7 @@ fun HomeScreen(
     viewModel: SubscriptionViewModel,
     modifier: Modifier = Modifier
 ) {
+    val activityContext = androidx.compose.ui.platform.LocalContext.current
     val allSubscriptions by viewModel.allSubscriptions.collectAsStateWithLifecycle()
     val filteredSubscriptions by viewModel.filteredSubscriptions.collectAsStateWithLifecycle()
     val financialOverview by viewModel.financialOverview.collectAsStateWithLifecycle()
@@ -644,7 +645,7 @@ fun HomeScreen(
             authState = authState,
             isSyncing = isSyncing,
             onDismissRequest = { viewModel.closeAuthDialog() },
-            onSignInWithGoogle = { viewModel.signInWithGoogle() },
+            onSignInWithGoogle = { viewModel.signInWithGoogle(activityContext) },
             onSignInWithEmail = { email, pass -> viewModel.signInWithEmail(email, pass) },
             onRegisterWithEmail = { email, pass -> viewModel.registerWithEmail(email, pass) },
             onSignOut = { viewModel.signOut() },

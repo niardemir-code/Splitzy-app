@@ -160,7 +160,7 @@ class FirebaseAuthService(
     /**
      * Iniciar sesión con Google usando Credential Manager
      */
-    suspend fun signInWithGoogle(): Result<FirebaseUser> = withContext(Dispatchers.IO) {
+    suspend fun signInWithGoogle(activityContext: android.content.Context? = null): Result<FirebaseUser> = withContext(Dispatchers.IO) {
         _authState.value = AuthState.Loading
         try {
             val serverClientId = getWebClientId() ?: "498651324948-18qocdi9iqatn6kc4isaof5d0bhate0q.apps.googleusercontent.com"
@@ -179,10 +179,11 @@ class FirebaseAuthService(
                 .addCredentialOption(googleIdOption)
                 .build()
 
+            val ctx = activityContext ?: context
             val cm = credentialManager ?: throw IllegalStateException("El gestor de credenciales no está disponible en este dispositivo")
             val response: GetCredentialResponse = cm.getCredential(
                 request = request,
-                context = context
+                context = ctx
             )
 
             when (val credential = response.credential) {

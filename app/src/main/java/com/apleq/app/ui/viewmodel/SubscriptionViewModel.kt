@@ -111,9 +111,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         _showAuthDialog.value = false
     }
 
-    fun signInWithGoogle() {
+    fun signInWithGoogle(activityContext: android.content.Context? = null) {
         viewModelScope.launch {
-            authService.signInWithGoogle()
+            authService.signInWithGoogle(activityContext)
         }
     }
 
