@@ -160,7 +160,7 @@ class FirebaseAuthService(
     /**
      * Iniciar sesión con Google usando Credential Manager
      */
-    suspend fun signInWithGoogle(activityContext: android.content.Context? = null): Result<FirebaseUser> = withContext(Dispatchers.IO) {
+    suspend fun signInWithGoogle(activityContext: android.content.Context? = null): Result<FirebaseUser> = withContext(Dispatchers.Main) {
         _authState.value = AuthState.Loading
         try {
             val serverClientId = getWebClientId() ?: "498651324948-18qocdi9iqatn6kc4isaof5d0bhate0q.apps.googleusercontent.com"
