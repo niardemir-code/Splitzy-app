@@ -68,7 +68,7 @@ fun AuthAccountDialog(
     onDismissRequest: () -> Unit,
     onSignInWithGoogle: () -> Unit,
     onSignInWithEmail: (email: String, pass: String) -> Unit,
-    onRegisterWithEmail: (email: String, pass: String) -> Unit,
+    onRegisterWithEmail: (email: String, pass: String, name: String) -> Unit,
     onSignOut: () -> Unit,
     onSyncToCloud: () -> Unit,
     onSyncFromCloud: () -> Unit,
@@ -76,6 +76,7 @@ fun AuthAccountDialog(
     onClearError: () -> Unit
 ) {
     var isRegisterMode by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -200,6 +201,8 @@ fun AuthAccountDialog(
 
                         LoginForm(
                             isRegisterMode = isRegisterMode,
+                            name = name,
+                            onNameChange = { name = it },
                             email = email,
                             onEmailChange = { email = it },
                             password = password,
@@ -210,7 +213,7 @@ fun AuthAccountDialog(
                             onSignInWithGoogle = onSignInWithGoogle,
                             onSubmitEmail = {
                                 if (isRegisterMode) {
-                                    onRegisterWithEmail(email, password)
+                                    onRegisterWithEmail(email, password, name)
                                 } else {
                                     onSignInWithEmail(email, password)
                                 }
@@ -221,6 +224,8 @@ fun AuthAccountDialog(
                     is AuthState.Idle -> {
                         LoginForm(
                             isRegisterMode = isRegisterMode,
+                            name = name,
+                            onNameChange = { name = it },
                             email = email,
                             onEmailChange = { email = it },
                             password = password,
@@ -231,7 +236,7 @@ fun AuthAccountDialog(
                             onSignInWithGoogle = onSignInWithGoogle,
                             onSubmitEmail = {
                                 if (isRegisterMode) {
-                                    onRegisterWithEmail(email, password)
+                                    onRegisterWithEmail(email, password, name)
                                 } else {
                                     onSignInWithEmail(email, password)
                                 }
@@ -388,6 +393,8 @@ private fun AuthenticatedUserView(
 @Composable
 private fun LoginForm(
     isRegisterMode: Boolean,
+    name: String,
+    onNameChange: (String) -> Unit,
     email: String,
     onEmailChange: (String) -> Unit,
     password: String,
@@ -454,6 +461,19 @@ private fun LoginForm(
             }
         }
 
+        if (isRegisterMode) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = onNameChange,
+                label = { Text("Tu nombre") },
+                placeholder = { Text("Ej. Víctor Oliver") },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
@@ -488,7 +508,7 @@ private fun LoginForm(
 
         Button(
             onClick = onSubmitEmail,
-            enabled = email.isNotBlank() && password.length >= 6,
+            enabled = email.isNotBlank() && password.length >= 6 && (!isRegisterMode || name.trim().isNotEmpty()),
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp)
         ) {

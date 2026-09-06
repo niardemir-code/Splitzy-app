@@ -26,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sync
@@ -99,6 +100,7 @@ fun AuthGateScreen(
     }
 
     var selectedTab by remember { mutableIntStateOf(0) } // 0 = Crear cuenta, 1 = Iniciar sesión
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -283,6 +285,33 @@ fun AuthGateScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Name Input (Only on Register)
+                if (selectedTab == 0) {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Tu nombre") },
+                        placeholder = { Text("Ej. Víctor Oliver") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(20.dp))
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("input_auth_gate_name"),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
                 // Email Input
                 OutlinedTextField(
                     value = email,
@@ -337,7 +366,7 @@ fun AuthGateScreen(
                             focusManager.clearFocus()
                             if (email.isNotBlank() && password.isNotBlank()) {
                                 if (selectedTab == 0) {
-                                    viewModel.registerWithEmail(email.trim(), password.trim())
+                                    viewModel.registerWithEmail(email.trim(), password.trim(), name.trim())
                                 } else {
                                     viewModel.signInWithEmail(email.trim(), password.trim())
                                 }
@@ -361,12 +390,12 @@ fun AuthGateScreen(
                     onClick = {
                         focusManager.clearFocus()
                         if (selectedTab == 0) {
-                            viewModel.registerWithEmail(email.trim(), password.trim())
+                            viewModel.registerWithEmail(email.trim(), password.trim(), name.trim())
                         } else {
                             viewModel.signInWithEmail(email.trim(), password.trim())
                         }
                     },
-                    enabled = !isLoading && email.isNotBlank() && password.length >= 6,
+                    enabled = !isLoading && email.isNotBlank() && password.length >= 6 && (selectedTab != 0 || name.trim().isNotEmpty()),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)

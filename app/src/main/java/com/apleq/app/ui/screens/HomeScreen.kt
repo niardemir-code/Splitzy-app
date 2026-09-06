@@ -749,7 +749,7 @@ fun HomeScreen(
             onDismissRequest = { viewModel.closeAuthDialog() },
             onSignInWithGoogle = { viewModel.signInWithGoogle(activityContext) },
             onSignInWithEmail = { email, pass -> viewModel.signInWithEmail(email, pass) },
-            onRegisterWithEmail = { email, pass -> viewModel.registerWithEmail(email, pass) },
+            onRegisterWithEmail = { email, pass, name -> viewModel.registerWithEmail(email, pass, name) },
             onSignOut = { viewModel.signOut() },
             onSyncToCloud = { viewModel.syncToCloud() },
             onSyncFromCloud = { viewModel.syncFromCloud() },

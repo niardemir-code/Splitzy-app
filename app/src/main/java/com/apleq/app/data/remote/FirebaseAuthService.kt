@@ -30,6 +30,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
@@ -295,14 +296,27 @@ class FirebaseAuthService(
     /**
      * Registro con correo y contraseña
      */
-    suspend fun registerWithEmail(email: String, password: String): Result<FirebaseUser> = withContext(Dispatchers.IO) {
+    suspend fun registerWithEmail(email: String, password: String, name: String = ""): Result<FirebaseUser> = withContext(Dispatchers.IO) {
         _authState.value = AuthState.Loading
         try {
             val authInst = auth ?: throw IllegalStateException("Servicio de autenticación no inicializado")
             val authResult = authInst.createUserWithEmailAndPassword(email.trim(), password).await()
             val user = authResult.user ?: throw IllegalStateException("Usuario no disponible")
+
+            val trimmedName = name.trim()
+            if (trimmedName.isNotEmpty()) {
+                try {
+                    val profileUpdate = UserProfileChangeRequest.Builder()
+                        .setDisplayName(trimmedName)
+                        .build()
+                    user.updateProfile(profileUpdate).await()
+                } catch (e: Exception) {
+                    // No bloquear el registro si falla el nombre; se puede editar luego
+                }
+            }
+
             _authState.value = AuthState.Authenticated(user)
-            
+
             // Subir datos locales a la nueva cuenta
             syncToCloud()
             Result.success(user)

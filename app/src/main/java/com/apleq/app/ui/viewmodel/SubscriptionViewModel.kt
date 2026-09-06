@@ -141,9 +141,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun registerWithEmail(email: String, pass: String) {
+    fun registerWithEmail(email: String, pass: String, name: String = "") {
         viewModelScope.launch {
-            authService.registerWithEmail(email, pass)
+            authService.registerWithEmail(email, pass, name)
         }
     }
 
