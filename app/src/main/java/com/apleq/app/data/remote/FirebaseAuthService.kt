@@ -124,10 +124,17 @@ class FirebaseAuthService(
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
 
     private val activeListeners = mutableListOf<ListenerRegistration>()
+    private var participatingGroupsListener: ListenerRegistration? = null
 
     private fun removeActiveListeners() {
         activeListeners.forEach { try { it.remove() } catch (_: Throwable) {} }
         activeListeners.clear()
+    }
+
+    private fun removeParticipatingGroupsListener() {
+        participatingGroupsListener?.remove()
+        participatingGroupsListener = null
+        _participatingGroups.value = emptyList()
     }
 
     init {
@@ -333,6 +340,7 @@ class FirebaseAuthService(
     suspend fun signOut(clearLocalData: Boolean = true) = withContext(Dispatchers.IO) {
         try {
             removeActiveListeners()
+            removeParticipatingGroupsListener()
             if (clearLocalData) {
                 dao.deleteAllMembers()
                 dao.deleteAllSubscriptions()
@@ -1961,8 +1969,9 @@ class FirebaseAuthService(
     fun startListeningParticipatingGroups() {
         val uid = auth?.currentUser?.uid ?: return
         val db = firestore ?: return
+        participatingGroupsListener?.remove()
         android.util.Log.d("ParticipatingGroups", "Iniciando listener para uid=$uid")
-        val listener = db.collectionGroup("subscriptions")
+        participatingGroupsListener = db.collectionGroup("subscriptions")
             .whereArrayContains("memberUids", uid)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
@@ -1979,7 +1988,6 @@ class FirebaseAuthService(
                 }
                 _participatingGroups.value = groups
             }
-        activeListeners.add(listener)
     }
 
     private fun getWebClientId(): String? {
