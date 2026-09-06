@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
@@ -115,6 +116,9 @@ class FirebaseAuthService(
 
     private val _syncStatus = MutableStateFlow<String?>(null)
     val syncStatus: StateFlow<String?> = _syncStatus.asStateFlow()
+
+    private val _participatingGroups = MutableStateFlow<List<Map<String, Any>>>(emptyList())
+    val participatingGroups: StateFlow<List<Map<String, Any>>> = _participatingGroups
 
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
@@ -339,6 +343,7 @@ class FirebaseAuthService(
             } catch (_: Exception) {}
             _authState.value = AuthState.Idle
             _syncStatus.value = null
+            _participatingGroups.value = emptyList()
         } catch (e: Exception) {
             Log.e("FirebaseAuthService", "Error signing out", e)
         }
@@ -1951,6 +1956,24 @@ class FirebaseAuthService(
                 }
             }
         activeListeners.add(l1)
+    }
+
+    fun startListeningParticipatingGroups() {
+        val uid = auth?.currentUser?.uid ?: return
+        val db = firestore ?: return
+        val listener = db.collectionGroup("subscriptions")
+            .whereArrayContains("memberUids", uid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+                val groups = snapshot.documents.mapNotNull { doc ->
+                    val data = doc.data?.toMutableMap() ?: return@mapNotNull null
+                    data["_docId"] = doc.id
+                    data["_ownerUid"] = doc.reference.parent.parent?.id ?: ""
+                    data
+                }
+                _participatingGroups.value = groups
+            }
+        activeListeners.add(listener)
     }
 
     private fun getWebClientId(): String? {

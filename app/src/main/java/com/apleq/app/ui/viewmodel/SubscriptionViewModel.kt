@@ -85,6 +85,13 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             repository.ensureDefaultPlatformsSeeded()
             com.apleq.app.data.util.CurrencyRateService.fetchLatestRates()
         }
+        viewModelScope.launch {
+            authService.authState.collect { state ->
+                if (state is AuthState.Authenticated) {
+                    authService.startListeningParticipatingGroups()
+                }
+            }
+        }
     }
 
     // Dynamic Sharing Platforms Flow
@@ -99,6 +106,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     val authState: StateFlow<AuthState> = authService.authState
     val isSyncing: StateFlow<Boolean> = authService.isSyncing
     val syncStatus: StateFlow<String?> = authService.syncStatus
+    val participatingGroups: StateFlow<List<Map<String, Any>>> = authService.participatingGroups
 
     private val _showAuthDialog = MutableStateFlow(false)
     val showAuthDialog: StateFlow<Boolean> = _showAuthDialog

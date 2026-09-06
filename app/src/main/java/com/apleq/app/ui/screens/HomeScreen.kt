@@ -42,6 +42,8 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -104,6 +106,7 @@ fun HomeScreen(
 
     val allSubscriptions by viewModel.allSubscriptions.collectAsStateWithLifecycle()
     val filteredSubscriptions by viewModel.filteredSubscriptions.collectAsStateWithLifecycle()
+    val participatingGroups by viewModel.participatingGroups.collectAsStateWithLifecycle()
     val financialOverview by viewModel.financialOverview.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
@@ -120,6 +123,7 @@ fun HomeScreen(
 
     var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
     var showJoinDialog by remember { mutableStateOf(false) }
+    var selectedClientGroup by remember { mutableStateOf<Map<String, Any>?>(null) }
 
     val rawCategories = listOf("Todas", "Streaming", "Música", "Productividad", "Gaming", "Educación", "Salud")
 
@@ -127,6 +131,7 @@ fun HomeScreen(
     val pendingRestorePreview by viewModel.pendingRestorePreview.collectAsStateWithLifecycle()
     val backupStatusMessage by viewModel.backupStatusMessage.collectAsStateWithLifecycle()
     val authState by viewModel.authState.collectAsStateWithLifecycle()
+    val currentUid = (authState as? com.apleq.app.data.remote.AuthState.Authenticated)?.user?.uid ?: ""
     val showAuthDialog by viewModel.showAuthDialog.collectAsStateWithLifecycle()
 
     LaunchedEffect(authState) {
@@ -556,6 +561,88 @@ fun HomeScreen(
                     )
                 }
             }
+
+            // --- Sección "Participo en" ---
+            if (participatingGroups.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Participo en (${participatingGroups.size})",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                    )
+                }
+                items(participatingGroups, key = { it["_docId"].toString() }) { group ->
+                    val groupName = (group["platformName"] ?: group["name"] ?: "Grupo").toString()
+                    val members = (group["members"] as? List<*>) ?: emptyList<Any>()
+                    val myMember = members.filterIsInstance<Map<String, Any?>>()
+                        .find { it["linkedUid"]?.toString() == currentUid || it["linked_uid"]?.toString() == currentUid }
+                    val myAmount = (myMember?.get("contributionAmount") ?: myMember?.get("contribution_amount") ?: myMember?.get("amount") ?: 0).toString().toDoubleOrNull() ?: 0.0
+                    val nextPayment = (myMember?.get("nextPaymentDate") ?: myMember?.get("next_payment_date") ?: "").toString()
+                    val nextPaymentFormatted = if (nextPayment.length >= 10) {
+                        val parts = nextPayment.substring(0, 10).split("-")
+                        if (parts.size == 3) "${parts[2]}-${parts[1]}-${parts[0]}" else nextPayment
+                    } else nextPayment
+                    val isPaid = myMember?.get("isPendingPayment") != true
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable { selectedClientGroup = group },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = groupName,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                ) {
+                                    Text(
+                                        text = "Cliente",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Tu parte:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${String.format("%.2f", myAmount)} €", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                            }
+                            if (nextPaymentFormatted.isNotBlank()) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text("Próximo pago:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(nextPaymentFormatted, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Estado:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    text = if (isPaid) "Pagado" else "Pendiente",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isPaid) androidx.compose.ui.graphics.Color(0xFF10B981) else androidx.compose.ui.graphics.Color(0xFFF59E0B)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -675,6 +762,105 @@ fun HomeScreen(
         JoinGroupDialog(
             onDismiss = { showJoinDialog = false },
             onJoin = { code, cb -> viewModel.claimInvite(code, cb) }
+        )
+    }
+
+    selectedClientGroup?.let { group ->
+        val groupName = (group["platformName"] ?: group["name"] ?: "Grupo").toString()
+        val members = (group["members"] as? List<*>) ?: emptyList<Any>()
+        val myMember = members.filterIsInstance<Map<String, Any?>>()
+            .find { it["linkedUid"]?.toString() == currentUid || it["linked_uid"]?.toString() == currentUid }
+        val myAmount = (myMember?.get("contributionAmount") ?: myMember?.get("contribution_amount") ?: myMember?.get("amount") ?: 0).toString().toDoubleOrNull() ?: 0.0
+        val nextPayment = (myMember?.get("nextPaymentDate") ?: myMember?.get("next_payment_date") ?: "").toString()
+        val nextPaymentFormatted = if (nextPayment.length >= 10) {
+            val parts = nextPayment.substring(0, 10).split("-")
+            if (parts.size == 3) "${parts[2]}-${parts[1]}-${parts[0]}" else nextPayment
+        } else nextPayment
+        val isPaid = myMember?.get("isPendingPayment") != true
+        val showOwnerName = group["showMainUserToMembers"] == true
+        val ownerName = (group["mainUserName"] ?: "").toString()
+        val platform = (myMember?.get("sharingPlatform") ?: myMember?.get("sharing_platform") ?: "").toString()
+
+        AlertDialog(
+            onDismissRequest = { selectedClientGroup = null },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(groupName, fontWeight = FontWeight.Black)
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    ) {
+                        Text(
+                            "Cliente",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (showOwnerName && ownerName.isNotBlank()) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Titular:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(ownerName, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    if (platform.isNotBlank()) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Plataforma:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(platform, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Tu parte:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${String.format("%.2f", myAmount)} €", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                    }
+                    if (nextPaymentFormatted.isNotBlank()) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Próximo pago:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(nextPaymentFormatted, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Estado:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            text = if (isPaid) "Pagado" else "Pendiente",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isPaid) androidx.compose.ui.graphics.Color(0xFF10B981) else androidx.compose.ui.graphics.Color(0xFFF59E0B)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text("Tu alarma", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text("Próximamente.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text("Mensajes con el gestor", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text("Próximamente.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { selectedClientGroup = null }) { Text("Cerrar") }
+            }
         )
     }
 
