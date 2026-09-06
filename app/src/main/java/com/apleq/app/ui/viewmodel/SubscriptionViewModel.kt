@@ -117,6 +117,16 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun handleGoogleSignInResult(data: android.content.Intent?) {
+        viewModelScope.launch {
+            authService.handleGoogleSignInResult(data)
+        }
+    }
+
+    fun getGoogleSignInIntent(ctx: android.content.Context): android.content.Intent {
+        return authService.getGoogleSignInIntent(ctx)
+    }
+
     fun signInWithEmail(email: String, pass: String) {
         viewModelScope.launch {
             authService.signInWithEmail(email, pass)

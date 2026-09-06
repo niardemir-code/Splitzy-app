@@ -1,5 +1,7 @@
 package com.apleq.app.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,6 +51,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -80,6 +84,20 @@ fun AuthGateScreen(
     authState: AuthState,
     modifier: Modifier = Modifier
 ) {
+    val activityContext = LocalContext.current
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        viewModel.handleGoogleSignInResult(result.data)
+    }
+
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Error && authState.message == "FALLBACK_GOOGLE_SIGNIN") {
+            val intent = viewModel.getGoogleSignInIntent(activityContext)
+            googleSignInLauncher.launch(intent)
+        }
+    }
+
     var selectedTab by remember { mutableIntStateOf(0) } // 0 = Crear cuenta, 1 = Iniciar sesión
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -133,7 +151,7 @@ fun AuthGateScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Error Message Card
-                if (authState is AuthState.Error) {
+                if (authState is AuthState.Error && authState.message != "FALLBACK_GOOGLE_SIGNIN") {
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.9f)
@@ -221,7 +239,7 @@ fun AuthGateScreen(
                 OutlinedButton(
                     onClick = {
                         focusManager.clearFocus()
-                        viewModel.signInWithGoogle()
+                        viewModel.signInWithGoogle(activityContext)
                     },
                     enabled = !isLoading,
                     modifier = Modifier

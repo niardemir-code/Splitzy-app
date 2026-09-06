@@ -1,6 +1,8 @@
 package com.apleq.app.data.remote
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
@@ -19,6 +21,9 @@ import com.apleq.app.data.model.CurrencyManager
 import com.apleq.app.data.model.PlatformPriceItem
 import com.apleq.app.data.model.PlatformPricingHelper
 import com.apleq.app.ui.util.ImageStorageHelper
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -82,6 +87,20 @@ class FirebaseAuthService(
         } catch (t: Throwable) {
             Log.w("FirebaseAuthService", "CredentialManager create: ${t.message}")
             null
+        }
+    }
+
+    // Fallback: GoogleSignInClient clásico para dispositivos donde Credential Manager falla
+    private var googleSignInClient: GoogleSignInClient? = null
+
+    private fun getOrCreateGoogleSignInClient(ctx: Context): GoogleSignInClient {
+        return googleSignInClient ?: run {
+            val serverClientId = getWebClientId() ?: "498651324948-18qocdi9iqatn6kc4isaof5d0bhate0q.apps.googleusercontent.com"
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(serverClientId)
+                .requestEmail()
+                .build()
+            GoogleSignIn.getClient(ctx, gso).also { googleSignInClient = it }
         }
     }
 
@@ -216,16 +235,47 @@ class FirebaseAuthService(
             Result.failure(e)
         } catch (e: GetCredentialException) {
             val rawMsg = e.localizedMessage ?: ""
-            val userFriendlyMsg = when {
-                rawMsg.contains("No credentials available", ignoreCase = true) || 
-                rawMsg.contains("No credential", ignoreCase = true) -> 
-                    "No se encontró una sesión de Google vinculada automáticamente. Puedes registrarte o iniciar sesión escribiendo tu Correo y Contraseña aquí abajo."
-                else -> "Error de Google: $rawMsg"
+            if (rawMsg.contains("No credentials available", ignoreCase = true) ||
+                rawMsg.contains("No credential", ignoreCase = true)) {
+                // Señal para que la UI lance el fallback con GoogleSignInClient
+                _authState.value = AuthState.Error("FALLBACK_GOOGLE_SIGNIN")
+                Result.failure(e)
+            } else {
+                _authState.value = AuthState.Error("Error de Google: $rawMsg")
+                Result.failure(e)
             }
-            _authState.value = AuthState.Error(userFriendlyMsg)
-            Result.failure(e)
         } catch (e: Exception) {
             val msg = e.localizedMessage ?: "Error de autenticación"
+            _authState.value = AuthState.Error(msg)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Fallback: inicia Google Sign-In con el método clásico (Intent).
+     * Devuelve el Intent que hay que lanzar con un ActivityResultLauncher.
+     */
+    fun getGoogleSignInIntent(ctx: Context): Intent {
+        return getOrCreateGoogleSignInClient(ctx).signInIntent
+    }
+
+    /**
+     * Procesa el resultado del Intent de Google Sign-In clásico.
+     */
+    suspend fun handleGoogleSignInResult(data: Intent?): Result<FirebaseUser> = withContext(Dispatchers.IO) {
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
+            val idToken = account?.idToken ?: throw IllegalStateException("No se obtuvo el token de Google")
+            val authCredential = GoogleAuthProvider.getCredential(idToken, null)
+            val authInst = auth ?: throw IllegalStateException("Servicio de autenticación no inicializado")
+            val authResult = authInst.signInWithCredential(authCredential).await()
+            val user = authResult.user ?: throw IllegalStateException("Usuario no disponible")
+            _authState.value = AuthState.Authenticated(user)
+            syncFromCloud()
+            Result.success(user)
+        } catch (e: Exception) {
+            val msg = e.localizedMessage ?: "Error de autenticación con Google"
             _authState.value = AuthState.Error(msg)
             Result.failure(e)
         }

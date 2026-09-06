@@ -1,5 +1,7 @@
 package com.apleq.app.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -94,6 +96,12 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val activityContext = androidx.compose.ui.platform.LocalContext.current
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        viewModel.handleGoogleSignInResult(result.data)
+    }
+
     val allSubscriptions by viewModel.allSubscriptions.collectAsStateWithLifecycle()
     val filteredSubscriptions by viewModel.filteredSubscriptions.collectAsStateWithLifecycle()
     val financialOverview by viewModel.financialOverview.collectAsStateWithLifecycle()
@@ -125,6 +133,13 @@ fun HomeScreen(
         if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
             viewModel.closeAuthDialog()
             viewModel.closeAppMenu()
+        }
+    }
+
+    LaunchedEffect(authState) {
+        if (authState is com.apleq.app.data.remote.AuthState.Error && (authState as com.apleq.app.data.remote.AuthState.Error).message == "FALLBACK_GOOGLE_SIGNIN") {
+            val intent = viewModel.getGoogleSignInIntent(activityContext)
+            googleSignInLauncher.launch(intent)
         }
     }
 
