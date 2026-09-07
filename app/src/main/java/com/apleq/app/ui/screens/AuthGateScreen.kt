@@ -2,9 +2,6 @@ package com.apleq.app.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,18 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,41 +29,31 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apleq.app.data.remote.AuthState
+import com.apleq.app.ui.components.EmailLoginDialog
+import com.apleq.app.ui.components.EmailRegisterDialog
 import com.apleq.app.ui.components.SplitzyLogo
 import com.apleq.app.ui.theme.Quicksand
 import com.apleq.app.ui.viewmodel.SubscriptionViewModel
@@ -99,14 +78,18 @@ fun AuthGateScreen(
         }
     }
 
-    var selectedTab by remember { mutableIntStateOf(0) } // 0 = Crear cuenta, 1 = Iniciar sesión
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
+    var showRegisterDialog by remember { mutableStateOf(false) }
+    var showLoginDialog by remember { mutableStateOf(false) }
 
     val isLoading = authState is AuthState.Loading
+
+    // Cerrar los diálogos automáticamente al autenticarse con éxito
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Authenticated) {
+            showRegisterDialog = false
+            showLoginDialog = false
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -127,7 +110,6 @@ fun AuthGateScreen(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Brand Header
                 SplitzyLogo(size = 72.dp)
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -152,7 +134,6 @@ fun AuthGateScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Error Message Card
                 if (authState is AuthState.Error && authState.message != "FALLBACK_GOOGLE_SIGNIN") {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -186,63 +167,15 @@ fun AuthGateScreen(
                                 onClick = { viewModel.clearAuthError() },
                                 modifier = Modifier.align(Alignment.End)
                             ) {
-                                Text(
-                                    "Aceptar",
-                                    color = MaterialTheme.colorScheme.error,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Text("Aceptar", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 }
 
-                // Auth Mode Tabs (Crear cuenta / Iniciar sesión)
-                TabRow(
-                    selectedTabIndex = selectedTab,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    contentColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                ) {
-                    Tab(
-                        selected = selectedTab == 0,
-                        onClick = {
-                            selectedTab = 0
-                            viewModel.clearAuthError()
-                        },
-                        text = {
-                            Text(
-                                "Crear cuenta",
-                                fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal,
-                                fontSize = 14.sp
-                            )
-                        }
-                    )
-                    Tab(
-                        selected = selectedTab == 1,
-                        onClick = {
-                            selectedTab = 1
-                            viewModel.clearAuthError()
-                        },
-                        text = {
-                            Text(
-                                "Iniciar sesión",
-                                fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal,
-                                fontSize = 14.sp
-                            )
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Quick Google Sign In
+                // Continuar con Google
                 OutlinedButton(
-                    onClick = {
-                        focusManager.clearFocus()
-                        viewModel.signInWithGoogle(activityContext)
-                    },
+                    onClick = { viewModel.signInWithGoogle(activityContext) },
                     enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -261,7 +194,7 @@ fun AuthGateScreen(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = if (selectedTab == 0) "Registrarme con Google" else "Continuar con Google",
+                        text = "Continuar con Google",
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -285,142 +218,38 @@ fun AuthGateScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Name Input (Only on Register)
-                if (selectedTab == 0) {
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("Tu nombre") },
-                        placeholder = { Text("Ej. Víctor Oliver") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(20.dp))
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("input_auth_gate_name"),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                // Email Input
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Correo electrónico") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(20.dp))
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("input_auth_gate_email"),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Password Input
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = {
-                        Text(if (selectedTab == 0) "Crear contraseña (mínimo 6 caracteres)" else "Contraseña")
-                    },
-                    leadingIcon = {
-                        Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(20.dp))
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
-                            )
-                        }
-                    },
-                    singleLine = true,
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
-                            if (email.isNotBlank() && password.isNotBlank()) {
-                                if (selectedTab == 0) {
-                                    viewModel.registerWithEmail(email.trim(), password.trim(), name.trim())
-                                } else {
-                                    viewModel.signInWithEmail(email.trim(), password.trim())
-                                }
-                            }
-                        }
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("input_auth_gate_password"),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Submit Button
+                // Registrarme con correo
                 Button(
                     onClick = {
-                        focusManager.clearFocus()
-                        if (selectedTab == 0) {
-                            viewModel.registerWithEmail(email.trim(), password.trim(), name.trim())
-                        } else {
-                            viewModel.signInWithEmail(email.trim(), password.trim())
-                        }
+                        viewModel.clearAuthError()
+                        showRegisterDialog = true
                     },
-                    enabled = !isLoading && email.isNotBlank() && password.length >= 6 && (selectedTab != 0 || name.trim().isNotEmpty()),
+                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
-                        .testTag("btn_auth_gate_submit"),
+                        .testTag("btn_auth_gate_register_email"),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(22.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text("Verificando...")
-                    } else {
-                        Text(
-                            text = if (selectedTab == 0) "Crear mi Cuenta" else "Iniciar Sesión",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                    }
+                    Text("Registrarme con correo", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                // Value propositions / Cloud backup benefits
+                // Ya tengo cuenta -> iniciar sesión con correo
+                TextButton(
+                    onClick = {
+                        viewModel.clearAuthError()
+                        showLoginDialog = true
+                    },
+                    enabled = !isLoading,
+                    modifier = Modifier.testTag("btn_auth_gate_login_email")
+                ) {
+                    Text("¿Ya tienes cuenta? Iniciar sesión con correo")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
@@ -446,6 +275,26 @@ fun AuthGateScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+
+    if (showRegisterDialog) {
+        EmailRegisterDialog(
+            isLoading = isLoading,
+            onDismiss = { showRegisterDialog = false },
+            onRegister = { name, email, password ->
+                viewModel.registerWithEmail(email, password, name)
+            }
+        )
+    }
+
+    if (showLoginDialog) {
+        EmailLoginDialog(
+            isLoading = isLoading,
+            onDismiss = { showLoginDialog = false },
+            onLogin = { email, password ->
+                viewModel.signInWithEmail(email, password)
+            }
+        )
     }
 }
 
