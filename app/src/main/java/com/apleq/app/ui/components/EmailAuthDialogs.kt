@@ -49,6 +49,7 @@ fun EmailRegisterDialog(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val passwordsMatch = confirmPassword.isEmpty() || password == confirmPassword
+    val passwordTooShort = password.isNotEmpty() && password.length < 6
     val canSubmit = name.trim().isNotEmpty() &&
         email.isNotBlank() &&
         password.length >= 6 &&
@@ -82,8 +83,21 @@ fun EmailRegisterDialog(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña (mínimo 6 caracteres)") },
+                    label = { Text("Contraseña") },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    isError = passwordTooShort,
+                    supportingText = {
+                        Text(
+                            text = if (passwordTooShort)
+                                "Demasiado corta: mínimo 6 caracteres"
+                            else
+                                "Mínimo 6 caracteres",
+                            color = if (passwordTooShort)
+                                MaterialTheme.colorScheme.error
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(

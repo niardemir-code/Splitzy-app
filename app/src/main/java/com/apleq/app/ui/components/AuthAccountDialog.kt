@@ -409,25 +409,27 @@ private fun AuthenticatedUserView(
         Text("Eliminar mi cuenta", fontSize = 12.sp)
     }
 
-    deleteError?.let { err ->
-        Text(
-            text = err,
-            color = MaterialTheme.colorScheme.error,
-            fontSize = 11.sp,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-    }
-
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { if (!isDeleting) showDeleteConfirm = false },
             title = { Text("¿Eliminar tu cuenta?", color = MaterialTheme.colorScheme.error) },
             text = {
-                Text(
-                    "Esta acción es irreversible. Se borrarán todas tus suscripciones, y dejarás de " +
-                        "aparecer en los grupos de otros donde participas (esas plazas quedarán libres). " +
-                        "No podrás recuperar tu cuenta ni tus datos."
-                )
+                Column {
+                    Text(
+                        "Esta acción es irreversible. Se borrarán todas tus suscripciones, y dejarás de " +
+                            "aparecer en los grupos de otros donde participas (esas plazas quedarán libres). " +
+                            "No podrás recuperar tu cuenta ni tus datos."
+                    )
+                    deleteError?.let { err ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = err,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             },
             confirmButton = {
                 TextButton(
