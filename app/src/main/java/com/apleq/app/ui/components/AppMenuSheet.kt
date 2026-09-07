@@ -51,7 +51,8 @@ fun AppMenuSheet(
     onOpenSettings: () -> Unit,
     onOpenBackupRestore: () -> Unit,
     onOpenCloudSync: () -> Unit,
-    userEmail: String? = null
+    userEmail: String? = null,
+    userName: String? = null
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -111,8 +112,14 @@ fun AppMenuSheet(
                             )
                         }
                     }
+                    val userLabel = when {
+                        !userName.isNullOrBlank() && !userEmail.isNullOrBlank() -> "$userName · $userEmail"
+                        !userName.isNullOrBlank() -> userName
+                        !userEmail.isNullOrBlank() -> userEmail
+                        else -> "Gestión de suscripciones compartidas"
+                    }
                     Text(
-                        text = if (!userEmail.isNullOrBlank()) userEmail else "Gestión de suscripciones compartidas",
+                        text = userLabel,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

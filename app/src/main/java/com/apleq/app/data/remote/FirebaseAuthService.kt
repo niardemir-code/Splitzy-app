@@ -653,7 +653,8 @@ class FirebaseAuthService(
                     "created_at" to isoCreatedAt,
                     "updatedAt" to isoUpdatedAt,
                     "updated_at" to isoUpdatedAt,
-                    "members" to memberMapList
+                    "members" to memberMapList,
+                    "memberUids" to subMembers.mapNotNull { it.linkedUid?.trim()?.ifBlank { null } }
                 )
 
                 // Escribir en la ruta principal del documento
@@ -1132,7 +1133,8 @@ class FirebaseAuthService(
                     "created_at" to isoCreatedAt,
                     "updatedAt" to isoUpdatedAt,
                     "updated_at" to isoUpdatedAt,
-                    "members" to memberMapList
+                    "members" to memberMapList,
+                    "memberUids" to mems.mapNotNull { it.linkedUid?.trim()?.ifBlank { null } }
                 )
 
                 val docRef = userSubsCol.document(sub.id.toString())

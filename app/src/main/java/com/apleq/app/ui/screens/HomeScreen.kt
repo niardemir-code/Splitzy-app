@@ -190,7 +190,8 @@ fun HomeScreen(
                             }
                             Text(
                                 text = if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
-                                    (authState as com.apleq.app.data.remote.AuthState.Authenticated).user.email ?: "Apleq"
+                                    val user = (authState as com.apleq.app.data.remote.AuthState.Authenticated).user
+                                    user.displayName?.takeIf { it.isNotBlank() } ?: user.email ?: "Apleq"
                                 } else {
                                     I18n.appSubtitle
                                 },
@@ -688,7 +689,8 @@ fun HomeScreen(
                 viewModel.closeAppMenu()
                 viewModel.openAuthDialog()
             },
-            userEmail = (authState as? com.apleq.app.data.remote.AuthState.Authenticated)?.user?.email
+            userEmail = (authState as? com.apleq.app.data.remote.AuthState.Authenticated)?.user?.email,
+            userName = (authState as? com.apleq.app.data.remote.AuthState.Authenticated)?.user?.displayName
         )
     }
 
