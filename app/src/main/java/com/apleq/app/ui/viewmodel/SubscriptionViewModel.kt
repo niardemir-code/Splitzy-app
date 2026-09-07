@@ -435,6 +435,17 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun deleteAccount(onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            val result = authService.deleteAccount()
+            if (result.isSuccess) {
+                onResult(true, "Cuenta eliminada correctamente.")
+            } else {
+                onResult(false, result.exceptionOrNull()?.message ?: "No se pudo eliminar la cuenta.")
+            }
+        }
+    }
+
     fun deleteMember(member: MemberEntity) {
         viewModelScope.launch {
             repository.deleteMember(member)

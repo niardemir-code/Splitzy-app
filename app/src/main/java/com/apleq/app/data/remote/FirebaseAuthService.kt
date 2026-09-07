@@ -348,6 +348,21 @@ class FirebaseAuthService(
         }
     }
 
+    suspend fun deleteAccount(): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val functions = com.google.firebase.functions.FirebaseFunctions.getInstance()
+            functions.getHttpsCallable("deleteAccount")
+                .call()
+                .await()
+            // Limpiar sesión local (la cuenta de Firebase Auth ya fue borrada en el servidor)
+            signOut(clearLocalData = true)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            val msg = e.message ?: "No se pudo eliminar la cuenta. Inténtalo de nuevo."
+            Result.failure(Exception(msg))
+        }
+    }
+
     /**
      * Cierre de sesión (limpia los datos locales para proteger la privacidad)
      */

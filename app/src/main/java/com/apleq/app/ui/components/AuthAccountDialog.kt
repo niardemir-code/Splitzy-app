@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
@@ -70,6 +71,7 @@ fun AuthAccountDialog(
     onSignInWithEmail: (email: String, pass: String) -> Unit,
     onRegisterWithEmail: (email: String, pass: String, name: String) -> Unit,
     onSignOut: () -> Unit,
+    onDeleteAccount: (onResult: (Boolean, String) -> Unit) -> Unit,
     onSyncToCloud: () -> Unit,
     onSyncFromCloud: () -> Unit,
     onCleanAndPruneDatabase: () -> Unit = {},
@@ -153,7 +155,8 @@ fun AuthAccountDialog(
                             onSyncToCloud = onSyncToCloud,
                             onSyncFromCloud = onSyncFromCloud,
                             onCleanAndPruneDatabase = onCleanAndPruneDatabase,
-                            onSignOut = onSignOut
+                            onSignOut = onSignOut,
+                            onDeleteAccount = onDeleteAccount
                         )
                     }
 
@@ -261,8 +264,13 @@ private fun AuthenticatedUserView(
     onSyncToCloud: () -> Unit,
     onSyncFromCloud: () -> Unit,
     onCleanAndPruneDatabase: () -> Unit,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onDeleteAccount: (onResult: (Boolean, String) -> Unit) -> Unit
 ) {
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
+    var deleteError by remember { mutableStateOf<String?>(null) }
+
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
@@ -387,6 +395,69 @@ private fun AuthenticatedUserView(
         Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Text("Cerrar sesión")
+    }
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    TextButton(
+        onClick = { showDeleteConfirm = true },
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+    ) {
+        Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text("Eliminar mi cuenta", fontSize = 12.sp)
+    }
+
+    deleteError?.let { err ->
+        Text(
+            text = err,
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 11.sp,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { if (!isDeleting) showDeleteConfirm = false },
+            title = { Text("¿Eliminar tu cuenta?", color = MaterialTheme.colorScheme.error) },
+            text = {
+                Text(
+                    "Esta acción es irreversible. Se borrarán todas tus suscripciones, y dejarás de " +
+                        "aparecer en los grupos de otros donde participas (esas plazas quedarán libres). " +
+                        "No podrás recuperar tu cuenta ni tus datos."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        isDeleting = true
+                        deleteError = null
+                        onDeleteAccount { ok, msg ->
+                            isDeleting = false
+                            if (ok) {
+                                showDeleteConfirm = false
+                            } else {
+                                deleteError = msg
+                            }
+                        }
+                    },
+                    enabled = !isDeleting
+                ) {
+                    Text(
+                        if (isDeleting) "Eliminando..." else "Sí, eliminar mi cuenta",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }, enabled = !isDeleting) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 

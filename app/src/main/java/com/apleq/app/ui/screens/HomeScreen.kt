@@ -753,6 +753,7 @@ fun HomeScreen(
             onSignInWithEmail = { email, pass -> viewModel.signInWithEmail(email, pass) },
             onRegisterWithEmail = { email, pass, name -> viewModel.registerWithEmail(email, pass, name) },
             onSignOut = { viewModel.signOut() },
+            onDeleteAccount = { onResult -> viewModel.deleteAccount(onResult) },
             onSyncToCloud = { viewModel.syncToCloud() },
             onSyncFromCloud = { viewModel.syncFromCloud() },
             onCleanAndPruneDatabase = { viewModel.cleanAndPruneFirebaseDatabase() },
