@@ -50,6 +50,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +77,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,6 +89,7 @@ import com.apleq.app.ui.components.AddEditMemberDialog
 import com.apleq.app.ui.components.AddEditSubscriptionDialog
 import com.apleq.app.ui.components.FinancialSummaryCard
 import com.apleq.app.ui.components.JoinGroupDialog
+import com.apleq.app.ui.components.PlatformIconBadge
 import com.apleq.app.ui.components.ReminderMessageDialog
 import com.apleq.app.ui.components.SplitzyLogo
 import com.apleq.app.ui.components.SubscriptionCard
@@ -630,26 +633,57 @@ fun HomeScreen(
                     } else nextPayment
                     val isPaid = myMember?.get("isPendingPayment") != true
 
+                    val clientIconColorHex = (group["iconColorHex"] ?: group["icon_color_hex"] ?: "#1285FA").toString()
+                    val clientIconType = (group["iconType"] ?: group["icon_type"] ?: "PRESET").toString()
+                    val clientIconKey = (group["iconKey"] ?: group["icon_key"] ?: groupName).toString()
+                    val clientCustomImageUri = (group["customImageUri"] ?: group["custom_image_uri"] ?: "").toString()
+                    val clientAccentColor = runCatching {
+                        Color(android.graphics.Color.parseColor(clientIconColorHex))
+                    }.getOrDefault(Color(0xFF1285FA))
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                             .clickable { selectedClientGroup = group },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .background(clientAccentColor)
+                        )
                         Column(modifier = Modifier.padding(16.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = groupName,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.weight(1f)
+                                PlatformIconBadge(
+                                    platformName = groupName,
+                                    iconType = clientIconType,
+                                    iconKey = clientIconKey,
+                                    customImageUri = clientCustomImageUri,
+                                    iconColorHex = clientIconColorHex,
+                                    size = 46.dp,
+                                    iconSize = 24.dp
                                 )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = groupName,
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp,
+                                            lineHeight = 20.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
@@ -663,17 +697,21 @@ fun HomeScreen(
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("Tu parte:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text("${String.format("%.2f", myAmount)} $myCurrencySymbol", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                             }
                             if (nextPaymentFormatted.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(6.dp))
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                     Text("Próximo pago:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     Text(nextPaymentFormatted, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                                 }
                             }
+                            Spacer(modifier = Modifier.height(6.dp))
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("Estado:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(
@@ -682,15 +720,6 @@ fun HomeScreen(
                                     fontWeight = FontWeight.Bold,
                                     color = if (isPaid) androidx.compose.ui.graphics.Color(0xFF10B981) else androidx.compose.ui.graphics.Color(0xFFF59E0B)
                                 )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            TextButton(
-                                onClick = { groupPendingLeave = group },
-                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                                contentPadding = PaddingValues(0.dp),
-                                modifier = Modifier.align(Alignment.End)
-                            ) {
-                                Text("Salir de este grupo", style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
@@ -949,6 +978,17 @@ fun HomeScreen(
             },
             confirmButton = {
                 TextButton(onClick = { selectedClientGroup = null }) { Text("Cerrar") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        groupPendingLeave = group
+                        selectedClientGroup = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Salir de este grupo")
+                }
             }
         )
     }
