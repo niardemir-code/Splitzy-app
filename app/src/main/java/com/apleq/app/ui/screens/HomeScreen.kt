@@ -66,7 +66,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -125,6 +127,10 @@ fun HomeScreen(
     var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
     var showJoinDialog by remember { mutableStateOf(false) }
     var selectedClientGroup by remember { mutableStateOf<Map<String, Any>?>(null) }
+    var groupPendingLeave by remember { mutableStateOf<Map<String, Any>?>(null) }
+    var isLeavingGroup by remember { mutableStateOf(false) }
+    var leaveGroupError by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     val rawCategories = listOf("Todas", "Streaming", "Música", "Productividad", "Gaming", "Educación", "Salud")
 
@@ -677,6 +683,15 @@ fun HomeScreen(
                                     color = if (isPaid) androidx.compose.ui.graphics.Color(0xFF10B981) else androidx.compose.ui.graphics.Color(0xFFF59E0B)
                                 )
                             }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            TextButton(
+                                onClick = { groupPendingLeave = group },
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                contentPadding = PaddingValues(0.dp),
+                                modifier = Modifier.align(Alignment.End)
+                            ) {
+                                Text("Salir de este grupo", style = MaterialTheme.typography.labelSmall)
+                            }
                         }
                     }
                 }
@@ -934,6 +949,63 @@ fun HomeScreen(
             },
             confirmButton = {
                 TextButton(onClick = { selectedClientGroup = null }) { Text("Cerrar") }
+            }
+        )
+    }
+
+    groupPendingLeave?.let { group ->
+        val groupName = (group["platformName"] ?: group["name"] ?: "este grupo").toString()
+        AlertDialog(
+            onDismissRequest = { if (!isLeavingGroup) { groupPendingLeave = null; leaveGroupError = null } },
+            title = { Text("¿Salir de $groupName?") },
+            text = {
+                Column {
+                    Text("Dejarás de participar en este grupo.")
+                    leaveGroupError?.let { err ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = err,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !isLeavingGroup,
+                    onClick = {
+                        val ownerUid = group["_ownerUid"].toString()
+                        val groupId = group["_docId"].toString()
+                        isLeavingGroup = true
+                        leaveGroupError = null
+                        coroutineScope.launch {
+                            val result = viewModel.leaveGroup(ownerUid, groupId)
+                            isLeavingGroup = false
+                            result.onSuccess {
+                                groupPendingLeave = null
+                            }.onFailure { e ->
+                                leaveGroupError = e.message ?: "No se pudo salir del grupo."
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    if (isLeavingGroup) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text("Salir")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !isLeavingGroup,
+                    onClick = { groupPendingLeave = null; leaveGroupError = null }
+                ) {
+                    Text("Cancelar")
+                }
             }
         )
     }

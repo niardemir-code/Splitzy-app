@@ -363,6 +363,23 @@ class FirebaseAuthService(
         }
     }
 
+    suspend fun leaveGroup(ownerUid: String, groupId: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val functions = com.google.firebase.functions.FirebaseFunctions.getInstance()
+            val data = hashMapOf(
+                "ownerUid" to ownerUid,
+                "groupId" to groupId
+            )
+            functions.getHttpsCallable("leaveGroup")
+                .call(data)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            val msg = e.message ?: "No se pudo salir del grupo. Inténtalo de nuevo."
+            Result.failure(Exception(msg))
+        }
+    }
+
     /**
      * Cierre de sesión (limpia los datos locales para proteger la privacidad)
      */

@@ -446,6 +446,10 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    suspend fun leaveGroup(ownerUid: String, groupId: String): Result<Unit> {
+        return authService.leaveGroup(ownerUid, groupId)
+    }
+
     fun deleteMember(member: MemberEntity) {
         viewModelScope.launch {
             repository.deleteMember(member)
