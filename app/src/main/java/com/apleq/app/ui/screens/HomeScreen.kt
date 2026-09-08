@@ -80,6 +80,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.apleq.app.ui.theme.Quicksand
 import com.apleq.app.data.local.SubscriptionEntity
+import com.apleq.app.data.model.PlatformPricingHelper
 import com.apleq.app.ui.components.AddEditMemberDialog
 import com.apleq.app.ui.components.AddEditSubscriptionDialog
 import com.apleq.app.ui.components.FinancialSummaryCard
@@ -579,7 +580,43 @@ fun HomeScreen(
                     val members = (group["members"] as? List<*>) ?: emptyList<Any>()
                     val myMember = members.filterIsInstance<Map<String, Any?>>()
                         .find { it["linkedUid"]?.toString() == currentUid || it["linked_uid"]?.toString() == currentUid }
-                    val myAmount = (myMember?.get("contributionAmount") ?: myMember?.get("contribution_amount") ?: myMember?.get("amount") ?: 0).toString().toDoubleOrNull() ?: 0.0
+                    val rawAmount = (myMember?.get("contributionAmount")
+                        ?: myMember?.get("contribution_amount")
+                        ?: myMember?.get("amount")
+                        ?: 0).toString().toDoubleOrNull() ?: 0.0
+
+                    // Respaldo: si el miembro no tiene importe propio, usar el precio por
+                    // usuario de su plataforma de compartición (igual que hace la vista del gestor).
+                    val myPlatformName = (myMember?.get("sharingPlatform")
+                        ?: myMember?.get("sharing_platform")
+                        ?: myMember?.get("platform")
+                        ?: "").toString()
+
+                    val groupPricingRaw = group["platformPricing"]
+                        ?: group["platform_pricing"]
+                        ?: group["platformPrices"]
+                        ?: group["platform_prices"]
+                        ?: group["platforms"]
+                        ?: group["sharingPlatforms"]
+                        ?: ""
+                    val groupPricingList = PlatformPricingHelper.parseAny(groupPricingRaw)
+
+                    val matchedPricing = groupPricingList.find {
+                        it.platformName.equals(myPlatformName, ignoreCase = true)
+                    }
+
+                    val myAmount = when {
+                        rawAmount > 0.0 -> rawAmount
+                        matchedPricing != null && matchedPricing.pricePerUser > 0.0 -> matchedPricing.pricePerUser
+                        groupPricingList.isNotEmpty() && groupPricingList.first().pricePerUser > 0.0 ->
+                            groupPricingList.first().pricePerUser
+                        else -> 0.0
+                    }
+
+                    val myCurrencySymbol = matchedPricing?.currencyItem?.symbol
+                        ?: groupPricingList.firstOrNull()?.currencyItem?.symbol
+                        ?: "€"
+
                     val nextPayment = (myMember?.get("nextPaymentDate") ?: myMember?.get("next_payment_date") ?: "").toString()
                     val nextPaymentFormatted = if (nextPayment.length >= 10) {
                         val parts = nextPayment.substring(0, 10).split("-")
@@ -623,7 +660,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("Tu parte:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("${String.format("%.2f", myAmount)} €", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                Text("${String.format("%.2f", myAmount)} $myCurrencySymbol", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                             }
                             if (nextPaymentFormatted.isNotBlank()) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -773,7 +810,41 @@ fun HomeScreen(
         val members = (group["members"] as? List<*>) ?: emptyList<Any>()
         val myMember = members.filterIsInstance<Map<String, Any?>>()
             .find { it["linkedUid"]?.toString() == currentUid || it["linked_uid"]?.toString() == currentUid }
-        val myAmount = (myMember?.get("contributionAmount") ?: myMember?.get("contribution_amount") ?: myMember?.get("amount") ?: 0).toString().toDoubleOrNull() ?: 0.0
+        val rawAmount = (myMember?.get("contributionAmount")
+            ?: myMember?.get("contribution_amount")
+            ?: myMember?.get("amount")
+            ?: 0).toString().toDoubleOrNull() ?: 0.0
+
+        val myPlatformName = (myMember?.get("sharingPlatform")
+            ?: myMember?.get("sharing_platform")
+            ?: myMember?.get("platform")
+            ?: "").toString()
+
+        val groupPricingRaw = group["platformPricing"]
+            ?: group["platform_pricing"]
+            ?: group["platformPrices"]
+            ?: group["platform_prices"]
+            ?: group["platforms"]
+            ?: group["sharingPlatforms"]
+            ?: ""
+        val groupPricingList = PlatformPricingHelper.parseAny(groupPricingRaw)
+
+        val matchedPricing = groupPricingList.find {
+            it.platformName.equals(myPlatformName, ignoreCase = true)
+        }
+
+        val myAmount = when {
+            rawAmount > 0.0 -> rawAmount
+            matchedPricing != null && matchedPricing.pricePerUser > 0.0 -> matchedPricing.pricePerUser
+            groupPricingList.isNotEmpty() && groupPricingList.first().pricePerUser > 0.0 ->
+                groupPricingList.first().pricePerUser
+            else -> 0.0
+        }
+
+        val myCurrencySymbol = matchedPricing?.currencyItem?.symbol
+            ?: groupPricingList.firstOrNull()?.currencyItem?.symbol
+            ?: "€"
+
         val nextPayment = (myMember?.get("nextPaymentDate") ?: myMember?.get("next_payment_date") ?: "").toString()
         val nextPaymentFormatted = if (nextPayment.length >= 10) {
             val parts = nextPayment.substring(0, 10).split("-")
@@ -823,7 +894,7 @@ fun HomeScreen(
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Tu parte:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${String.format("%.2f", myAmount)} €", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                        Text("${String.format("%.2f", myAmount)} $myCurrencySymbol", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                     }
                     if (nextPaymentFormatted.isNotBlank()) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
