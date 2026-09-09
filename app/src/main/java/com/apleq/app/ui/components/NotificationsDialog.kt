@@ -16,11 +16,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,6 +45,8 @@ import com.apleq.app.data.model.NotificationStatus
 fun NotificationsDialog(
     notifications: List<AppNotification>,
     onMarkAllRead: () -> Unit,
+    onDismissNotification: (String) -> Unit,
+    onDismissAll: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val unreadCount = notifications.count { !it.isRead }
@@ -51,25 +55,45 @@ fun NotificationsDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.testTag("dialog_notifications"),
         title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Notificaciones",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                if (unreadCount > 0) {
-                    TextButton(
-                        onClick = onMarkAllRead,
-                        modifier = Modifier.testTag("btn_mark_all_read")
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Notificaciones",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                if (notifications.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Marcar todas como leídas",
-                            style = MaterialTheme.typography.labelSmall
-                        )
+                        if (unreadCount > 0) {
+                            TextButton(
+                                onClick = onMarkAllRead,
+                                modifier = Modifier.testTag("btn_mark_all_read")
+                            ) {
+                                Text(
+                                    text = "Marcar leídas",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+                        TextButton(
+                            onClick = onDismissAll,
+                            modifier = Modifier.testTag("btn_dismiss_all_notifications")
+                        ) {
+                            Text(
+                                text = "Borrar todas",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             }
@@ -107,7 +131,10 @@ fun NotificationsDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(notifications, key = { it.id }) { notif ->
-                        NotificationItemRow(notif = notif)
+                        NotificationItemRow(
+                            notif = notif,
+                            onDismiss = { onDismissNotification(notif.id) }
+                        )
                     }
                 }
             }
@@ -124,7 +151,10 @@ fun NotificationsDialog(
 }
 
 @Composable
-private fun NotificationItemRow(notif: AppNotification) {
+private fun NotificationItemRow(
+    notif: AppNotification,
+    onDismiss: () -> Unit
+) {
     val accentColor = runCatching {
         Color(android.graphics.Color.parseColor(notif.subscriptionColorHex))
     }.getOrDefault(Color(0xFF1285FA))
@@ -209,6 +239,22 @@ private fun NotificationItemRow(notif: AppNotification) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .size(28.dp)
+                    .testTag("btn_dismiss_notification_${notif.id}")
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Descartar aviso",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
             }
         }
     }

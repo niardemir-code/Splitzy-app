@@ -75,7 +75,8 @@ object NotificationGenerator {
                 val isPaid = m.isPaidThisMonth && !m.isPendingPayment
                 val hasAlarm = m.enableAlarm
 
-                if (isPaid && !hasAlarm) return@forEach
+                // No se corta por estar pagado: si el próximo cobro está a 3 días o menos,
+                // el gestor quiere verlo igualmente.
 
                 var daysRemaining = 999
                 var alarmTriggered = false
@@ -87,7 +88,11 @@ object NotificationGenerator {
                 }
 
                 val isPending = m.isPendingPayment
-                val shouldNotify = alarmTriggered || (isPending && daysRemaining <= 3)
+                // Avisa si: salta su alarma configurada, o quedan 3 días o menos para
+                // el cobro (esté marcado como pendiente o no), o ya está vencido e impagado.
+                val shouldNotify = alarmTriggered ||
+                    (daysRemaining in 0..3) ||
+                    (daysRemaining < 0 && isPending)
                 if (!shouldNotify) return@forEach
 
                 val status = when {

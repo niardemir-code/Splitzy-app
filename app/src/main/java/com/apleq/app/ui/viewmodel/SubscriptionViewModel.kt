@@ -18,6 +18,7 @@ import com.apleq.app.data.remote.AuthState
 import com.apleq.app.data.remote.FirebaseAuthService
 import com.apleq.app.data.repository.SubscriptionRepository
 import com.apleq.app.data.util.AppThemeMode
+import com.apleq.app.data.util.calculateNextCycleDate
 import com.apleq.app.data.util.ThemePreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -69,6 +70,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     private val themePreferences: ThemePreferences = ThemePreferences(application)
     private val notificationPrefs: SharedPreferences = application.getSharedPreferences("apleq_notifications_prefs", Context.MODE_PRIVATE)
     private val READ_NOTIFICATIONS_KEY = "read_notification_ids"
+    private val DISMISSED_NOTIFICATIONS_KEY = "dismissed_notification_ids"
 
     private fun getReadNotificationIds(): Set<String> =
         notificationPrefs.getStringSet(READ_NOTIFICATIONS_KEY, emptySet()) ?: emptySet()
@@ -77,7 +79,15 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         notificationPrefs.edit().putStringSet(READ_NOTIFICATIONS_KEY, ids).apply()
     }
 
+    fun getDismissedNotificationIds(): Set<String> =
+        notificationPrefs.getStringSet(DISMISSED_NOTIFICATIONS_KEY, emptySet()) ?: emptySet()
+
+    fun saveDismissedNotificationIds(ids: Set<String>) {
+        notificationPrefs.edit().putStringSet(DISMISSED_NOTIFICATIONS_KEY, ids).apply()
+    }
+
     private val _readNotificationIds = MutableStateFlow<Set<String>>(getReadNotificationIds())
+    private val _dismissedNotificationIds = MutableStateFlow<Set<String>>(getDismissedNotificationIds())
 
     private val _themeMode = MutableStateFlow(themePreferences.getThemeMode())
     val themeMode: StateFlow<AppThemeMode> = _themeMode
@@ -99,6 +109,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             repository.ensureDefaultPlatformsSeeded()
             com.apleq.app.data.util.CurrencyRateService.fetchLatestRates()
+            rolloverDuePaymentCycles()
         }
         viewModelScope.launch {
             authService.authState.collect { state ->
@@ -297,15 +308,17 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
 
     val notifications: StateFlow<List<AppNotification>> = combine(
         repository.allSubscriptions,
-        _readNotificationIds
-    ) { subsWithMembers, readIds ->
+        _readNotificationIds,
+        _dismissedNotificationIds
+    ) { subsWithMembers, readIds, dismissedIds ->
         val subscriptions = subsWithMembers.map { it.subscription }
         val membersBySub = subsWithMembers.associate { it.subscription.id.toString() to it.members }
-        NotificationGenerator.generate(
+        val generated = NotificationGenerator.generate(
             subscriptions = subscriptions,
             membersBySubscription = membersBySub,
             readIds = readIds
         )
+        generated.filter { it.id !in dismissedIds }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -332,6 +345,69 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         val updated = _readNotificationIds.value + id
         _readNotificationIds.value = updated
         saveReadNotificationIds(updated)
+    }
+
+    fun dismissNotification(id: String) {
+        val updated = _dismissedNotificationIds.value + id
+        _dismissedNotificationIds.value = updated
+        saveDismissedNotificationIds(updated)
+    }
+
+    fun dismissAllNotifications() {
+        val allVisibleIds = notifications.value.map { it.id }.toSet()
+        val updated = _dismissedNotificationIds.value + allVisibleIds
+        _dismissedNotificationIds.value = updated
+        saveDismissedNotificationIds(updated)
+    }
+
+    /**
+     * Reinicia el ciclo de cobro de los miembros cuya fecha de pago ya ha llegado
+     * y que estaban marcados como pagados. Se ejecuta al abrir la app.
+     * Los impagados NO se tocan, para que sigan constando como vencidos.
+     */
+    fun rolloverDuePaymentCycles() {
+        viewModelScope.launch {
+            try {
+                val todayMillis = java.util.Calendar.getInstance().apply {
+                    set(java.util.Calendar.HOUR_OF_DAY, 0)
+                    set(java.util.Calendar.MINUTE, 0)
+                    set(java.util.Calendar.SECOND, 0)
+                    set(java.util.Calendar.MILLISECOND, 0)
+                }.timeInMillis
+
+                val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+
+                val allMembers = repository.getAllMembersDirect()
+
+                allMembers.forEach { member ->
+                    if (member.isPendingRemoval) return@forEach
+                    if (member.nextPaymentDate.isBlank()) return@forEach
+                    // Solo los que están al día: los impagados se dejan como están.
+                    if (member.isPendingPayment || !member.isPaidThisMonth) return@forEach
+
+                    val dueMillis = try {
+                        isoFormat.parse(member.nextPaymentDate)?.time ?: return@forEach
+                    } catch (e: Exception) { return@forEach }
+
+                    if (dueMillis <= todayMillis) {
+                        val newDateMillis = calculateNextCycleDate(
+                            dueMillis,
+                            member.paymentFrequencyValue,
+                            member.paymentFrequencyUnit,
+                            todayMillis
+                        )
+                        val updated = member.copy(
+                            isPendingPayment = true,
+                            isPaidThisMonth = false,
+                            nextPaymentDate = isoFormat.format(java.util.Date(newDateMillis))
+                        )
+                        saveMember(updated)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("Rollover", "Error en el reinicio de ciclos", e)
+            }
+        }
     }
 
     // UI Dialog & Navigation States
