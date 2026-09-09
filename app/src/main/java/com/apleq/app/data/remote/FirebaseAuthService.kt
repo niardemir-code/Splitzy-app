@@ -1623,10 +1623,15 @@ class FirebaseAuthService(
                     parseSafeBoolean(rawItem["pendingAdd"]) ||
                     statusStr == "pending_registration" || statusStr == "registration" || statusStr == "alta" || statusStr == "pendiente_alta" || statusStr == "pendiente_dar_de_alta"
 
-            // Toggle exclusivity rule:
-            val finalPendingPayment = isPendingPayment && !isPendingRemoval && !isPendingRegistration
-            val finalPendingRemoval = isPendingRemoval && !isPendingRegistration
-            val finalPendingRegistration = isPendingRegistration
+            // Regla de prioridad de estados (de mayor a menor):
+            //   1. Pendiente de eliminar  -> gana siempre; anula alta y pago pendiente.
+            //   2. Pendiente de alta      -> recordatorio manual del gestor.
+            //   3. Pendiente de pago.
+            // La baja debe verse aunque "pendiente de alta" siguiera encendido: puede
+            // ocurrir que el gestor no llegue a apagarlo antes de que el cliente se dé de baja.
+            val finalPendingRemoval = isPendingRemoval
+            val finalPendingRegistration = isPendingRegistration && !isPendingRemoval
+            val finalPendingPayment = isPendingPayment && !isPendingRemoval && !finalPendingRegistration
 
             val rawPaid = if (rawItem.containsKey("isPaidThisMonth")) {
                 parseSafeBoolean(rawItem["isPaidThisMonth"])
