@@ -1,6 +1,8 @@
 package com.apleq.app.ui.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.apleq.app.data.local.AppDatabase
@@ -8,7 +10,9 @@ import com.apleq.app.data.local.MemberEntity
 import com.apleq.app.data.local.SharingPlatformEntity
 import com.apleq.app.data.local.SubscriptionEntity
 import com.apleq.app.data.local.SubscriptionWithMembers
+import com.apleq.app.data.model.AppNotification
 import com.apleq.app.data.model.CurrencyManager
+import com.apleq.app.data.model.NotificationGenerator
 import com.apleq.app.data.model.SharingPlatforms
 import com.apleq.app.data.remote.AuthState
 import com.apleq.app.data.remote.FirebaseAuthService
@@ -63,6 +67,17 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     private val repository: SubscriptionRepository
     private val authService: FirebaseAuthService
     private val themePreferences: ThemePreferences = ThemePreferences(application)
+    private val notificationPrefs: SharedPreferences = application.getSharedPreferences("apleq_notifications_prefs", Context.MODE_PRIVATE)
+    private val READ_NOTIFICATIONS_KEY = "read_notification_ids"
+
+    private fun getReadNotificationIds(): Set<String> =
+        notificationPrefs.getStringSet(READ_NOTIFICATIONS_KEY, emptySet()) ?: emptySet()
+
+    private fun saveReadNotificationIds(ids: Set<String>) {
+        notificationPrefs.edit().putStringSet(READ_NOTIFICATIONS_KEY, ids).apply()
+    }
+
+    private val _readNotificationIds = MutableStateFlow<Set<String>>(getReadNotificationIds())
 
     private val _themeMode = MutableStateFlow(themePreferences.getThemeMode())
     val themeMode: StateFlow<AppThemeMode> = _themeMode
@@ -279,6 +294,45 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = FinancialOverview()
         )
+
+    val notifications: StateFlow<List<AppNotification>> = combine(
+        repository.allSubscriptions,
+        _readNotificationIds
+    ) { subsWithMembers, readIds ->
+        val subscriptions = subsWithMembers.map { it.subscription }
+        val membersBySub = subsWithMembers.associate { it.subscription.id.toString() to it.members }
+        NotificationGenerator.generate(
+            subscriptions = subscriptions,
+            membersBySubscription = membersBySub,
+            readIds = readIds
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    val unreadNotificationsCount: StateFlow<Int> = notifications
+        .combine(MutableStateFlow(Unit)) { notifs, _ ->
+            notifs.count { !it.isRead }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0
+        )
+
+    fun markAllNotificationsRead() {
+        val allIds = notifications.value.map { it.id }.toSet()
+        val updated = _readNotificationIds.value + allIds
+        _readNotificationIds.value = updated
+        saveReadNotificationIds(updated)
+    }
+
+    fun markNotificationRead(id: String) {
+        val updated = _readNotificationIds.value + id
+        _readNotificationIds.value = updated
+        saveReadNotificationIds(updated)
+    }
 
     // UI Dialog & Navigation States
     private val _showAddEditSubscriptionDialog = MutableStateFlow(false)

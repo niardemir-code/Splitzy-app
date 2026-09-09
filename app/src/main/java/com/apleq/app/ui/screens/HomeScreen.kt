@@ -35,11 +35,15 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -89,6 +93,7 @@ import com.apleq.app.ui.components.AddEditMemberDialog
 import com.apleq.app.ui.components.AddEditSubscriptionDialog
 import com.apleq.app.ui.components.FinancialSummaryCard
 import com.apleq.app.ui.components.JoinGroupDialog
+import com.apleq.app.ui.components.NotificationsDialog
 import com.apleq.app.ui.components.PlatformIconBadge
 import com.apleq.app.ui.components.ReminderMessageDialog
 import com.apleq.app.ui.components.SplitzyLogo
@@ -127,8 +132,12 @@ fun HomeScreen(
 
     val reminderData by viewModel.reminderMemberData.collectAsStateWithLifecycle()
 
+    val notifications by viewModel.notifications.collectAsStateWithLifecycle()
+    val unreadNotificationsCount by viewModel.unreadNotificationsCount.collectAsStateWithLifecycle()
+
     var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
     var showJoinDialog by remember { mutableStateOf(false) }
+    var showNotificationsDialog by remember { mutableStateOf(false) }
     var selectedClientGroup by remember { mutableStateOf<Map<String, Any>?>(null) }
     var groupPendingLeave by remember { mutableStateOf<Map<String, Any>?>(null) }
     var isLeavingGroup by remember { mutableStateOf(false) }
@@ -212,6 +221,35 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = { showNotificationsDialog = true },
+                        modifier = Modifier.testTag("btn_top_notifications")
+                    ) {
+                        BadgedBox(
+                            badge = {
+                                if (unreadNotificationsCount > 0) {
+                                    Badge(
+                                        containerColor = Color(0xFFE11D48),
+                                        contentColor = Color.White
+                                    ) {
+                                        Text(
+                                            text = if (unreadNotificationsCount > 99) "99+" else unreadNotificationsCount.toString(),
+                                            fontSize = 9.sp
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (unreadNotificationsCount > 0)
+                                    Icons.Default.Notifications
+                                else
+                                    Icons.Default.NotificationsNone,
+                                contentDescription = "Notificaciones"
+                            )
+                        }
+                    }
+
                     IconButton(
                         onClick = { showJoinDialog = true },
                         modifier = Modifier.testTag("btn_top_join_group")
@@ -1047,6 +1085,14 @@ fun HomeScreen(
                     Text("Cancelar")
                 }
             }
+        )
+    }
+
+    if (showNotificationsDialog) {
+        NotificationsDialog(
+            notifications = notifications,
+            onMarkAllRead = { viewModel.markAllNotificationsRead() },
+            onDismiss = { showNotificationsDialog = false }
         )
     }
 
