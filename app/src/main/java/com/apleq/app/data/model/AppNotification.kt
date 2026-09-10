@@ -154,10 +154,11 @@ object NotificationGenerator {
                     else -> NotificationType.PENDING
                 }
 
-                // Para deudas, el id se ancla a la fecha de inicio de la deuda, que no cambia
-                // mientras no se salde: así un aviso descartado no reaparece al avanzar el ciclo.
+                // Para deudas, el id se ancla a la fecha de inicio de la deuda MÁS el número
+                // de cuotas: así, descartar un aviso lo silencia solo mientras la deuda no
+                // empeore; si sube de 1 a 2 cuotas, se genera un aviso nuevo que vuelve a saltar.
                 val notifId = if (hasDebt && m.debtSinceDate.isNotBlank()) {
-                    "notif_${subId}_${m.id}_debt_${m.debtSinceDate}"
+                    "notif_${subId}_${m.id}_debt_${m.debtSinceDate}_${m.unpaidCycles}"
                 } else {
                     "notif_${subId}_${m.id}_${m.nextPaymentDate.ifBlank { "nopdate" }}"
                 }

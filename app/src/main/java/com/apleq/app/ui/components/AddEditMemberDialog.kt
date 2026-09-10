@@ -206,6 +206,13 @@ fun AddEditMemberDialog(
     }
 
     // 7. Statuses
+    val debtCycles = memberToEdit?.unpaidCycles ?: 0
+    val debtSince = memberToEdit?.debtSinceDate ?: ""
+    val hasDebt = debtCycles >= 1 && debtSince.isNotBlank()
+    val debtSinceFormatted = if (debtSince.length >= 10) {
+        "${debtSince.substring(8, 10)}/${debtSince.substring(5, 7)}/${debtSince.substring(0, 4)}"
+    } else debtSince
+
     var isPendingPayment by remember {
         mutableStateOf(memberToEdit?.isPendingPayment ?: (if (memberToEdit != null) !memberToEdit.isPaidThisMonth else false))
     }
@@ -1128,6 +1135,39 @@ fun AddEditMemberDialog(
                                     }
                                 }
                             )
+                        }
+
+                        // Información de deuda acumulada, solo si la hay y sigue pendiente.
+                        if (hasDebt && isPendingPayment) {
+                            HorizontalDivider(
+                                color = Color(0xFFF97316).copy(alpha = 0.25f),
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = if (debtCycles == 1)
+                                        "Debe 1 cuota"
+                                    else
+                                        "Debe $debtCycles cuotas",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color(0xFFE11D48)
+                                )
+                                Text(
+                                    text = "Desde el $debtSinceFormatted",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Apaga el interruptor cuando te haya pagado: la deuda se saldará por completo.",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
 
