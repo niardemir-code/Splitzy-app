@@ -129,11 +129,13 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             var hasSynced = false
             authService.isSyncing.collect { syncing ->
+                android.util.Log.d("Rollover", "isSyncing = $syncing (hasSynced=$hasSynced)")
                 if (syncing) {
                     hasSynced = true
                 } else if (hasSynced) {
                     // La sincronización acaba de terminar.
                     hasSynced = false
+                    android.util.Log.d("Rollover", "Sincronización terminada -> lanzando reinicio")
                     rolloverDuePaymentCycles()
                 }
             }
@@ -142,7 +144,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         // ocurre, así que se ejecuta una vez tras un breve margen.
         viewModelScope.launch {
             kotlinx.coroutines.delay(2500)
+            android.util.Log.d("Rollover", "Respaldo tras 2,5s. authState=${authState.value}")
             if (authState.value !is AuthState.Authenticated) {
+                android.util.Log.d("Rollover", "Sin sesión -> lanzando reinicio de respaldo")
                 rolloverDuePaymentCycles()
             }
         }
@@ -396,11 +400,16 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     private var isRollingOver = false
 
     fun rolloverDuePaymentCycles() {
-        if (isRollingOver) return
+        if (isRollingOver) {
+            android.util.Log.d("Rollover", "IGNORADO: ya hay un reinicio en curso")
+            return
+        }
         isRollingOver = true
         viewModelScope.launch {
             var changedCount = 0
             try {
+                android.util.Log.d("Rollover", "===== INICIO del reinicio de ciclos =====")
+
                 val todayMillis = java.util.Calendar.getInstance().apply {
                     set(java.util.Calendar.HOUR_OF_DAY, 0)
                     set(java.util.Calendar.MINUTE, 0)
@@ -409,46 +418,83 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 }.timeInMillis
 
                 val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                android.util.Log.d("Rollover", "Hoy = ${isoFormat.format(java.util.Date(todayMillis))}")
 
                 val allMembers = repository.getAllMembersDirect()
+                android.util.Log.d("Rollover", "Miembros encontrados en Room: ${allMembers.size}")
 
                 allMembers.forEach { member ->
-                    if (member.isPendingRemoval) return@forEach
-                    if (member.nextPaymentDate.isBlank()) return@forEach
-                    // Solo los que están al día: los impagados se dejan como están.
-                    if (member.isPendingPayment || !member.isPaidThisMonth) return@forEach
+                    val quien = "[${member.id}] ${member.memberName}"
+
+                    android.util.Log.d(
+                        "Rollover",
+                        "$quien -> fecha='${member.nextPaymentDate}' " +
+                            "pendientePago=${member.isPendingPayment} " +
+                            "pagado=${member.isPaidThisMonth} " +
+                            "pendienteEliminar=${member.isPendingRemoval} " +
+                            "freq=${member.paymentFrequencyValue}/${member.paymentFrequencyUnit}"
+                    )
+
+                    if (member.isPendingRemoval) {
+                        android.util.Log.d("Rollover", "$quien DESCARTADO: pendiente de eliminar")
+                        return@forEach
+                    }
+                    if (member.nextPaymentDate.isBlank()) {
+                        android.util.Log.d("Rollover", "$quien DESCARTADO: sin fecha de pago")
+                        return@forEach
+                    }
+                    if (member.isPendingPayment || !member.isPaidThisMonth) {
+                        android.util.Log.d("Rollover", "$quien DESCARTADO: no está al día (impagado)")
+                        return@forEach
+                    }
 
                     val dueMillis = try {
-                        isoFormat.parse(member.nextPaymentDate)?.time ?: return@forEach
-                    } catch (e: Exception) { return@forEach }
+                        isoFormat.parse(member.nextPaymentDate)?.time ?: run {
+                            android.util.Log.w("Rollover", "$quien DESCARTADO: fecha no interpretable")
+                            return@forEach
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.w("Rollover", "$quien DESCARTADO: error al leer la fecha", e)
+                        return@forEach
+                    }
 
                     if (dueMillis <= todayMillis) {
-                        val newDateMillis = calculateNextCycleDate(
+                        val newDateMillis = com.apleq.app.data.util.calculateNextCycleDate(
                             dueMillis,
                             member.paymentFrequencyValue,
                             member.paymentFrequencyUnit,
                             todayMillis
                         )
+                        val nuevaFecha = isoFormat.format(java.util.Date(newDateMillis))
                         val updated = member.copy(
                             isPendingPayment = true,
                             isPaidThisMonth = false,
-                            nextPaymentDate = isoFormat.format(java.util.Date(newDateMillis))
+                            nextPaymentDate = nuevaFecha
                         )
-                        // Escritura directa en Room: saveMember() cierra diálogos y
-                        // dispara una subida a la nube por cada miembro, que aquí no procede.
                         repository.updateMember(updated)
                         changedCount++
+                        android.util.Log.i(
+                            "Rollover",
+                            "$quien REINICIADO: '${member.nextPaymentDate}' -> '$nuevaFecha'"
+                        )
+                    } else {
+                        android.util.Log.d("Rollover", "$quien DESCARTADO: la fecha aún no ha llegado")
                     }
                 }
-                // Una única subida a la nube al final, si hubo cambios.
+
+                android.util.Log.i("Rollover", "===== FIN. Miembros reiniciados: $changedCount =====")
+
                 if (changedCount > 0) {
-                    android.util.Log.i("Rollover", "Ciclos reiniciados: $changedCount")
                     if (authState.value is AuthState.Authenticated) {
+                        android.util.Log.d("Rollover", "Subiendo cambios a la nube...")
                         authService.syncToCloud()
+                        android.util.Log.d("Rollover", "Subida completada")
+                    } else {
+                        android.util.Log.d("Rollover", "Sin sesión: no se sube a la nube")
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("Rollover", "Error en el reinicio de ciclos", e)
+                android.util.Log.e("Rollover", "ERROR en el reinicio de ciclos", e)
             } finally {
                 isRollingOver = false
             }
