@@ -129,13 +129,11 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             var hasSynced = false
             authService.isSyncing.collect { syncing ->
-                android.util.Log.d("Rollover", "isSyncing = $syncing (hasSynced=$hasSynced)")
                 if (syncing) {
                     hasSynced = true
                 } else if (hasSynced) {
                     // La sincronización acaba de terminar.
                     hasSynced = false
-                    android.util.Log.d("Rollover", "Sincronización terminada -> lanzando reinicio")
                     rolloverDuePaymentCycles()
                 }
             }
@@ -144,9 +142,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         // ocurre, así que se ejecuta una vez tras un breve margen.
         viewModelScope.launch {
             kotlinx.coroutines.delay(2500)
-            android.util.Log.d("Rollover", "Respaldo tras 2,5s. authState=${authState.value}")
             if (authState.value !is AuthState.Authenticated) {
-                android.util.Log.d("Rollover", "Sin sesión -> lanzando reinicio de respaldo")
                 rolloverDuePaymentCycles()
             }
         }
@@ -401,15 +397,12 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
 
     fun rolloverDuePaymentCycles() {
         if (isRollingOver) {
-            android.util.Log.d("Rollover", "IGNORADO: ya hay un reinicio en curso")
             return
         }
         isRollingOver = true
         viewModelScope.launch {
             var changedCount = 0
             try {
-                android.util.Log.d("Rollover", "===== INICIO del reinicio de ciclos =====")
-
                 val todayMillis = java.util.Calendar.getInstance().apply {
                     set(java.util.Calendar.HOUR_OF_DAY, 0)
                     set(java.util.Calendar.MINUTE, 0)
@@ -418,10 +411,8 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 }.timeInMillis
 
                 val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
-                android.util.Log.d("Rollover", "Hoy = ${isoFormat.format(java.util.Date(todayMillis))}")
 
                 val allMembers = repository.getAllMembersDirect()
-                android.util.Log.d("Rollover", "Miembros encontrados en Room: ${allMembers.size}")
 
                 allMembers.forEach { member ->
                     if (member.isPendingRemoval) return@forEach
@@ -475,19 +466,13 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                     changedCount++
                 }
 
-                android.util.Log.i("Rollover", "===== FIN. Miembros reiniciados: $changedCount =====")
-
                 if (changedCount > 0) {
                     if (authState.value is AuthState.Authenticated) {
-                        android.util.Log.d("Rollover", "Subiendo cambios a la nube...")
                         authService.syncToCloud()
-                        android.util.Log.d("Rollover", "Subida completada")
-                    } else {
-                        android.util.Log.d("Rollover", "Sin sesión: no se sube a la nube")
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("Rollover", "ERROR en el reinicio de ciclos", e)
+                android.util.Log.e("Rollover", "Error en el reinicio de ciclos", e)
             } finally {
                 isRollingOver = false
             }
