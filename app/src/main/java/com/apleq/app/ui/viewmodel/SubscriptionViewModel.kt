@@ -108,14 +108,42 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         )
         viewModelScope.launch {
             repository.ensureDefaultPlatformsSeeded()
-            com.apleq.app.data.util.CurrencyRateService.fetchLatestRates()
-            rolloverDuePaymentCycles()
+        }
+        viewModelScope.launch {
+            // Aislada: si falla la red, no debe arrastrar a nada más.
+            try {
+                com.apleq.app.data.util.CurrencyRateService.fetchLatestRates()
+            } catch (e: Exception) {
+                android.util.Log.w("Rates", "No se pudieron obtener los tipos de cambio", e)
+            }
         }
         viewModelScope.launch {
             authService.authState.collect { state ->
                 if (state is AuthState.Authenticated) {
                     authService.startListeningParticipatingGroups()
                 }
+            }
+        }
+        // El reinicio de ciclos debe correr DESPUÉS de que la sincronización con
+        // Firestore haya terminado; si no, la descarga del servidor lo sobrescribe.
+        viewModelScope.launch {
+            var hasSynced = false
+            authService.isSyncing.collect { syncing ->
+                if (syncing) {
+                    hasSynced = true
+                } else if (hasSynced) {
+                    // La sincronización acaba de terminar.
+                    hasSynced = false
+                    rolloverDuePaymentCycles()
+                }
+            }
+        }
+        // Caso sin sesión iniciada (solo datos locales): la sincronización nunca
+        // ocurre, así que se ejecuta una vez tras un breve margen.
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(2500)
+            if (authState.value !is AuthState.Authenticated) {
+                rolloverDuePaymentCycles()
             }
         }
     }
@@ -365,8 +393,13 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
      * y que estaban marcados como pagados. Se ejecuta al abrir la app.
      * Los impagados NO se tocan, para que sigan constando como vencidos.
      */
+    private var isRollingOver = false
+
     fun rolloverDuePaymentCycles() {
+        if (isRollingOver) return
+        isRollingOver = true
         viewModelScope.launch {
+            var changedCount = 0
             try {
                 val todayMillis = java.util.Calendar.getInstance().apply {
                     set(java.util.Calendar.HOUR_OF_DAY, 0)
@@ -401,11 +434,23 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                             isPaidThisMonth = false,
                             nextPaymentDate = isoFormat.format(java.util.Date(newDateMillis))
                         )
-                        saveMember(updated)
+                        // Escritura directa en Room: saveMember() cierra diálogos y
+                        // dispara una subida a la nube por cada miembro, que aquí no procede.
+                        repository.updateMember(updated)
+                        changedCount++
+                    }
+                }
+                // Una única subida a la nube al final, si hubo cambios.
+                if (changedCount > 0) {
+                    android.util.Log.i("Rollover", "Ciclos reiniciados: $changedCount")
+                    if (authState.value is AuthState.Authenticated) {
+                        authService.syncToCloud()
                     }
                 }
             } catch (e: Exception) {
                 android.util.Log.e("Rollover", "Error en el reinicio de ciclos", e)
+            } finally {
+                isRollingOver = false
             }
         }
     }

@@ -153,10 +153,6 @@ fun HomeScreen(
     val currentUid = (authState as? com.apleq.app.data.remote.AuthState.Authenticated)?.user?.uid ?: ""
     val showAuthDialog by viewModel.showAuthDialog.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.rolloverDuePaymentCycles()
-    }
-
     LaunchedEffect(authState) {
         if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
             viewModel.closeAuthDialog()
