@@ -107,20 +107,27 @@ object NotificationGenerator {
                 }
 
                 val isPending = m.isPendingPayment
-                // Avisa si: salta su alarma configurada, o quedan 3 días o menos para
-                // el cobro (esté marcado como pendiente o no), o ya está vencido e impagado.
-                val shouldNotify = alarmTriggered ||
-                    (daysRemaining in 0..3) ||
-                    (daysRemaining < 0 && isPending)
+                val hasDebt = m.unpaidCycles >= 1
+
+                // Avisa si: el miembro tiene cuotas pendientes (deuda), o salta su alarma
+                // configurada, o quedan 3 días o menos para el próximo cobro.
+                // La deuda manda: como la fecha de pago siempre apunta al futuro, sin esta
+                // condición un moroso nunca generaría aviso.
+                val shouldNotify = hasDebt ||
+                    alarmTriggered ||
+                    (daysRemaining in 0..3)
                 if (!shouldNotify) return@forEach
 
                 val status = when {
+                    hasDebt -> NotificationStatus.OVERDUE
                     daysRemaining < 0 -> NotificationStatus.OVERDUE
                     daysRemaining == 0 -> NotificationStatus.TODAY
                     else -> NotificationStatus.UPCOMING
                 }
 
                 val dueDateText = when {
+                    hasDebt && m.unpaidCycles == 1 -> "Pago pendiente"
+                    hasDebt -> "${m.unpaidCycles} pagos pendientes"
                     daysRemaining < 0 -> {
                         val d = -daysRemaining
                         if (d == 1) "Vencido ayer" else "Vencido hace $d días"
@@ -147,7 +154,13 @@ object NotificationGenerator {
                     else -> NotificationType.PENDING
                 }
 
-                val notifId = "notif_${subId}_${m.id}_${m.nextPaymentDate.ifBlank { "nopdate" }}"
+                // Para deudas, el id se ancla a la fecha de inicio de la deuda, que no cambia
+                // mientras no se salde: así un aviso descartado no reaparece al avanzar el ciclo.
+                val notifId = if (hasDebt && m.debtSinceDate.isNotBlank()) {
+                    "notif_${subId}_${m.id}_debt_${m.debtSinceDate}"
+                } else {
+                    "notif_${subId}_${m.id}_${m.nextPaymentDate.ifBlank { "nopdate" }}"
+                }
 
                 val matchedPricing = platformPrices.find { it.platformName.equals(m.sharingPlatform, ignoreCase = true) }
                 val effectiveAmount = when {
@@ -186,7 +199,10 @@ object NotificationGenerator {
             }
         }
 
-        // Los vencidos primero, luego por días restantes ascendente.
-        return result.sortedWith(compareBy({ it.daysRemaining }))
+        // Primero los que tienen deuda (más cuotas primero), luego por proximidad del cobro.
+        return result.sortedWith(
+            compareByDescending<AppNotification> { it.unpaidCycles }
+                .thenBy { it.daysRemaining }
+        )
     }
 }
