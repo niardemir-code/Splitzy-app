@@ -139,15 +139,14 @@ fun AddEditMemberDialog(
     // Contribution Amount
     var contributionText by remember {
         mutableStateOf(
+            // Solo se rellena solo si el miembro ya tenía importe, o si su plataforma de
+            // compartición tiene precio propio. Si no, se deja vacío: lo decide el gestor.
             if (memberToEdit != null && memberToEdit.contributionAmount > 0.0) {
                 String.format(Locale.US, "%.2f", memberToEdit.contributionAmount)
             } else if (initialMatchedPlatformPrice != null && initialMatchedPlatformPrice.pricePerUser > 0.0) {
                 String.format(Locale.US, "%.2f", initialMatchedPlatformPrice.pricePerUser)
-            } else if (sub.defaultContributionPerUser > 0.0) {
-                String.format(Locale.US, "%.2f", sub.defaultContributionPerUser)
             } else {
-                val split = targetSubscription.equalSplitPerPerson
-                String.format(Locale.US, "%.2f", split)
+                ""
             }
         )
     }
@@ -501,7 +500,7 @@ fun AddEditMemberDialog(
                             value = contributionText,
                             onValueChange = {
                                 contributionText = it
-                                amountError = it.replace(',', '.').toDoubleOrNull() == null
+                                amountError = it.isNotBlank() && it.replace(',', '.').toDoubleOrNull() == null
                             },
                             placeholder = { Text("2.25") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
