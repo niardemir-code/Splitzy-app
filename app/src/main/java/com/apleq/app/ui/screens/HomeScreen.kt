@@ -215,7 +215,9 @@ fun HomeScreen(
                                     I18n.appSubtitle
                                 },
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -248,16 +250,6 @@ fun HomeScreen(
                                 contentDescription = "Notificaciones"
                             )
                         }
-                    }
-
-                    IconButton(
-                        onClick = { showJoinDialog = true },
-                        modifier = Modifier.testTag("btn_top_join_group")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.GroupAdd,
-                            contentDescription = "Unirse a un grupo"
-                        )
                     }
 
                     // Cloud Download / Sync Button (to the left of Settings)
