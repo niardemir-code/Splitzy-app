@@ -424,62 +424,55 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 android.util.Log.d("Rollover", "Miembros encontrados en Room: ${allMembers.size}")
 
                 allMembers.forEach { member ->
-                    val quien = "[${member.id}] ${member.memberName}"
-
-                    android.util.Log.d(
-                        "Rollover",
-                        "$quien -> fecha='${member.nextPaymentDate}' " +
-                            "pendientePago=${member.isPendingPayment} " +
-                            "pagado=${member.isPaidThisMonth} " +
-                            "pendienteEliminar=${member.isPendingRemoval} " +
-                            "freq=${member.paymentFrequencyValue}/${member.paymentFrequencyUnit}"
-                    )
-
-                    if (member.isPendingRemoval) {
-                        android.util.Log.d("Rollover", "$quien DESCARTADO: pendiente de eliminar")
-                        return@forEach
-                    }
-                    if (member.nextPaymentDate.isBlank()) {
-                        android.util.Log.d("Rollover", "$quien DESCARTADO: sin fecha de pago")
-                        return@forEach
-                    }
-                    if (member.isPendingPayment || !member.isPaidThisMonth) {
-                        android.util.Log.d("Rollover", "$quien DESCARTADO: no está al día (impagado)")
-                        return@forEach
-                    }
+                    if (member.isPendingRemoval) return@forEach
+                    if (member.nextPaymentDate.isBlank()) return@forEach
 
                     val dueMillis = try {
-                        isoFormat.parse(member.nextPaymentDate)?.time ?: run {
-                            android.util.Log.w("Rollover", "$quien DESCARTADO: fecha no interpretable")
-                            return@forEach
-                        }
-                    } catch (e: Exception) {
-                        android.util.Log.w("Rollover", "$quien DESCARTADO: error al leer la fecha", e)
-                        return@forEach
-                    }
+                        isoFormat.parse(member.nextPaymentDate)?.time ?: return@forEach
+                    } catch (e: Exception) { return@forEach }
 
-                    if (dueMillis <= todayMillis) {
-                        val newDateMillis = com.apleq.app.data.util.calculateNextCycleDate(
-                            dueMillis,
+                    // Si la fecha aún no ha llegado, no hay nada que hacer.
+                    if (dueMillis > todayMillis) return@forEach
+
+                    // La fecha SIEMPRE avanza al siguiente ciclo futuro.
+                    val newDateMillis = com.apleq.app.data.util.calculateNextCycleDate(
+                        dueMillis,
+                        member.paymentFrequencyValue,
+                        member.paymentFrequencyUnit,
+                        todayMillis
+                    )
+                    val nuevaFecha = isoFormat.format(java.util.Date(newDateMillis))
+
+                    // Cuántos ciclos han vencido de golpe (si la app llevaba tiempo sin abrirse).
+                    var ciclosVencidos = 0
+                    var cursor = dueMillis
+                    while (cursor <= todayMillis && ciclosVencidos < 240) {
+                        ciclosVencidos++
+                        cursor = com.apleq.app.data.util.calculateNextCycleDate(
+                            cursor,
                             member.paymentFrequencyValue,
                             member.paymentFrequencyUnit,
-                            todayMillis
+                            cursor // avanzar un solo periodo cada vez
                         )
-                        val nuevaFecha = isoFormat.format(java.util.Date(newDateMillis))
-                        val updated = member.copy(
-                            isPendingPayment = true,
-                            isPaidThisMonth = false,
-                            nextPaymentDate = nuevaFecha
-                        )
-                        repository.updateMember(updated)
-                        changedCount++
-                        android.util.Log.i(
-                            "Rollover",
-                            "$quien REINICIADO: '${member.nextPaymentDate}' -> '$nuevaFecha'"
-                        )
-                    } else {
-                        android.util.Log.d("Rollover", "$quien DESCARTADO: la fecha aún no ha llegado")
                     }
+                    if (ciclosVencidos < 1) ciclosVencidos = 1
+
+                    val yaDebia = member.isPendingPayment || !member.isPaidThisMonth
+
+                    val updated = member.copy(
+                        isPendingPayment = true,
+                        isPaidThisMonth = false,
+                        nextPaymentDate = nuevaFecha,
+                        // Si ya debía, se conserva la fecha original de la deuda.
+                        debtSinceDate = if (yaDebia && member.debtSinceDate.isNotBlank())
+                            member.debtSinceDate
+                        else
+                            member.nextPaymentDate,
+                        unpaidCycles = (if (yaDebia) member.unpaidCycles else 0) + ciclosVencidos
+                    )
+
+                    repository.updateMember(updated)
+                    changedCount++
                 }
 
                 android.util.Log.i("Rollover", "===== FIN. Miembros reiniciados: $changedCount =====")
@@ -692,7 +685,12 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
 
     fun toggleMemberPendingPayment(memberId: Long, isPending: Boolean) {
         viewModelScope.launch {
-            repository.toggleMemberPendingPayment(memberId, isPending)
+            if (!isPending) {
+                // Apagar el interruptor = el gestor ha cobrado: se salda la deuda entera.
+                repository.settleMemberDebt(memberId)
+            } else {
+                repository.toggleMemberPendingPayment(memberId, isPending)
+            }
             if (authState.value is AuthState.Authenticated) {
                 authService.syncToCloud()
             }

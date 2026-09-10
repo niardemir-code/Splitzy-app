@@ -222,6 +222,16 @@ private fun NotificationItemRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
+                notif.debtText?.let { debtInfo ->
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = debtInfo,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFE11D48)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(

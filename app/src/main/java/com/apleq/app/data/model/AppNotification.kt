@@ -24,8 +24,27 @@ data class AppNotification(
     val daysRemaining: Int,
     val status: NotificationStatus,
     val isRead: Boolean,
-    val alarmConfigText: String? = null
-)
+    val alarmConfigText: String? = null,
+    val debtSinceDate: String = "",
+    val unpaidCycles: Int = 0
+) {
+    val debtText: String?
+        get() {
+            if (unpaidCycles < 1 || debtSinceDate.isBlank()) return null
+            val formattedDate = try {
+                val inputFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                val outputFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                LocalDate.parse(debtSinceDate.take(10), inputFmt).format(outputFmt)
+            } catch (e: Exception) {
+                debtSinceDate
+            }
+            return if (unpaidCycles == 1) {
+                "Debe 1 cuota desde el $formattedDate"
+            } else {
+                "Debe $unpaidCycles cuotas desde el $formattedDate"
+            }
+        }
+}
 
 object NotificationGenerator {
 
@@ -159,7 +178,9 @@ object NotificationGenerator {
                         daysRemaining = daysRemaining,
                         status = status,
                         isRead = readIds.contains(notifId),
-                        alarmConfigText = alarmConfigText
+                        alarmConfigText = alarmConfigText,
+                        debtSinceDate = m.debtSinceDate,
+                        unpaidCycles = m.unpaidCycles
                     )
                 )
             }

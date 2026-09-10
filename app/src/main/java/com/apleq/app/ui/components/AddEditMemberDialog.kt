@@ -1296,6 +1296,8 @@ fun AddEditMemberDialog(
                                 isPendingPayment = isPendingPayment,
                                 isPendingRemoval = isPendingRemoval,
                                 isPendingRegistration = isPendingRegistration,
+                                debtSinceDate = if (!isPendingPayment) "" else (memberToEdit?.debtSinceDate ?: ""),
+                                unpaidCycles = if (!isPendingPayment) 0 else (memberToEdit?.unpaidCycles ?: 0),
                                 notes = notesOrProfile.trim()
                             )
                             onSave(updatedEntity)

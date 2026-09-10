@@ -500,6 +500,25 @@ fun SubscriptionCard(
                                             modifier = Modifier.weight(1f, fill = false)
                                         )
 
+                                        if (member.unpaidCycles > 1) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = Color(0xFFFFE4E6),
+                                                border = BorderStroke(1.dp, Color(0xFFFECDD3)),
+                                                modifier = Modifier.testTag("member_unpaid_cycles_badge_${member.id}")
+                                            ) {
+                                                Text(
+                                                    text = "${member.unpaidCycles} cuotas",
+                                                    style = MaterialTheme.typography.labelSmall.copy(
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    ),
+                                                    color = Color(0xFFE11D48),
+                                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp)
+                                                )
+                                            }
+                                        }
+
                                         val memberPaymentDateFormatted = remember(
                                             member.nextPaymentDate,
                                             member.joinedDate,

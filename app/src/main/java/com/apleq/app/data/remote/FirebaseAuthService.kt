@@ -621,6 +621,10 @@ class FirebaseAuthService(
                         "is_pending_registration" to m.isPendingRegistration,
                         "paymentStatus" to pStatus,
                         "payment_status" to pStatus,
+                        "debtSinceDate" to m.debtSinceDate,
+                        "debt_since_date" to m.debtSinceDate,
+                        "unpaidCycles" to m.unpaidCycles,
+                        "unpaid_cycles" to m.unpaidCycles,
                         "notes" to m.notes
                     )
                 }
@@ -1074,6 +1078,10 @@ class FirebaseAuthService(
                         "is_pending_registration" to m.isPendingRegistration,
                         "paymentStatus" to pStatus,
                         "payment_status" to pStatus,
+                        "debtSinceDate" to m.debtSinceDate,
+                        "debt_since_date" to m.debtSinceDate,
+                        "unpaidCycles" to m.unpaidCycles,
+                        "unpaid_cycles" to m.unpaidCycles,
                         "notes" to m.notes
                     )
                 }
@@ -1653,6 +1661,9 @@ class FirebaseAuthService(
             val finalPaymentStatus = if (statusStr.isNotBlank()) statusStr else if (finalPaid) "paid" else "pending"
 
             val mNotes = (rawItem["notes"] as? String)?.trim() ?: (rawItem["note"] as? String)?.trim().orEmpty()
+            val mDebtSinceDate = (rawItem["debtSinceDate"] as? String)?.trim()
+                ?: (rawItem["debt_since_date"] as? String)?.trim().orEmpty()
+            val mUnpaidCycles = parseSafeInt(rawItem["unpaidCycles"] ?: rawItem["unpaid_cycles"], 0)
 
             val memberObj = MemberEntity(
                 id = if (mId > 0) mId else (effectiveId * 1000L + index + 1),
@@ -1681,6 +1692,8 @@ class FirebaseAuthService(
                 isPendingRemoval = finalPendingRemoval,
                 isPendingRegistration = finalPendingRegistration,
                 paymentStatus = finalPaymentStatus,
+                debtSinceDate = mDebtSinceDate,
+                unpaidCycles = mUnpaidCycles,
                 notes = mNotes
             )
 

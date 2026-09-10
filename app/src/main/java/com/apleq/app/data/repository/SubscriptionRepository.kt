@@ -38,6 +38,18 @@ class SubscriptionRepository(private val dao: SubscriptionDao) {
         dao.updateMemberPendingPayment(memberId = memberId, isPending = isPending)
     }
 
+    suspend fun settleMemberDebt(memberId: Long) {
+        val member = dao.getAllMembersDirect().find { it.id == memberId } ?: return
+        dao.updateMember(
+            member.copy(
+                isPendingPayment = false,
+                isPaidThisMonth = true,
+                debtSinceDate = "",
+                unpaidCycles = 0
+            )
+        )
+    }
+
     suspend fun toggleMemberPendingRemoval(memberId: Long, isPending: Boolean) {
         dao.updateMemberPendingRemoval(memberId = memberId, isPending = isPending)
     }

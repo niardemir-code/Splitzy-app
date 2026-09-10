@@ -45,6 +45,8 @@ data class MemberEntity(
     val isPendingRemoval: Boolean = false, // Alerta: Pendiente de eliminar / baja (Rojo)
     val isPendingRegistration: Boolean = false, // Alerta: Pendiente de dar de alta (Azul)
     val paymentStatus: String = "paid", // "paid", "pending", "overdue"
+    val debtSinceDate: String = "", // Fecha (YYYY-MM-DD) del primer cobro vencido sin pagar
+    val unpaidCycles: Int = 0,      // Número de cuotas pendientes acumuladas
     val notes: String = ""
 )
 
