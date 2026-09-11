@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -275,16 +277,20 @@ private fun NotificationItemRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 8.dp, bottom = 6.dp),
+                .padding(start = 12.dp, end = 8.dp, bottom = 4.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            TextButton(
+            IconButton(
                 onClick = { onToggleRead(notif.id) },
-                modifier = Modifier.testTag("btn_toggle_read_notification_${notif.id}")
+                modifier = Modifier
+                    .size(32.dp)
+                    .testTag("btn_toggle_read_notification_${notif.id}")
             ) {
-                Text(
-                    text = if (notif.isRead) "Marcar no leído" else "Marcar leído",
-                    style = MaterialTheme.typography.labelSmall
+                Icon(
+                    imageVector = if (notif.isRead) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = if (notif.isRead) "Marcar como no leída" else "Marcar como leída",
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
