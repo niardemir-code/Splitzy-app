@@ -122,16 +122,20 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             authService.authState.collect { state ->
                 if (state is AuthState.Authenticated) {
                     authService.startListeningParticipatingGroups()
-                    // Fusionar el estado de leído local con el de la nube, una vez por sesión.
+                    // Sincronizar el estado de leído con la nube, una vez por sesión.
                     if (!hasMergedReadIds) {
                         hasMergedReadIds = true
                         val cloudIds = authService.loadReadNotificationIdsFromCloud()
-                        val merged = _readNotificationIds.value + cloudIds
-                        if (merged != _readNotificationIds.value) {
-                            _readNotificationIds.value = merged
-                            saveReadNotificationIds(merged)
+                        if (cloudIds == null) {
+                            // Primera vez (o sin conexión): se sube lo que ya había en local,
+                            // sin tocar el estado local.
+                            authService.saveReadNotificationIdsToCloud(_readNotificationIds.value)
+                        } else {
+                            // La nube ya existe: manda ella. Así, si algo se desmarcó como
+                            // leído en otra plataforma, aquí también deja de estarlo.
+                            _readNotificationIds.value = cloudIds
+                            saveReadNotificationIds(cloudIds)
                         }
-                        authService.saveReadNotificationIdsToCloud(merged)
                     }
                 }
             }

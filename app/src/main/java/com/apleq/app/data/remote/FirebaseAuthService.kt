@@ -748,18 +748,26 @@ class FirebaseAuthService(
         }
     }
 
-    suspend fun loadReadNotificationIdsFromCloud(): Set<String> = withContext(Dispatchers.IO) {
-        val db = firestore ?: return@withContext emptySet()
-        val user = auth?.currentUser ?: return@withContext emptySet()
+    /**
+     * Devuelve el estado de leído guardado en la nube, o null si el documento
+     * todavía no existe (primera sincronización) o si no se pudo contactar con
+     * Firestore. La diferencia entre "vacío" y "no existe" importa: un conjunto
+     * vacío real significa "nada leído todavía", mientras que null significa
+     * "no sabemos, no toques lo que hay en local".
+     */
+    suspend fun loadReadNotificationIdsFromCloud(): Set<String>? = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext null
+        val user = auth?.currentUser ?: return@withContext null
         try {
             val snap = db.collection("users").document(user.uid)
                 .collection("settings").document("notificationReads")
                 .get().await()
+            if (!snap.exists()) return@withContext null
             val list = snap.get("readIds") as? List<*>
             list?.mapNotNull { it as? String }?.toSet() ?: emptySet()
         } catch (e: Exception) {
             android.util.Log.w("Notifications", "No se pudo cargar el estado de leído desde la nube", e)
-            emptySet()
+            null
         }
     }
 

@@ -17,8 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MarkEmailRead
-import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -177,12 +175,13 @@ private fun NotificationItemRow(
             .fillMaxWidth()
             .alpha(if (notif.isRead) 0.55f else 1f)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
             // Barra vertical del color de la suscripción
             Box(
                 modifier = Modifier
@@ -259,20 +258,6 @@ private fun NotificationItemRow(
             Spacer(modifier = Modifier.width(6.dp))
 
             IconButton(
-                onClick = { onToggleRead(notif.id) },
-                modifier = Modifier
-                    .size(28.dp)
-                    .testTag("btn_toggle_read_notification_${notif.id}")
-            ) {
-                Icon(
-                    imageVector = if (notif.isRead) Icons.Default.MarkEmailUnread else Icons.Default.MarkEmailRead,
-                    contentDescription = if (notif.isRead) "Marcar como no leída" else "Marcar como leída",
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            IconButton(
                 onClick = onDismiss,
                 modifier = Modifier
                     .size(28.dp)
@@ -285,6 +270,24 @@ private fun NotificationItemRow(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
             }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 12.dp, end = 8.dp, bottom = 6.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                onClick = { onToggleRead(notif.id) },
+                modifier = Modifier.testTag("btn_toggle_read_notification_${notif.id}")
+            ) {
+                Text(
+                    text = if (notif.isRead) "Marcar no leído" else "Marcar leído",
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
         }
     }
 }
