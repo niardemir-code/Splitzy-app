@@ -87,6 +87,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private val _readNotificationIds = MutableStateFlow<Set<String>>(getReadNotificationIds())
+    private var hasMergedReadIds = false
     private val _dismissedNotificationIds = MutableStateFlow<Set<String>>(getDismissedNotificationIds())
 
     private val _themeMode = MutableStateFlow(themePreferences.getThemeMode())
@@ -121,6 +122,17 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             authService.authState.collect { state ->
                 if (state is AuthState.Authenticated) {
                     authService.startListeningParticipatingGroups()
+                    // Fusionar el estado de leído local con el de la nube, una vez por sesión.
+                    if (!hasMergedReadIds) {
+                        hasMergedReadIds = true
+                        val cloudIds = authService.loadReadNotificationIdsFromCloud()
+                        val merged = _readNotificationIds.value + cloudIds
+                        if (merged != _readNotificationIds.value) {
+                            _readNotificationIds.value = merged
+                            saveReadNotificationIds(merged)
+                        }
+                        authService.saveReadNotificationIdsToCloud(merged)
+                    }
                 }
             }
         }
@@ -367,12 +379,21 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         val updated = _readNotificationIds.value + allIds
         _readNotificationIds.value = updated
         saveReadNotificationIds(updated)
+        viewModelScope.launch { authService.saveReadNotificationIdsToCloud(updated) }
     }
 
     fun markNotificationRead(id: String) {
         val updated = _readNotificationIds.value + id
         _readNotificationIds.value = updated
         saveReadNotificationIds(updated)
+        viewModelScope.launch { authService.saveReadNotificationIdsToCloud(updated) }
+    }
+
+    fun unmarkNotificationRead(id: String) {
+        val updated = _readNotificationIds.value - id
+        _readNotificationIds.value = updated
+        saveReadNotificationIds(updated)
+        viewModelScope.launch { authService.saveReadNotificationIdsToCloud(updated) }
     }
 
     fun dismissNotification(id: String) {

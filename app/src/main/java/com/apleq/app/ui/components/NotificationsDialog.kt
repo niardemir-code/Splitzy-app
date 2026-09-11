@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MarkEmailRead
+import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -47,7 +49,8 @@ fun NotificationsDialog(
     onMarkAllRead: () -> Unit,
     onDismissNotification: (String) -> Unit,
     onDismissAll: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onToggleRead: (String) -> Unit = {}
 ) {
     val unreadCount = notifications.count { !it.isRead }
 
@@ -133,7 +136,8 @@ fun NotificationsDialog(
                     items(notifications, key = { it.id }) { notif ->
                         NotificationItemRow(
                             notif = notif,
-                            onDismiss = { onDismissNotification(notif.id) }
+                            onDismiss = { onDismissNotification(notif.id) },
+                            onToggleRead = onToggleRead
                         )
                     }
                 }
@@ -153,7 +157,8 @@ fun NotificationsDialog(
 @Composable
 private fun NotificationItemRow(
     notif: AppNotification,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onToggleRead: (String) -> Unit
 ) {
     val accentColor = runCatching {
         Color(android.graphics.Color.parseColor(notif.subscriptionColorHex))
@@ -252,6 +257,20 @@ private fun NotificationItemRow(
             }
 
             Spacer(modifier = Modifier.width(6.dp))
+
+            IconButton(
+                onClick = { onToggleRead(notif.id) },
+                modifier = Modifier
+                    .size(28.dp)
+                    .testTag("btn_toggle_read_notification_${notif.id}")
+            ) {
+                Icon(
+                    imageVector = if (notif.isRead) Icons.Default.MarkEmailUnread else Icons.Default.MarkEmailRead,
+                    contentDescription = if (notif.isRead) "Marcar como no leída" else "Marcar como leída",
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             IconButton(
                 onClick = onDismiss,

@@ -748,6 +748,40 @@ class FirebaseAuthService(
         }
     }
 
+    suspend fun loadReadNotificationIdsFromCloud(): Set<String> = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext emptySet()
+        val user = auth?.currentUser ?: return@withContext emptySet()
+        try {
+            val snap = db.collection("users").document(user.uid)
+                .collection("settings").document("notificationReads")
+                .get().await()
+            val list = snap.get("readIds") as? List<*>
+            list?.mapNotNull { it as? String }?.toSet() ?: emptySet()
+        } catch (e: Exception) {
+            android.util.Log.w("Notifications", "No se pudo cargar el estado de leído desde la nube", e)
+            emptySet()
+        }
+    }
+
+    suspend fun saveReadNotificationIdsToCloud(ids: Set<String>) = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext
+        val user = auth?.currentUser ?: return@withContext
+        try {
+            db.collection("users").document(user.uid)
+                .collection("settings").document("notificationReads")
+                .set(
+                    mapOf(
+                        "readIds" to ids.toList(),
+                        "updatedAt" to System.currentTimeMillis()
+                    ),
+                    com.google.firebase.firestore.SetOptions.merge()
+                )
+                .await()
+        } catch (e: Exception) {
+            android.util.Log.w("Notifications", "No se pudo guardar el estado de leído en la nube", e)
+        }
+    }
+
     /**
      * Elimina una suscripción de Firestore
      */

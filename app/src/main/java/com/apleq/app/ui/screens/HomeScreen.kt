@@ -1086,7 +1086,14 @@ fun HomeScreen(
             onMarkAllRead = { viewModel.markAllNotificationsRead() },
             onDismissNotification = { id -> viewModel.dismissNotification(id) },
             onDismissAll = { viewModel.dismissAllNotifications() },
-            onDismiss = { showNotificationsDialog = false }
+            onDismiss = { showNotificationsDialog = false },
+            onToggleRead = { id ->
+                if (notifications.find { it.id == id }?.isRead == true) {
+                    viewModel.unmarkNotificationRead(id)
+                } else {
+                    viewModel.markNotificationRead(id)
+                }
+            }
         )
     }
 
