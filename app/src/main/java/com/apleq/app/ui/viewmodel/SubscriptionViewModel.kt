@@ -23,6 +23,7 @@ import com.apleq.app.data.util.ThemePreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -89,6 +90,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     private val _readNotificationIds = MutableStateFlow<Set<String>>(getReadNotificationIds())
     private var hasMergedReadIds = false
     private val _dismissedNotificationIds = MutableStateFlow<Set<String>>(getDismissedNotificationIds())
+
+    private val _clientAlarmPrefs = MutableStateFlow<Map<String, Pair<Boolean, Int>>>(emptyMap())
+    val clientAlarmPrefs: StateFlow<Map<String, Pair<Boolean, Int>>> = _clientAlarmPrefs.asStateFlow()
 
     private val _themeMode = MutableStateFlow(themePreferences.getThemeMode())
     val themeMode: StateFlow<AppThemeMode> = _themeMode
@@ -160,6 +164,16 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             kotlinx.coroutines.delay(2500)
             if (authState.value !is AuthState.Authenticated) {
                 rolloverDuePaymentCycles()
+            }
+        }
+        viewModelScope.launch {
+            authService.participatingGroups.collect { groups ->
+                val missingIds = groups.mapNotNull { it["_docId"]?.toString() }
+                    .filter { it !in _clientAlarmPrefs.value.keys }
+                missingIds.forEach { groupId ->
+                    val pref = authService.loadClientAlarmPreference(groupId) ?: (true to 3)
+                    _clientAlarmPrefs.value = _clientAlarmPrefs.value + (groupId to pref)
+                }
             }
         }
     }
@@ -350,19 +364,32 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             initialValue = FinancialOverview()
         )
 
+    private val clientReminderSourceFlow = combine(
+        authService.participatingGroups,
+        _clientAlarmPrefs
+    ) { groups, prefs -> groups to prefs }
+
     val notifications: StateFlow<List<AppNotification>> = combine(
         repository.allSubscriptions,
         _readNotificationIds,
-        _dismissedNotificationIds
-    ) { subsWithMembers, readIds, dismissedIds ->
+        _dismissedNotificationIds,
+        clientReminderSourceFlow
+    ) { subsWithMembers, readIds, dismissedIds, (participating, prefs) ->
         val subscriptions = subsWithMembers.map { it.subscription }
         val membersBySub = subsWithMembers.associate { it.subscription.id.toString() to it.members }
-        val generated = NotificationGenerator.generate(
+        val managerNotifs = NotificationGenerator.generate(
             subscriptions = subscriptions,
             membersBySubscription = membersBySub,
             readIds = readIds
         )
-        generated.filter { it.id !in dismissedIds }
+        val currentUid = (authState.value as? com.apleq.app.data.remote.AuthState.Authenticated)?.user?.uid ?: ""
+        val clientNotifs = NotificationGenerator.generateForClient(
+            participatingGroups = participating,
+            currentUid = currentUid,
+            alarmPrefs = prefs,
+            readIds = readIds
+        )
+        (managerNotifs + clientNotifs).filter { it.id !in dismissedIds }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -391,6 +418,11 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         _readNotificationIds.value = updated
         saveReadNotificationIds(updated)
         viewModelScope.launch { authService.saveReadNotificationIdsToCloud(updated) }
+    }
+
+    fun setClientAlarmPreference(groupId: String, enabled: Boolean, leadDays: Int) {
+        _clientAlarmPrefs.value = _clientAlarmPrefs.value + (groupId to (enabled to leadDays))
+        viewModelScope.launch { authService.saveClientAlarmPreference(groupId, enabled, leadDays) }
     }
 
     fun unmarkNotificationRead(id: String) {

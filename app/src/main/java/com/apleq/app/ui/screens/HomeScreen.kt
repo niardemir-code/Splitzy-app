@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Subscriptions
@@ -62,6 +63,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -152,6 +154,7 @@ fun HomeScreen(
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val currentUid = (authState as? com.apleq.app.data.remote.AuthState.Authenticated)?.user?.uid ?: ""
     val showAuthDialog by viewModel.showAuthDialog.collectAsStateWithLifecycle()
+    val clientAlarmPrefs by viewModel.clientAlarmPrefs.collectAsStateWithLifecycle()
 
     LaunchedEffect(authState) {
         if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
@@ -991,8 +994,75 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
-                            Text("Tu alarma", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                            Text("Próximamente.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            val groupIdForAlarm = group["_docId"].toString()
+                            val currentPref = clientAlarmPrefs[groupIdForAlarm] ?: (true to 3)
+                            var alarmEnabled by remember(groupIdForAlarm, currentPref) { mutableStateOf(currentPref.first) }
+                            var alarmDays by remember(groupIdForAlarm, currentPref) { mutableStateOf(currentPref.second) }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Tu alarma", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                                Switch(
+                                    checked = alarmEnabled,
+                                    onCheckedChange = {
+                                        alarmEnabled = it
+                                        viewModel.setClientAlarmPreference(groupIdForAlarm, it, alarmDays)
+                                    }
+                                )
+                            }
+                            if (alarmEnabled) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        "Avisarme",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            val newVal = (alarmDays - 1).coerceAtLeast(1)
+                                            alarmDays = newVal
+                                            viewModel.setClientAlarmPreference(groupIdForAlarm, alarmEnabled, newVal)
+                                        },
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(Icons.Default.Remove, contentDescription = "Menos días", modifier = Modifier.size(16.dp))
+                                    }
+                                    Text(
+                                        text = "$alarmDays ${if (alarmDays == 1) "día" else "días"}",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            val newVal = (alarmDays + 1).coerceAtMost(30)
+                                            alarmDays = newVal
+                                            viewModel.setClientAlarmPreference(groupIdForAlarm, alarmEnabled, newVal)
+                                        },
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(Icons.Default.Add, contentDescription = "Más días", modifier = Modifier.size(16.dp))
+                                    }
+                                    Text(
+                                        "antes",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    "No recibirás avisos de este pago.",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                     Surface(

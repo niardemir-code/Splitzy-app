@@ -791,6 +791,48 @@ class FirebaseAuthService(
     }
 
     /**
+     * Lee la preferencia de alarma del cliente para un grupo en el que participa.
+     * Devuelve null si nunca se ha configurado (el llamador debe aplicar el
+     * valor por defecto: activada, 3 días).
+     */
+    suspend fun loadClientAlarmPreference(groupId: String): Pair<Boolean, Int>? = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext null
+        val user = auth?.currentUser ?: return@withContext null
+        try {
+            val snap = db.collection("users").document(user.uid)
+                .collection("groupAlarms").document(groupId)
+                .get().await()
+            if (!snap.exists()) return@withContext null
+            val enabled = snap.getBoolean("enabled") ?: true
+            val leadDays = (snap.getLong("leadDays") ?: 3L).toInt()
+            enabled to leadDays
+        } catch (e: Exception) {
+            android.util.Log.w("ClientAlarm", "No se pudo leer la preferencia de alarma", e)
+            null
+        }
+    }
+
+    suspend fun saveClientAlarmPreference(groupId: String, enabled: Boolean, leadDays: Int) = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext
+        val user = auth?.currentUser ?: return@withContext
+        try {
+            db.collection("users").document(user.uid)
+                .collection("groupAlarms").document(groupId)
+                .set(
+                    mapOf(
+                        "enabled" to enabled,
+                        "leadDays" to leadDays,
+                        "updatedAt" to System.currentTimeMillis()
+                    ),
+                    com.google.firebase.firestore.SetOptions.merge()
+                )
+                .await()
+        } catch (e: Exception) {
+            android.util.Log.w("ClientAlarm", "No se pudo guardar la preferencia de alarma", e)
+        }
+    }
+
+    /**
      * Elimina una suscripción de Firestore
      */
     suspend fun deleteSubscriptionFromCloud(subscriptionId: Long) = withContext(Dispatchers.IO) {

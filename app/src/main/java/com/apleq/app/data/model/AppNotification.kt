@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 enum class NotificationStatus { UPCOMING, TODAY, OVERDUE }
-enum class NotificationType { ALARM, OVERDUE, PENDING }
+enum class NotificationType { ALARM, OVERDUE, PENDING, CLIENT_REMINDER }
 
 data class AppNotification(
     val id: String,
@@ -205,5 +205,99 @@ object NotificationGenerator {
             compareByDescending<AppNotification> { it.unpaidCycles }
                 .thenBy { it.daysRemaining }
         )
+    }
+
+    /**
+     * Genera avisos para los propios pagos del usuario como CLIENTE de otros
+     * grupos (no como gestor). Cada grupo tiene su propia preferencia de
+     * antelación, guardada aparte por el cliente; si no se ha configurado
+     * ninguna, se usa el valor por defecto: activada, 3 días.
+     */
+    fun generateForClient(
+        participatingGroups: List<Map<String, Any?>>,
+        currentUid: String,
+        alarmPrefs: Map<String, Pair<Boolean, Int>>,
+        readIds: Set<String>,
+        today: LocalDate = LocalDate.now()
+    ): List<AppNotification> {
+        if (currentUid.isBlank()) return emptyList()
+        val result = mutableListOf<AppNotification>()
+
+        participatingGroups.forEach { group ->
+            val groupId = group["_docId"]?.toString() ?: return@forEach
+            val (enabled, leadDays) = alarmPrefs[groupId] ?: (true to 3)
+            if (!enabled) return@forEach
+
+            val members = (group["members"] as? List<*>) ?: return@forEach
+            val myMember = members.filterIsInstance<Map<String, Any?>>()
+                .find {
+                    it["linkedUid"]?.toString() == currentUid || it["linked_uid"]?.toString() == currentUid
+                } ?: return@forEach
+
+            if ((myMember["isPendingRemoval"] as? Boolean) == true) return@forEach
+
+            val paymentDateStr = (myMember["nextPaymentDate"] ?: myMember["next_payment_date"] ?: "").toString()
+            val paymentDate = parseIsoDate(paymentDateStr) ?: return@forEach
+
+            val daysRemaining = (paymentDate.toEpochDay() - today.toEpochDay()).toInt()
+            val unpaidCycles = (myMember["unpaidCycles"] as? Number)?.toInt()
+                ?: (myMember["unpaid_cycles"] as? Number)?.toInt() ?: 0
+            val hasDebt = unpaidCycles >= 1
+
+            // Solo avisa si está dentro de la ventana configurada, o si hay deuda propia.
+            if (!hasDebt && daysRemaining > leadDays) return@forEach
+            if (daysRemaining < -60) return@forEach
+
+            val groupName = (group["platformName"] ?: group["name"] ?: "Suscripción").toString()
+            val groupColor = (group["iconColorHex"] ?: group["icon_color_hex"] ?: "#1285FA").toString()
+            val rawAmount = (myMember["contributionAmount"]
+                ?: myMember["contribution_amount"]
+                ?: myMember["amount"]
+                ?: 0).toString().toDoubleOrNull() ?: 0.0
+
+            val dueDateText = when {
+                hasDebt && unpaidCycles == 1 -> "Tienes un pago pendiente"
+                hasDebt -> "Tienes $unpaidCycles pagos pendientes"
+                daysRemaining < 0 -> "Tu pago venció hace ${-daysRemaining} días"
+                daysRemaining == 0 -> "¡Tu pago vence hoy!"
+                daysRemaining == 1 -> "Tu pago vence mañana"
+                else -> "Tu pago vence en $daysRemaining días"
+            }
+
+            val status = when {
+                hasDebt || daysRemaining < 0 -> NotificationStatus.OVERDUE
+                daysRemaining == 0 -> NotificationStatus.TODAY
+                else -> NotificationStatus.UPCOMING
+            }
+
+            val notifId = if (hasDebt) {
+                "client_notif_${groupId}_debt_$unpaidCycles"
+            } else {
+                "client_notif_${groupId}_$paymentDateStr"
+            }
+
+            result.add(
+                AppNotification(
+                    id = notifId,
+                    type = NotificationType.CLIENT_REMINDER,
+                    subscriptionId = groupId,
+                    subscriptionName = groupName,
+                    subscriptionColorHex = groupColor,
+                    memberId = "",
+                    memberName = "Tu pago",
+                    sharingPlatform = "",
+                    amount = rawAmount,
+                    currencySymbol = "€",
+                    nextPaymentDate = paymentDateStr,
+                    dueDateText = dueDateText,
+                    daysRemaining = daysRemaining,
+                    status = status,
+                    isRead = readIds.contains(notifId),
+                    alarmConfigText = if (!hasDebt) "Alarma configurada: $leadDays días antes" else null
+                )
+            )
+        }
+
+        return result
     }
 }
