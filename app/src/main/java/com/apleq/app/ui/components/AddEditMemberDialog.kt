@@ -36,6 +36,8 @@ import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -97,6 +99,7 @@ fun AddEditMemberDialog(
     onDelete: ((MemberEntity) -> Unit)? = null,
     availablePlatforms: List<SharingPlatformEntity> = emptyList(),
     onOpenChat: ((chatId: String, clientUid: String, clientName: String) -> Unit)? = null,
+    hasUnreadChat: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val isEditing = memberToEdit != null
@@ -353,11 +356,34 @@ fun AddEditMemberDialog(
                                 val chatId = "${ownerUid}_${groupId}_${clientUid}"
                                 onOpenChat(chatId, clientUid, memberToEdit.memberName.ifBlank { "Cliente" })
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = if (hasUnreadChat) {
+                                ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                            } else {
+                                ButtonDefaults.outlinedButtonColors()
+                            },
+                            border = if (hasUnreadChat) {
+                                BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                            } else {
+                                ButtonDefaults.outlinedButtonBorder()
+                            }
                         ) {
-                            Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Chatear con ${memberToEdit.memberName.ifBlank { "el cliente" }}")
+                            BadgedBox(
+                                badge = {
+                                    if (hasUnreadChat) {
+                                        Badge(containerColor = Color(0xFFE11D48))
+                                    }
+                                }
+                            ) {
+                                Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(16.dp))
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                if (hasUnreadChat)
+                                    "Chatear con ${memberToEdit.memberName.ifBlank { "el cliente" }} · Nuevo mensaje"
+                                else
+                                    "Chatear con ${memberToEdit.memberName.ifBlank { "el cliente" }}"
+                            )
                         }
                     }
 

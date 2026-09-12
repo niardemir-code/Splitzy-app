@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -26,13 +27,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Notifications
@@ -163,6 +167,9 @@ fun HomeScreen(
     val unreadChats by viewModel.unreadChats.collectAsStateWithLifecycle()
     val unreadChatIdsForOwner = remember(unreadChats) {
         unreadChats.filter { it.isOwnerSide }.map { it.chatId }.toSet()
+    }
+    val unreadChatIdsForClient = remember(unreadChats) {
+        unreadChats.filter { !it.isOwnerSide }.map { it.chatId }.toSet()
     }
 
     LaunchedEffect(authState) {
@@ -728,6 +735,31 @@ fun HomeScreen(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
+                                run {
+                                    val myChatId = "${group["_ownerUid"]}_${group["_docId"]}_${currentUid}"
+                                    if (unreadChatIdsForClient.contains(myChatId)) {
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(end = 6.dp)
+                                                .size(20.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Email,
+                                                contentDescription = "Mensaje sin leer del gestor",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(17.dp)
+                                            )
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(7.dp)
+                                                    .align(Alignment.TopEnd)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0xFFE11D48))
+                                            )
+                                        }
+                                    }
+                                }
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
@@ -798,6 +830,15 @@ fun HomeScreen(
                 viewModel.closeAddEditMember()
             },
             availablePlatforms = sharingPlatforms,
+            hasUnreadChat = run {
+                val linkedUid = memberToEdit?.linkedUid
+                val groupId = targetSubForMember?.subscription?.id
+                if (linkedUid.isNullOrBlank() || groupId == null) {
+                    false
+                } else {
+                    unreadChatIdsForOwner.contains("${currentUid}_${groupId}_${linkedUid}")
+                }
+            },
             onOpenChat = { chatId, clientUid, clientName ->
                 val subName = targetSubForMember?.subscription?.platformName ?: "Suscripción"
                 openChatIsOwnerSide = true
@@ -1083,26 +1124,77 @@ fun HomeScreen(
                             }
                         }
                     }
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                val ownerUid = group["_ownerUid"].toString()
-                                val groupId = group["_docId"].toString()
-                                val myUid = currentUid
-                                val chatId = "${ownerUid}_${groupId}_${myUid}"
-                                val subName = (group["platformName"] ?: group["name"] ?: "Suscripción").toString()
-                                openChatIsOwnerSide = false
-                                openChatInfo = Triple(chatId, subName, "El gestor")
-                                viewModel.openChat(chatId)
-                                viewModel.markChatRead(chatId, asOwner = false)
+                    run {
+                        val ownerUidForChat = group["_ownerUid"].toString()
+                        val groupIdForChat = group["_docId"].toString()
+                        val myChatId = "${ownerUidForChat}_${groupIdForChat}_${currentUid}"
+                        val hasUnread = unreadChatIdsForClient.contains(myChatId)
+
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (hasUnread)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            else
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.06f),
+                            border = BorderStroke(
+                                if (hasUnread) 1.5.dp else 1.dp,
+                                MaterialTheme.colorScheme.primary.copy(alpha = if (hasUnread) 0.9f else 0.35f)
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    val subName = (group["platformName"] ?: group["name"] ?: "Suscripción").toString()
+                                    openChatIsOwnerSide = false
+                                    openChatInfo = Triple(myChatId, subName, "El gestor")
+                                    viewModel.openChat(myChatId)
+                                    viewModel.markChatRead(myChatId, asOwner = false)
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                BadgedBox(
+                                    badge = {
+                                        if (hasUnread) {
+                                            Badge(containerColor = Color(0xFFE11D48))
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Chat,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Mensajes con el gestor",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = if (hasUnread) "Tienes un mensaje nuevo" else "Toca para abrir la conversación",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = if (hasUnread) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (hasUnread)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text("Mensajes con el gestor", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                            Text("Toca para abrir la conversación.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
