@@ -93,6 +93,7 @@ import com.apleq.app.data.local.SubscriptionEntity
 import com.apleq.app.data.model.PlatformPricingHelper
 import com.apleq.app.ui.components.AddEditMemberDialog
 import com.apleq.app.ui.components.AddEditSubscriptionDialog
+import com.apleq.app.ui.components.ChatDialog
 import com.apleq.app.ui.components.FinancialSummaryCard
 import com.apleq.app.ui.components.JoinGroupDialog
 import com.apleq.app.ui.components.NotificationsDialog
@@ -155,6 +156,11 @@ fun HomeScreen(
     val currentUid = (authState as? com.apleq.app.data.remote.AuthState.Authenticated)?.user?.uid ?: ""
     val showAuthDialog by viewModel.showAuthDialog.collectAsStateWithLifecycle()
     val clientAlarmPrefs by viewModel.clientAlarmPrefs.collectAsStateWithLifecycle()
+
+    var openChatInfo by remember { mutableStateOf<Triple<String, String, String>?>(null) } // chatId, subscriptionName, otherPersonName
+    var openChatIsOwnerSide by remember { mutableStateOf(true) }
+    val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
+    val unreadChats by viewModel.unreadChats.collectAsStateWithLifecycle()
 
     LaunchedEffect(authState) {
         if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
@@ -786,7 +792,14 @@ fun HomeScreen(
                 viewModel.deleteMember(entity)
                 viewModel.closeAddEditMember()
             },
-            availablePlatforms = sharingPlatforms
+            availablePlatforms = sharingPlatforms,
+            onOpenChat = { chatId, clientUid, clientName ->
+                val subName = targetSubForMember?.subscription?.platformName ?: "Suscripción"
+                openChatIsOwnerSide = true
+                openChatInfo = Triple(chatId, subName, clientName)
+                viewModel.openChat(chatId)
+                viewModel.markChatRead(chatId, asOwner = true)
+            }
         )
     }
 
@@ -1067,11 +1080,24 @@ fun HomeScreen(
                     }
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val ownerUid = group["_ownerUid"].toString()
+                                val groupId = group["_docId"].toString()
+                                val myUid = currentUid
+                                val chatId = "${ownerUid}_${groupId}_${myUid}"
+                                val subName = (group["platformName"] ?: group["name"] ?: "Suscripción").toString()
+                                openChatIsOwnerSide = false
+                                openChatInfo = Triple(chatId, subName, "El gestor")
+                                viewModel.openChat(chatId)
+                                viewModel.markChatRead(chatId, asOwner = false)
+                            }
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text("Mensajes con el gestor", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                            Text("Próximamente.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Toca para abrir la conversación.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -1163,6 +1189,35 @@ fun HomeScreen(
                 } else {
                     viewModel.markNotificationRead(id)
                 }
+            }
+        )
+    }
+
+    openChatInfo?.let { (chatId, subName, otherName) ->
+        ChatDialog(
+            subscriptionName = subName,
+            otherPersonName = otherName,
+            currentUid = currentUid,
+            messages = chatMessages,
+            onSend = { text ->
+                val parts = chatId.split("_")
+                if (parts.size >= 3) {
+                    val ownerUid = parts[0]
+                    val groupId = parts[1]
+                    val clientUid = parts.drop(2).joinToString("_")
+                    viewModel.sendChatMessage(
+                        ownerUid = ownerUid,
+                        clientUid = clientUid,
+                        groupId = groupId,
+                        subscriptionName = subName,
+                        clientName = if (openChatIsOwnerSide) otherName else "Cliente",
+                        text = text
+                    )
+                }
+            },
+            onDismiss = {
+                viewModel.closeChat()
+                openChatInfo = null
             }
         )
     }

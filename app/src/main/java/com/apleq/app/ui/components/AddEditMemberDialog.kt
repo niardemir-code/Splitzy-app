@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
@@ -95,6 +96,7 @@ fun AddEditMemberDialog(
     onSave: (MemberEntity) -> Unit,
     onDelete: ((MemberEntity) -> Unit)? = null,
     availablePlatforms: List<SharingPlatformEntity> = emptyList(),
+    onOpenChat: ((chatId: String, clientUid: String, clientName: String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val isEditing = memberToEdit != null
@@ -1167,6 +1169,24 @@ fun AddEditMemberDialog(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
+                        }
+                    }
+
+                    if (onOpenChat != null && !memberToEdit?.linkedUid.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedButton(
+                            onClick = {
+                                val clientUid = memberToEdit!!.linkedUid!!
+                                val groupId = sub.id.toString()
+                                val ownerUid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                                val chatId = "${ownerUid}_${groupId}_${clientUid}"
+                                onOpenChat(chatId, clientUid, memberToEdit.memberName.ifBlank { "Cliente" })
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Chatear con ${memberToEdit.memberName.ifBlank { "el cliente" }}")
                         }
                     }
 

@@ -126,6 +126,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             authService.authState.collect { state ->
                 if (state is AuthState.Authenticated) {
                     authService.startListeningParticipatingGroups()
+                    authService.startListeningUnreadChats()
                     // Sincronizar el estado de leído con la nube, una vez por sesión.
                     if (!hasMergedReadIds) {
                         hasMergedReadIds = true
@@ -191,6 +192,33 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     val isSyncing: StateFlow<Boolean> = authService.isSyncing
     val syncStatus: StateFlow<String?> = authService.syncStatus
     val participatingGroups: StateFlow<List<Map<String, Any>>> = authService.participatingGroups
+    val unreadChats: StateFlow<List<com.apleq.app.data.model.UnreadChatInfo>> = authService.unreadChats
+    val chatMessages: StateFlow<List<com.apleq.app.data.model.ChatMessage>> = authService.chatMessages
+
+    fun openChat(chatId: String) {
+        authService.startListeningChatMessages(chatId)
+    }
+
+    fun closeChat() {
+        authService.stopListeningChatMessages()
+    }
+
+    fun sendChatMessage(
+        ownerUid: String,
+        clientUid: String,
+        groupId: String,
+        subscriptionName: String,
+        clientName: String,
+        text: String
+    ) {
+        viewModelScope.launch {
+            authService.sendChatMessage(ownerUid, clientUid, groupId, subscriptionName, clientName, text)
+        }
+    }
+
+    fun markChatRead(chatId: String, asOwner: Boolean) {
+        viewModelScope.launch { authService.markChatRead(chatId, asOwner) }
+    }
 
     private val _showAuthDialog = MutableStateFlow(false)
     val showAuthDialog: StateFlow<Boolean> = _showAuthDialog
@@ -366,15 +394,16 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
 
     private val clientReminderSourceFlow = combine(
         authService.participatingGroups,
-        _clientAlarmPrefs
-    ) { groups, prefs -> groups to prefs }
+        _clientAlarmPrefs,
+        authService.unreadChats
+    ) { groups, prefs, unreadChatsList -> Triple(groups, prefs, unreadChatsList) }
 
     val notifications: StateFlow<List<AppNotification>> = combine(
         repository.allSubscriptions,
         _readNotificationIds,
         _dismissedNotificationIds,
         clientReminderSourceFlow
-    ) { subsWithMembers, readIds, dismissedIds, (participating, prefs) ->
+    ) { subsWithMembers, readIds, dismissedIds, (participating, prefs, unreadChatsList) ->
         val subscriptions = subsWithMembers.map { it.subscription }
         val membersBySub = subsWithMembers.associate { it.subscription.id.toString() to it.members }
         val managerNotifs = NotificationGenerator.generate(
@@ -389,7 +418,27 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             alarmPrefs = prefs,
             readIds = readIds
         )
-        (managerNotifs + clientNotifs).filter { it.id !in dismissedIds }
+        val chatNotifs = unreadChatsList.map { chat ->
+            com.apleq.app.data.model.AppNotification(
+                id = "chat_${chat.chatId}",
+                type = com.apleq.app.data.model.NotificationType.CLIENT_REMINDER,
+                subscriptionId = chat.groupId,
+                subscriptionName = chat.subscriptionName,
+                subscriptionColorHex = "#1285FA",
+                memberId = "",
+                memberName = chat.otherPersonName,
+                sharingPlatform = "",
+                amount = 0.0,
+                currencySymbol = "€",
+                nextPaymentDate = "",
+                dueDateText = "Nuevo mensaje: ${chat.lastMessageText.take(40)}",
+                daysRemaining = 0,
+                status = com.apleq.app.data.model.NotificationStatus.TODAY,
+                isRead = false,
+                alarmConfigText = null
+            )
+        }
+        (managerNotifs + clientNotifs + chatNotifs).filter { it.id !in dismissedIds }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

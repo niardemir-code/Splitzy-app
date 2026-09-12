@@ -121,6 +121,15 @@ class FirebaseAuthService(
     private val _participatingGroups = MutableStateFlow<List<Map<String, Any>>>(emptyList())
     val participatingGroups: StateFlow<List<Map<String, Any>>> = _participatingGroups
 
+    // ===== CHATS =====
+    private val _chatMessages = MutableStateFlow<List<com.apleq.app.data.model.ChatMessage>>(emptyList())
+    val chatMessages: StateFlow<List<com.apleq.app.data.model.ChatMessage>> = _chatMessages
+    private var chatMessagesListener: ListenerRegistration? = null
+
+    private val _unreadChats = MutableStateFlow<List<com.apleq.app.data.model.UnreadChatInfo>>(emptyList())
+    val unreadChats: StateFlow<List<com.apleq.app.data.model.UnreadChatInfo>> = _unreadChats
+    private var unreadChatsListeners: List<ListenerRegistration> = emptyList()
+
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
 
@@ -387,6 +396,8 @@ class FirebaseAuthService(
         try {
             removeActiveListeners()
             removeParticipatingGroupsListener()
+            stopListeningUnreadChats()
+            stopListeningChatMessages()
             if (clearLocalData) {
                 dao.deleteAllMembers()
                 dao.deleteAllSubscriptions()
@@ -2138,6 +2149,148 @@ class FirebaseAuthService(
                 }
                 _participatingGroups.value = groups
             }
+    }
+
+    fun buildChatId(ownerUid: String, groupId: String, clientUid: String): String =
+        "${ownerUid}_${groupId}_${clientUid}"
+
+    /**
+     * Escucha, en tiempo real, los chats con mensajes sin leer para el usuario
+     * actual — tanto los que tiene como gestor como los que tiene como cliente.
+     * Se llama una vez al iniciar sesión.
+     */
+    fun startListeningUnreadChats() {
+        val uid = auth?.currentUser?.uid ?: return
+        val db = firestore ?: return
+        unreadChatsListeners.forEach { it.remove() }
+
+        var ownerSide = emptyList<com.apleq.app.data.model.UnreadChatInfo>()
+        var clientSide = emptyList<com.apleq.app.data.model.UnreadChatInfo>()
+        fun publish() { _unreadChats.value = ownerSide + clientSide }
+
+        fun mapDocs(docs: List<com.google.firebase.firestore.DocumentSnapshot>, isOwnerSide: Boolean) =
+            docs.mapNotNull { doc ->
+                val data = doc.data ?: return@mapNotNull null
+                com.apleq.app.data.model.UnreadChatInfo(
+                    chatId = doc.id,
+                    groupId = (data["groupId"] as? String) ?: "",
+                    ownerUid = (data["ownerUid"] as? String) ?: "",
+                    clientUid = (data["clientUid"] as? String) ?: "",
+                    subscriptionName = (data["subscriptionName"] as? String) ?: "Suscripción",
+                    otherPersonName = if (isOwnerSide) (data["clientName"] as? String ?: "Cliente") else "El gestor",
+                    lastMessageText = (data["lastMessageText"] as? String) ?: "",
+                    isOwnerSide = isOwnerSide
+                )
+            }
+
+        val l1 = db.collection("chats")
+            .whereEqualTo("ownerUid", uid)
+            .whereEqualTo("unreadForOwner", true)
+            .addSnapshotListener { snap, error ->
+                if (error != null) { android.util.Log.e("Chat", "Error escuchando chats (gestor)", error); return@addSnapshotListener }
+                ownerSide = mapDocs(snap?.documents ?: emptyList(), true)
+                publish()
+            }
+        val l2 = db.collection("chats")
+            .whereEqualTo("clientUid", uid)
+            .whereEqualTo("unreadForClient", true)
+            .addSnapshotListener { snap, error ->
+                if (error != null) { android.util.Log.e("Chat", "Error escuchando chats (cliente)", error); return@addSnapshotListener }
+                clientSide = mapDocs(snap?.documents ?: emptyList(), false)
+                publish()
+            }
+        unreadChatsListeners = listOf(l1, l2)
+    }
+
+    fun stopListeningUnreadChats() {
+        unreadChatsListeners.forEach { it.remove() }
+        unreadChatsListeners = emptyList()
+        _unreadChats.value = emptyList()
+    }
+
+    /**
+     * Escucha, en tiempo real, los mensajes de UN chat concreto. Se llama al
+     * abrir la conversación, y se detiene al cerrarla.
+     */
+    fun startListeningChatMessages(chatId: String) {
+        val db = firestore ?: return
+        chatMessagesListener?.remove()
+        _chatMessages.value = emptyList()
+        chatMessagesListener = db.collection("chats").document(chatId)
+            .collection("messages")
+            .orderBy("createdAtMs", com.google.firebase.firestore.Query.Direction.ASCENDING)
+            .addSnapshotListener { snap, error ->
+                if (error != null) { android.util.Log.e("Chat", "Error escuchando mensajes", error); return@addSnapshotListener }
+                if (snap == null) return@addSnapshotListener
+                _chatMessages.value = snap.documents.mapNotNull { doc ->
+                    val data = doc.data ?: return@mapNotNull null
+                    com.apleq.app.data.model.ChatMessage(
+                        id = doc.id,
+                        senderId = (data["senderId"] as? String) ?: "",
+                        text = (data["text"] as? String) ?: "",
+                        createdAtMs = (data["createdAtMs"] as? Number)?.toLong() ?: 0L
+                    )
+                }
+            }
+    }
+
+    fun stopListeningChatMessages() {
+        chatMessagesListener?.remove()
+        chatMessagesListener = null
+        _chatMessages.value = emptyList()
+    }
+
+    suspend fun sendChatMessage(
+        ownerUid: String,
+        clientUid: String,
+        groupId: String,
+        subscriptionName: String,
+        clientName: String,
+        text: String
+    ): Unit = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext
+        val myUid = auth?.currentUser?.uid ?: return@withContext
+        val chatId = buildChatId(ownerUid, groupId, clientUid)
+        val chatRef = db.collection("chats").document(chatId)
+        val nowMs = System.currentTimeMillis()
+        try {
+            chatRef.set(
+                mapOf(
+                    "ownerUid" to ownerUid,
+                    "clientUid" to clientUid,
+                    "groupId" to groupId,
+                    "subscriptionName" to subscriptionName,
+                    "clientName" to clientName,
+                    "lastMessageText" to text,
+                    "lastMessageAt" to nowMs,
+                    "lastMessageSenderId" to myUid,
+                    "unreadForOwner" to (myUid != ownerUid),
+                    "unreadForClient" to (myUid != clientUid)
+                ),
+                com.google.firebase.firestore.SetOptions.merge()
+            ).await()
+
+            chatRef.collection("messages").add(
+                mapOf(
+                    "senderId" to myUid,
+                    "text" to text,
+                    "createdAtMs" to nowMs
+                )
+            ).await()
+        } catch (e: Exception) {
+            android.util.Log.e("Chat", "No se pudo enviar el mensaje", e)
+        }
+    }
+
+    suspend fun markChatRead(chatId: String, asOwner: Boolean): Unit = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext
+        try {
+            db.collection("chats").document(chatId)
+                .update(if (asOwner) "unreadForOwner" else "unreadForClient", false)
+                .await()
+        } catch (e: Exception) {
+            android.util.Log.w("Chat", "No se pudo marcar el chat como leído", e)
+        }
     }
 
     private fun getWebClientId(): String? {
