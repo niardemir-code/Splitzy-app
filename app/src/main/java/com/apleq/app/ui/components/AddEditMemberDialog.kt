@@ -1322,7 +1322,7 @@ fun AddEditMemberDialog(
                                 nextPaymentDate = isoNextPayment,
                                 paymentFrequencyValue = paymentFrequencyValue,
                                 paymentFrequencyUnit = paymentFrequencyUnit,
-                                autoRepeatPayment = true,
+                                autoRepeatPayment = memberToEdit?.autoRepeatPayment ?: true,
                                 paymentMethod = paymentMethod.trim(),
                                 lastPaymentDate = memberToEdit?.lastPaymentDate ?: "",
                                 enableAlarm = enableAlarm,
@@ -1337,7 +1337,12 @@ fun AddEditMemberDialog(
                                 isPendingRegistration = isPendingRegistration,
                                 debtSinceDate = if (!isPendingPayment) "" else (memberToEdit?.debtSinceDate ?: ""),
                                 unpaidCycles = if (!isPendingPayment) 0 else (memberToEdit?.unpaidCycles ?: 0),
-                                notes = notesOrProfile.trim()
+                                notes = notesOrProfile.trim(),
+                                // CRÍTICO: si no se preserva, editar un miembro con cliente real
+                                // desconecta su cuenta en silencio (ver historial de este archivo).
+                                linkedUid = memberToEdit?.linkedUid,
+                                inviteCode = memberToEdit?.inviteCode,
+                                paymentStatus = if (!isPendingPayment) "paid" else (memberToEdit?.paymentStatus ?: "pending")
                             )
                             onSave(updatedEntity)
                         },
