@@ -98,6 +98,7 @@ import com.apleq.app.data.model.PlatformPricingHelper
 import com.apleq.app.ui.components.AddEditMemberDialog
 import com.apleq.app.ui.components.AddEditSubscriptionDialog
 import com.apleq.app.ui.components.ChatDialog
+import com.apleq.app.ui.components.ChatListDialog
 import com.apleq.app.ui.components.FinancialSummaryCard
 import com.apleq.app.ui.components.JoinGroupDialog
 import com.apleq.app.ui.components.NotificationsDialog
@@ -171,6 +172,7 @@ fun HomeScreen(
     val unreadChatIdsForClient = remember(unreadChats) {
         unreadChats.filter { !it.isOwnerSide }.map { it.chatId }.toSet()
     }
+    var chatListForSubscription by remember { mutableStateOf<com.apleq.app.data.local.SubscriptionWithMembers?>(null) }
 
     LaunchedEffect(authState) {
         if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
@@ -619,7 +621,8 @@ fun HomeScreen(
                         onGenerateInvite = { viewModel.generateInvite(item) },
                         onEditClick = { viewModel.openEditSubscription(item.subscription) },
                         onDeleteClick = { subscriptionToDelete = item.subscription },
-                        onMemberClick = { member -> viewModel.openEditMember(member, item) }
+                        onMemberClick = { member -> viewModel.openEditMember(member, item) },
+                        onOpenChatList = { chatListForSubscription = item }
                     )
                 }
             }
@@ -829,23 +832,7 @@ fun HomeScreen(
                 viewModel.deleteMember(entity)
                 viewModel.closeAddEditMember()
             },
-            availablePlatforms = sharingPlatforms,
-            hasUnreadChat = run {
-                val linkedUid = memberToEdit?.linkedUid
-                val groupId = targetSubForMember?.subscription?.id
-                if (linkedUid.isNullOrBlank() || groupId == null) {
-                    false
-                } else {
-                    unreadChatIdsForOwner.contains("${currentUid}_${groupId}_${linkedUid}")
-                }
-            },
-            onOpenChat = { chatId, clientUid, clientName ->
-                val subName = targetSubForMember?.subscription?.platformName ?: "Suscripción"
-                openChatIsOwnerSide = true
-                openChatInfo = Triple(chatId, subName, clientName)
-                viewModel.openChat(chatId)
-                viewModel.markChatRead(chatId, asOwner = true)
-            }
+            availablePlatforms = sharingPlatforms
         )
     }
 
@@ -1287,6 +1274,24 @@ fun HomeScreen(
                     viewModel.markNotificationRead(id)
                 }
             }
+        )
+    }
+
+    chatListForSubscription?.let { subWithMembers ->
+        ChatListDialog(
+            subscriptionName = subWithMembers.subscription.platformName,
+            members = subWithMembers.members,
+            currentUid = currentUid,
+            groupId = subWithMembers.subscription.id.toString(),
+            unreadChatIdsForOwner = unreadChatIdsForOwner,
+            onMemberClick = { chatId, clientUid, clientName ->
+                openChatIsOwnerSide = true
+                openChatInfo = Triple(chatId, subWithMembers.subscription.platformName, clientName)
+                viewModel.openChat(chatId)
+                viewModel.markChatRead(chatId, asOwner = true)
+                chatListForSubscription = null
+            },
+            onDismiss = { chatListForSubscription = null }
         )
     }
 

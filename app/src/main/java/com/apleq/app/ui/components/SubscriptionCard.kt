@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -43,6 +44,8 @@ import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -91,6 +94,7 @@ fun SubscriptionCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onMemberClick: (com.apleq.app.data.local.MemberEntity) -> Unit = {},
+    onOpenChatList: () -> Unit = {},
     searchQuery: String = "",
     availablePlatforms: List<SharingPlatformEntity> = emptyList(),
     currentUid: String = "",
@@ -107,6 +111,13 @@ fun SubscriptionCard(
     val netBalance = subscriptionWithMembers.netBalance
     val isProfit = subscriptionWithMembers.isNetProfit
     val period = subscriptionWithMembers.billingPeriodObj
+
+    val hasAnyUnreadChat = remember(members, unreadChatIdsForOwner, currentUid, sub.id) {
+        members.any { m ->
+            !m.linkedUid.isNullOrBlank() &&
+                unreadChatIdsForOwner.contains("${currentUid}_${sub.id}_${m.linkedUid}")
+        }
+    }
 
     var isExpanded by rememberSaveable(sub.id) { mutableStateOf(false) }
 
@@ -192,6 +203,26 @@ fun SubscriptionCard(
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.rotate(arrowRotation)
                     )
+                }
+
+                // Chat with members button
+                IconButton(
+                    onClick = onOpenChatList,
+                    modifier = Modifier.testTag("chat_list_${sub.id}")
+                ) {
+                    BadgedBox(
+                        badge = {
+                            if (hasAnyUnreadChat) {
+                                Badge(containerColor = Color(0xFFE11D48))
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Chat,
+                            contentDescription = "Chats con miembros",
+                            tint = if (hasAnyUnreadChat) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 // Edit subscription button
