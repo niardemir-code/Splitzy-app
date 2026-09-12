@@ -2274,7 +2274,9 @@ class FirebaseAuthService(
                 mapOf(
                     "senderId" to myUid,
                     "text" to text,
-                    "createdAtMs" to nowMs
+                    "createdAtMs" to nowMs,
+                    "ownerUid" to ownerUid,
+                    "clientUid" to clientUid
                 )
             ).await()
         } catch (e: Exception) {

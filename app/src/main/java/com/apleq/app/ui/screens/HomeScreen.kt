@@ -1277,22 +1277,24 @@ fun HomeScreen(
         )
     }
 
-    chatListForSubscription?.let { subWithMembers ->
-        ChatListDialog(
-            subscriptionName = subWithMembers.subscription.platformName,
-            members = subWithMembers.members,
-            currentUid = currentUid,
-            groupId = subWithMembers.subscription.id.toString(),
-            unreadChatIdsForOwner = unreadChatIdsForOwner,
-            onMemberClick = { chatId, clientUid, clientName ->
-                openChatIsOwnerSide = true
-                openChatInfo = Triple(chatId, subWithMembers.subscription.platformName, clientName)
-                viewModel.openChat(chatId)
-                viewModel.markChatRead(chatId, asOwner = true)
-                chatListForSubscription = null
-            },
-            onDismiss = { chatListForSubscription = null }
-        )
+    if (chatListForSubscription != null && openChatInfo == null) {
+        chatListForSubscription?.let { subWithMembers ->
+            ChatListDialog(
+                subscriptionName = subWithMembers.subscription.platformName,
+                members = subWithMembers.members,
+                currentUid = currentUid,
+                groupId = subWithMembers.subscription.id.toString(),
+                unreadChatIdsForOwner = unreadChatIdsForOwner,
+                onMemberClick = { chatId, clientUid, clientName ->
+                    openChatIsOwnerSide = true
+                    openChatInfo = Triple(chatId, subWithMembers.subscription.platformName, clientName)
+                    viewModel.openChat(chatId)
+                    viewModel.markChatRead(chatId, asOwner = true)
+                    // No se cierra la lista aquí: se queda de fondo para poder volver a ella.
+                },
+                onDismiss = { chatListForSubscription = null }
+            )
+        }
     }
 
     openChatInfo?.let { (chatId, subName, otherName) ->
@@ -1317,9 +1319,18 @@ fun HomeScreen(
                     )
                 }
             },
+            onBack = if (openChatIsOwnerSide && chatListForSubscription != null) {
+                {
+                    viewModel.closeChat()
+                    openChatInfo = null
+                    // chatListForSubscription se queda como está: al cerrar solo el
+                    // chat, la lista (que seguía de fondo) vuelve a mostrarse.
+                }
+            } else null,
             onDismiss = {
                 viewModel.closeChat()
                 openChatInfo = null
+                chatListForSubscription = null
             }
         )
     }

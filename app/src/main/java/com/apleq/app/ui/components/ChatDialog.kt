@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -26,7 +27,8 @@ fun ChatDialog(
     currentUid: String,
     messages: List<ChatMessage>,
     onSend: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onBack: (() -> Unit)? = null
 ) {
     var text by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
@@ -50,9 +52,17 @@ fun ChatDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(otherPersonName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                        Text(subscriptionName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (onBack != null) {
+                            IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver a la lista")
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+                        Column {
+                            Text(otherPersonName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                            Text(subscriptionName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Cerrar")
