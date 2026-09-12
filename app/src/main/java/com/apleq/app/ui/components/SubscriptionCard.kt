@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -92,6 +93,8 @@ fun SubscriptionCard(
     onMemberClick: (com.apleq.app.data.local.MemberEntity) -> Unit = {},
     searchQuery: String = "",
     availablePlatforms: List<SharingPlatformEntity> = emptyList(),
+    currentUid: String = "",
+    unreadChatIdsForOwner: Set<String> = emptySet(),
     modifier: Modifier = Modifier
 ) {
     val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
@@ -499,6 +502,34 @@ fun SubscriptionCard(
                                             overflow = TextOverflow.Ellipsis,
                                             modifier = Modifier.weight(1f, fill = false)
                                         )
+
+                                        val memberChatId = if (!member.linkedUid.isNullOrBlank()) {
+                                            "${currentUid}_${sub.id}_${member.linkedUid}"
+                                        } else null
+                                        val hasUnreadChat = memberChatId != null && unreadChatIdsForOwner.contains(memberChatId)
+
+                                        if (hasUnreadChat) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .testTag("member_unread_chat_icon_${member.id}"),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Email,
+                                                    contentDescription = "Mensaje sin leer",
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(7.dp)
+                                                        .align(Alignment.TopEnd)
+                                                        .clip(CircleShape)
+                                                        .background(Color(0xFFE11D48))
+                                                )
+                                            }
+                                        }
 
                                         val memberPaymentDateFormatted = remember(
                                             member.nextPaymentDate,

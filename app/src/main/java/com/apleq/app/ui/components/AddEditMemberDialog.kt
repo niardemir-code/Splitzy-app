@@ -343,6 +343,24 @@ fun AddEditMemberDialog(
                         shape = RoundedCornerShape(12.dp)
                     )
 
+                    if (onOpenChat != null && !memberToEdit?.linkedUid.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedButton(
+                            onClick = {
+                                val clientUid = memberToEdit!!.linkedUid!!
+                                val groupId = sub.id.toString()
+                                val ownerUid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                                val chatId = "${ownerUid}_${groupId}_${clientUid}"
+                                onOpenChat(chatId, clientUid, memberToEdit.memberName.ifBlank { "Cliente" })
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Chatear con ${memberToEdit.memberName.ifBlank { "el cliente" }}")
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // PLATAFORMA DE COMPARTICIÓN
@@ -1169,24 +1187,6 @@ fun AddEditMemberDialog(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                        }
-                    }
-
-                    if (onOpenChat != null && !memberToEdit?.linkedUid.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = {
-                                val clientUid = memberToEdit!!.linkedUid!!
-                                val groupId = sub.id.toString()
-                                val ownerUid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                                val chatId = "${ownerUid}_${groupId}_${clientUid}"
-                                onOpenChat(chatId, clientUid, memberToEdit.memberName.ifBlank { "Cliente" })
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Chatear con ${memberToEdit.memberName.ifBlank { "el cliente" }}")
                         }
                     }
 

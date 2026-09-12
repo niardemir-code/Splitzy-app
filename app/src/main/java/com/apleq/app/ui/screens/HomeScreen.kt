@@ -161,6 +161,9 @@ fun HomeScreen(
     var openChatIsOwnerSide by remember { mutableStateOf(true) }
     val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
     val unreadChats by viewModel.unreadChats.collectAsStateWithLifecycle()
+    val unreadChatIdsForOwner = remember(unreadChats) {
+        unreadChats.filter { it.isOwnerSide }.map { it.chatId }.toSet()
+    }
 
     LaunchedEffect(authState) {
         if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
@@ -603,6 +606,8 @@ fun HomeScreen(
                         subscriptionWithMembers = item,
                         searchQuery = searchQuery,
                         availablePlatforms = sharingPlatforms,
+                        currentUid = currentUid,
+                        unreadChatIdsForOwner = unreadChatIdsForOwner,
                         onAddMemberClick = { viewModel.openAddMember(item) },
                         onGenerateInvite = { viewModel.generateInvite(item) },
                         onEditClick = { viewModel.openEditSubscription(item.subscription) },
