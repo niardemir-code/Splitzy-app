@@ -195,8 +195,8 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     val unreadChats: StateFlow<List<com.apleq.app.data.model.UnreadChatInfo>> = authService.unreadChats
     val chatMessages: StateFlow<List<com.apleq.app.data.model.ChatMessage>> = authService.chatMessages
 
-    fun openChat(chatId: String) {
-        authService.startListeningChatMessages(chatId)
+    fun openChat(chatId: String, currentUid: String, isOwnerSide: Boolean) {
+        authService.startListeningChatMessages(chatId, currentUid, isOwnerSide)
     }
 
     fun closeChat() {

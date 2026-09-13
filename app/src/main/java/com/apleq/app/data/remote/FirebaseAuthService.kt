@@ -2212,12 +2212,14 @@ class FirebaseAuthService(
      * Escucha, en tiempo real, los mensajes de UN chat concreto. Se llama al
      * abrir la conversación, y se detiene al cerrarla.
      */
-    fun startListeningChatMessages(chatId: String) {
+    fun startListeningChatMessages(chatId: String, currentUid: String, isOwnerSide: Boolean) {
         val db = firestore ?: return
         chatMessagesListener?.remove()
         _chatMessages.value = emptyList()
+        val fieldToMatch = if (isOwnerSide) "ownerUid" else "clientUid"
         chatMessagesListener = db.collection("chats").document(chatId)
             .collection("messages")
+            .whereEqualTo(fieldToMatch, currentUid)
             .orderBy("createdAtMs", com.google.firebase.firestore.Query.Direction.ASCENDING)
             .addSnapshotListener { snap, error ->
                 if (error != null) { android.util.Log.e("Chat", "Error escuchando mensajes", error); return@addSnapshotListener }

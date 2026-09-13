@@ -1133,7 +1133,7 @@ fun HomeScreen(
                                     val subName = (group["platformName"] ?: group["name"] ?: "Suscripción").toString()
                                     openChatIsOwnerSide = false
                                     openChatInfo = Triple(myChatId, subName, "El gestor")
-                                    viewModel.openChat(myChatId)
+                                    viewModel.openChat(myChatId, currentUid, isOwnerSide = false)
                                     viewModel.markChatRead(myChatId, asOwner = false)
                                 }
                         ) {
@@ -1288,7 +1288,7 @@ fun HomeScreen(
                 onMemberClick = { chatId, clientUid, clientName ->
                     openChatIsOwnerSide = true
                     openChatInfo = Triple(chatId, subWithMembers.subscription.platformName, clientName)
-                    viewModel.openChat(chatId)
+                    viewModel.openChat(chatId, currentUid, isOwnerSide = true)
                     viewModel.markChatRead(chatId, asOwner = true)
                     // No se cierra la lista aquí: se queda de fondo para poder volver a ella.
                 },
