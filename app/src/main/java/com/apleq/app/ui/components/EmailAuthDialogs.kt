@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.apleq.app.ui.util.I18n
 
 /**
  * Diálogo de REGISTRO con correo: nombre + email + contraseña + repetir contraseña.
@@ -89,9 +90,9 @@ fun EmailRegisterDialog(
                     supportingText = {
                         Text(
                             text = if (passwordTooShort)
-                                "Demasiado corta: mínimo 6 caracteres"
+                                I18n.passwordTooShortWarning
                             else
-                                "Mínimo 6 caracteres",
+                                I18n.passwordMinChars,
                             color = if (passwordTooShort)
                                 MaterialTheme.colorScheme.error
                             else

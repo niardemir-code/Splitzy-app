@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apleq.app.data.local.MemberEntity
+import com.apleq.app.ui.util.I18n
 
 @Composable
 fun ChatListDialog(
@@ -36,11 +37,11 @@ fun ChatListDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Chats · $subscriptionName") },
+        title = { Text(I18n.chatListTitle(subscriptionName)) },
         text = {
             if (linkedMembers.isEmpty()) {
                 Text(
-                    "Ningún miembro tiene cuenta enlazada todavía.",
+                    I18n.chatNoLinkedMembers,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -53,7 +54,7 @@ fun ChatListDialog(
                         val clientUid = member.linkedUid!!
                         val chatId = "${currentUid}_${groupId}_${clientUid}"
                         val hasUnread = unreadChatIdsForOwner.contains(chatId)
-                        val displayName = member.memberName.ifBlank { "Cliente" }
+                        val displayName = member.memberName.ifBlank { I18n.chatDefaultClientName }
                         val initial = displayName.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "?"
 
                         Surface(
@@ -115,7 +116,7 @@ fun ChatListDialog(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Email,
-                                            contentDescription = "Mensaje sin leer",
+                                            contentDescription = I18n.chatUnreadMessage,
                                             tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(18.dp)
                                         )
@@ -143,7 +144,7 @@ fun ChatListDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cerrar") }
+            TextButton(onClick = onDismiss) { Text(I18n.close) }
         }
     )
 }

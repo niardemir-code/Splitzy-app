@@ -219,7 +219,7 @@ fun SubscriptionCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Chat,
-                            contentDescription = "Chats con miembros",
+                            contentDescription = I18n.chatWithMembers,
                             tint = if (hasAnyUnreadChat) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -690,9 +690,9 @@ fun SubscriptionCard(
                                                 ) {
                                                     Text(
                                                         text = if (member.unpaidCycles == 1)
-                                                            "1 cuota pendiente"
+                                                            I18n.oneCyclePendingBadge
                                                         else
-                                                            "${member.unpaidCycles} cuotas pendientes",
+                                                            I18n.cyclesPendingBadge(member.unpaidCycles),
                                                         style = MaterialTheme.typography.labelSmall.copy(
                                                             fontSize = 10.sp,
                                                             fontWeight = FontWeight.Bold

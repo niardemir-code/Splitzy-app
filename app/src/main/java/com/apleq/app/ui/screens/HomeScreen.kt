@@ -1050,7 +1050,7 @@ fun HomeScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Tu alarma", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                                Text(I18n.yourAlarmTitle, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                                 Switch(
                                     checked = alarmEnabled,
                                     onCheckedChange = {
@@ -1066,7 +1066,7 @@ fun HomeScreen(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Text(
-                                        "Avisarme",
+                                        I18n.remindMeLabel,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -1081,7 +1081,7 @@ fun HomeScreen(
                                         Icon(Icons.Default.Remove, contentDescription = "Menos días", modifier = Modifier.size(16.dp))
                                     }
                                     Text(
-                                        text = "$alarmDays ${if (alarmDays == 1) "día" else "días"}",
+                                        text = "$alarmDays ${I18n.timeUnitLabel("days", alarmDays)}",
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -1096,7 +1096,7 @@ fun HomeScreen(
                                         Icon(Icons.Default.Add, contentDescription = "Más días", modifier = Modifier.size(16.dp))
                                     }
                                     Text(
-                                        "antes",
+                                        I18n.beforeLabel,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -1104,7 +1104,7 @@ fun HomeScreen(
                             } else {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    "No recibirás avisos de este pago.",
+                                    I18n.noAlarmForThisPayment,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1130,9 +1130,9 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    val subName = (group["platformName"] ?: group["name"] ?: "Suscripción").toString()
+                                    val subName = (group["platformName"] ?: group["name"] ?: I18n.subscriptionFallbackName).toString()
                                     openChatIsOwnerSide = false
-                                    openChatInfo = Triple(myChatId, subName, "El gestor")
+                                    openChatInfo = Triple(myChatId, subName, I18n.chatManagerName)
                                     viewModel.openChat(myChatId, currentUid, isOwnerSide = false)
                                     viewModel.markChatRead(myChatId, asOwner = false)
                                 }
@@ -1158,15 +1158,16 @@ fun HomeScreen(
                                     )
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
+
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Mensajes con el gestor",
+                                        text = I18n.messagesWithManagerTitle,
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = if (hasUnread) "Tienes un mensaje nuevo" else "Toca para abrir la conversación",
+                                        text = if (hasUnread) I18n.youHaveNewMessage else I18n.tapToOpenConversation,
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = if (hasUnread) FontWeight.Bold else FontWeight.Normal,
                                         color = if (hasUnread)
@@ -1187,7 +1188,7 @@ fun HomeScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { selectedClientGroup = null }) { Text("Cerrar") }
+                TextButton(onClick = { selectedClientGroup = null }) { Text(I18n.close) }
             },
             dismissButton = {
                 TextButton(
@@ -1197,7 +1198,7 @@ fun HomeScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Salir de este grupo")
+                    Text(I18n.leaveThisGroup)
                 }
             }
         )
@@ -1207,10 +1208,10 @@ fun HomeScreen(
         val groupName = (group["platformName"] ?: group["name"] ?: "este grupo").toString()
         AlertDialog(
             onDismissRequest = { if (!isLeavingGroup) { groupPendingLeave = null; leaveGroupError = null } },
-            title = { Text("¿Salir de $groupName?") },
+            title = { Text(I18n.leaveGroupConfirmTitle(groupName)) },
             text = {
                 Column {
-                    Text("Dejarás de participar en este grupo.")
+                    Text(I18n.leaveGroupConfirmMsg)
                     leaveGroupError?.let { err ->
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -1236,7 +1237,7 @@ fun HomeScreen(
                             result.onSuccess {
                                 groupPendingLeave = null
                             }.onFailure { e ->
-                                leaveGroupError = e.message ?: "No se pudo salir del grupo."
+                                leaveGroupError = e.message ?: I18n.couldNotLeaveGroup
                             }
                         }
                     },
@@ -1245,7 +1246,7 @@ fun HomeScreen(
                     if (isLeavingGroup) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("Salir")
+                        Text(I18n.leaveButtonLabel)
                     }
                 }
             },
@@ -1314,7 +1315,7 @@ fun HomeScreen(
                         clientUid = clientUid,
                         groupId = groupId,
                         subscriptionName = subName,
-                        clientName = if (openChatIsOwnerSide) otherName else "Cliente",
+                        clientName = if (openChatIsOwnerSide) otherName else I18n.chatDefaultClientName,
                         text = text
                     )
                 }

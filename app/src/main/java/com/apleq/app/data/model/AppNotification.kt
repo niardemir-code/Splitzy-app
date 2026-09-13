@@ -2,6 +2,7 @@ package com.apleq.app.data.model
 
 import com.apleq.app.data.local.MemberEntity
 import com.apleq.app.data.local.SubscriptionEntity
+import com.apleq.app.ui.util.I18n
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -39,9 +40,9 @@ data class AppNotification(
                 debtSinceDate
             }
             return if (unpaidCycles == 1) {
-                "Debe 1 cuota desde el $formattedDate"
+                I18n.debtSinceOneCycle(formattedDate)
             } else {
-                "Debe $unpaidCycles cuotas desde el $formattedDate"
+                I18n.debtSinceMultipleCycles(unpaidCycles, formattedDate)
             }
         }
 }
@@ -79,7 +80,7 @@ object NotificationGenerator {
 
         subscriptions.forEach { sub ->
             val subId = sub.id.toString()
-            val subName = sub.platformName.ifBlank { "Suscripción" }
+            val subName = sub.platformName.ifBlank { I18n.subscriptionFallbackName }
             val subColor = sub.iconColorHex.ifBlank { "#1285FA" }
             val members = membersBySubscription[subId] ?: emptyList()
 
@@ -126,26 +127,22 @@ object NotificationGenerator {
                 }
 
                 val dueDateText = when {
-                    hasDebt && m.unpaidCycles == 1 -> "Pago pendiente"
-                    hasDebt -> "${m.unpaidCycles} pagos pendientes"
+                    hasDebt && m.unpaidCycles == 1 -> I18n.paymentPendingShort
+                    hasDebt -> I18n.paymentsPendingCount(m.unpaidCycles)
                     daysRemaining < 0 -> {
                         val d = -daysRemaining
-                        if (d == 1) "Vencido ayer" else "Vencido hace $d días"
+                        if (d == 1) I18n.overdueYesterday else I18n.overdueDays(d)
                     }
-                    daysRemaining == 0 -> "¡Vence hoy!"
-                    daysRemaining == 1 -> "Vence mañana"
-                    else -> "Vence en $daysRemaining días"
+                    daysRemaining == 0 -> I18n.dueTodayExclaim
+                    daysRemaining == 1 -> I18n.dueTomorrowShort
+                    else -> I18n.dueInDaysShort(daysRemaining)
                 }
 
-                val unitLabel = when (m.alarmUnit) {
-                    "weeks" -> if (m.alarmValue == 1) "semana" else "semanas"
-                    "months" -> if (m.alarmValue == 1) "mes" else "meses"
-                    else -> if (m.alarmValue == 1) "día" else "días"
-                }
+                val unitLabel = I18n.timeUnitLabel(m.alarmUnit, m.alarmValue)
                 val alarmConfigText = when {
                     !hasAlarm -> null
-                    m.alarmUnit == "same_day" || m.alarmValue == 0 -> "Alarma configurada: El mismo día"
-                    else -> "Alarma configurada: ${m.alarmValue} $unitLabel antes"
+                    m.alarmUnit == "same_day" || m.alarmValue == 0 -> I18n.alarmSetSameDay
+                    else -> I18n.alarmSetLeadTime(m.alarmValue, unitLabel)
                 }
 
                 val type = when {
@@ -183,7 +180,7 @@ object NotificationGenerator {
                         subscriptionName = subName,
                         subscriptionColorHex = subColor,
                         memberId = m.id.toString(),
-                        memberName = m.memberName.ifBlank { "Co-suscriptor" },
+                        memberName = m.memberName.ifBlank { I18n.coSubscriberFallback },
                         sharingPlatform = m.sharingPlatform,
                         amount = effectiveAmount,
                         currencySymbol = currencySymbol,
@@ -248,7 +245,7 @@ object NotificationGenerator {
             if (!hasDebt && daysRemaining > leadDays) return@forEach
             if (daysRemaining < -60) return@forEach
 
-            val groupName = (group["platformName"] ?: group["name"] ?: "Suscripción").toString()
+            val groupName = (group["platformName"] ?: group["name"] ?: I18n.subscriptionFallbackName).toString()
             val groupColor = (group["iconColorHex"] ?: group["icon_color_hex"] ?: "#1285FA").toString()
             val rawAmount = (myMember["contributionAmount"]
                 ?: myMember["contribution_amount"]
@@ -256,12 +253,12 @@ object NotificationGenerator {
                 ?: 0).toString().toDoubleOrNull() ?: 0.0
 
             val dueDateText = when {
-                hasDebt && unpaidCycles == 1 -> "Tienes un pago pendiente"
-                hasDebt -> "Tienes $unpaidCycles pagos pendientes"
-                daysRemaining < 0 -> "Tu pago venció hace ${-daysRemaining} días"
-                daysRemaining == 0 -> "¡Tu pago vence hoy!"
-                daysRemaining == 1 -> "Tu pago vence mañana"
-                else -> "Tu pago vence en $daysRemaining días"
+                hasDebt && unpaidCycles == 1 -> I18n.youHavePaymentDue
+                hasDebt -> I18n.youHavePaymentsDue(unpaidCycles)
+                daysRemaining < 0 -> I18n.yourPaymentOverdueDays(-daysRemaining)
+                daysRemaining == 0 -> I18n.dueTodayExclaim
+                daysRemaining == 1 -> I18n.yourPaymentDueTomorrow
+                else -> I18n.yourPaymentDueInDays(daysRemaining)
             }
 
             val status = when {
@@ -284,7 +281,7 @@ object NotificationGenerator {
                     subscriptionName = groupName,
                     subscriptionColorHex = groupColor,
                     memberId = "",
-                    memberName = "Tu pago",
+                    memberName = I18n.yourPaymentLabel,
                     sharingPlatform = "",
                     amount = rawAmount,
                     currencySymbol = "€",
@@ -293,7 +290,7 @@ object NotificationGenerator {
                     daysRemaining = daysRemaining,
                     status = status,
                     isRead = readIds.contains(notifId),
-                    alarmConfigText = if (!hasDebt) "Alarma configurada: $leadDays días antes" else null
+                    alarmConfigText = if (!hasDebt) I18n.alarmSetLeadTime(leadDays, I18n.timeUnitLabel("days", leadDays)) else null
                 )
             )
         }

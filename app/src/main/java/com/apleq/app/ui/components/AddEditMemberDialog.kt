@@ -79,6 +79,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.apleq.app.ui.util.I18n
 import com.apleq.app.data.local.MemberEntity
 import com.apleq.app.data.local.SharingPlatformEntity
 import com.apleq.app.data.local.SubscriptionWithMembers
@@ -1152,20 +1153,20 @@ fun AddEditMemberDialog(
                             ) {
                                 Text(
                                     text = if (debtCycles == 1)
-                                        "Debe 1 cuota"
+                                        I18n.debtPanelOneCycle
                                     else
-                                        "Debe $debtCycles cuotas",
+                                        I18n.debtPanelMultipleCycles(debtCycles),
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                     color = Color(0xFFE11D48)
                                 )
                                 Text(
-                                    text = "Desde el $debtSinceFormatted",
+                                    text = I18n.debtPanelSinceDate(debtSinceFormatted),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    text = "Apaga el interruptor cuando te haya pagado: la deuda se saldará por completo.",
+                                    text = I18n.debtPanelInstruction,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

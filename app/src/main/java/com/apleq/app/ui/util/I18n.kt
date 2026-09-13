@@ -1033,4 +1033,388 @@ object I18n {
             else -> category
         }
     }
+
+    // ==========================================
+    // DEBT & PAYMENT CYCLES (manager)
+    // ==========================================
+    fun debtSinceOneCycle(date: String): String = when {
+        isSpanish -> "Debe 1 cuota desde el $date"
+        isCatalan -> "Deu 1 quota des del $date"
+        else -> "Owes 1 installment since $date"
+    }
+
+    fun debtSinceMultipleCycles(count: Int, date: String): String = when {
+        isSpanish -> "Debe $count cuotas desde el $date"
+        isCatalan -> "Deu $count quotes des del $date"
+        else -> "Owes $count installments since $date"
+    }
+
+    val subscriptionFallbackName: String get() = when {
+        isSpanish -> "Suscripción"
+        isCatalan -> "Subscripció"
+        else -> "Subscription"
+    }
+
+    val coSubscriberFallback: String get() = when {
+        isSpanish -> "Co-suscriptor"
+        isCatalan -> "Co-subscriptor"
+        else -> "Co-subscriber"
+    }
+
+    val paymentPendingShort: String get() = when {
+        isSpanish -> "Pago pendiente"
+        isCatalan -> "Pagament pendent"
+        else -> "Payment pending"
+    }
+
+    fun paymentsPendingCount(count: Int): String = when {
+        isSpanish -> "$count pagos pendientes"
+        isCatalan -> "$count pagaments pendents"
+        else -> "$count payments pending"
+    }
+
+    val overdueYesterday: String get() = when {
+        isSpanish -> "Vencido ayer"
+        isCatalan -> "Vençut ahir"
+        else -> "Overdue yesterday"
+    }
+
+    fun overdueDays(days: Int): String = when {
+        isSpanish -> "Vencido hace $days días"
+        isCatalan -> "Vençut fa $days dies"
+        else -> "Overdue by $days days"
+    }
+
+    val dueTodayExclaim: String get() = when {
+        isSpanish -> "¡Vence hoy!"
+        isCatalan -> "Venç avui!"
+        else -> "Due today!"
+    }
+
+    val dueTomorrowShort: String get() = when {
+        isSpanish -> "Vence mañana"
+        isCatalan -> "Venç demà"
+        else -> "Due tomorrow"
+    }
+
+    fun dueInDaysShort(days: Int): String = when {
+        isSpanish -> "Vence en $days días"
+        isCatalan -> "Venç en $days dies"
+        else -> "Due in $days days"
+    }
+
+    val alarmSetSameDay: String get() = when {
+        isSpanish -> "Alarma configurada: El mismo día"
+        isCatalan -> "Alarma configurada: El mateix dia"
+        else -> "Alarm set: same day"
+    }
+
+    fun alarmSetLeadTime(value: Int, unitLabel: String): String = when {
+        isSpanish -> "Alarma configurada: $value $unitLabel antes"
+        isCatalan -> "Alarma configurada: $value $unitLabel abans"
+        else -> "Alarm set: $value $unitLabel before"
+    }
+
+    fun timeUnitLabel(unit: String, value: Int): String {
+        val plural = value != 1
+        return when (unit) {
+            "weeks" -> when {
+                isSpanish -> if (plural) "semanas" else "semana"
+                isCatalan -> if (plural) "setmanes" else "setmana"
+                else -> if (plural) "weeks" else "week"
+            }
+            "months" -> when {
+                isSpanish -> if (plural) "meses" else "mes"
+                isCatalan -> if (plural) "mesos" else "mes"
+                else -> if (plural) "months" else "month"
+            }
+            else -> when {
+                isSpanish -> if (plural) "días" else "día"
+                isCatalan -> if (plural) "dies" else "dia"
+                else -> if (plural) "days" else "day"
+            }
+        }
+    }
+
+    // ==========================================
+    // DEBT & PAYMENT (client's own reminders)
+    // ==========================================
+    val youHavePaymentDue: String get() = when {
+        isSpanish -> "Tienes un pago pendiente"
+        isCatalan -> "Tens un pagament pendent"
+        else -> "You have a payment due"
+    }
+
+    fun youHavePaymentsDue(count: Int): String = when {
+        isSpanish -> "Tienes $count pagos pendientes"
+        isCatalan -> "Tens $count pagaments pendents"
+        else -> "You have $count payments due"
+    }
+
+    fun yourPaymentOverdueDays(days: Int): String = when {
+        isSpanish -> "Tu pago venció hace $days días"
+        isCatalan -> "El teu pagament ha vençut fa $days dies"
+        else -> "Your payment was due $days days ago"
+    }
+
+    val yourPaymentDueTomorrow: String get() = when {
+        isSpanish -> "Tu pago vence mañana"
+        isCatalan -> "El teu pagament venç demà"
+        else -> "Your payment is due tomorrow"
+    }
+
+    fun yourPaymentDueInDays(days: Int): String = when {
+        isSpanish -> "Tu pago vence en $days días"
+        isCatalan -> "El teu pagament venç en $days dies"
+        else -> "Your payment is due in $days days"
+    }
+
+    val yourPaymentLabel: String get() = when {
+        isSpanish -> "Tu pago"
+        isCatalan -> "El teu pagament"
+        else -> "Your payment"
+    }
+
+    // ==========================================
+    // NOTIFICATIONS PANEL
+    // ==========================================
+    val notificationsTitle: String get() = when {
+        isSpanish -> "Notificaciones"
+        isCatalan -> "Notificacions"
+        else -> "Notifications"
+    }
+
+    val markAllRead: String get() = when {
+        isSpanish -> "Marcar leídas"
+        isCatalan -> "Marcar com llegides"
+        else -> "Mark as read"
+    }
+
+    val deleteAllNotifications: String get() = when {
+        isSpanish -> "Borrar todas"
+        isCatalan -> "Esborrar totes"
+        else -> "Delete all"
+    }
+
+    val noNotificationsPending: String get() = when {
+        isSpanish -> "No tienes avisos pendientes."
+        isCatalan -> "No tens avisos pendents."
+        else -> "You have no pending alerts."
+    }
+
+    val dismissNotification: String get() = when {
+        isSpanish -> "Descartar aviso"
+        isCatalan -> "Descartar avís"
+        else -> "Dismiss alert"
+    }
+
+    val markAsUnread: String get() = when {
+        isSpanish -> "Marcar como no leída"
+        isCatalan -> "Marcar com no llegit"
+        else -> "Mark as unread"
+    }
+
+    val markAsRead: String get() = when {
+        isSpanish -> "Marcar como leída"
+        isCatalan -> "Marcar com llegit"
+        else -> "Mark as read"
+    }
+
+    // ==========================================
+    // CHAT
+    // ==========================================
+    val chatBackToList: String get() = when {
+        isSpanish -> "Volver a la lista"
+        isCatalan -> "Tornar a la llista"
+        else -> "Back to list"
+    }
+
+    val chatNoMessagesYet: String get() = when {
+        isSpanish -> "Aún no hay mensajes. Escribe el primero."
+        isCatalan -> "Encara no hi ha missatges. Escriu el primer."
+        else -> "No messages yet. Write the first one."
+    }
+
+    val chatMessagePlaceholder: String get() = when {
+        isSpanish -> "Escribe un mensaje..."
+        isCatalan -> "Escriu un missatge..."
+        else -> "Type a message..."
+    }
+
+    val chatSend: String get() = when {
+        isSpanish -> "Enviar"
+        isCatalan -> "Enviar"
+        else -> "Send"
+    }
+
+    fun chatListTitle(subscriptionName: String): String = when {
+        isSpanish -> "Chats · $subscriptionName"
+        isCatalan -> "Xats · $subscriptionName"
+        else -> "Chats · $subscriptionName"
+    }
+
+    val chatWithMembers: String get() = when {
+        isSpanish -> "Chats con miembros"
+        isCatalan -> "Xats amb membres"
+        else -> "Chats with members"
+    }
+
+    val chatNoLinkedMembers: String get() = when {
+        isSpanish -> "Ningún miembro tiene cuenta enlazada todavía."
+        isCatalan -> "Cap membre té un compte enllaçat encara."
+        else -> "No members have a linked account yet."
+    }
+
+    val chatDefaultClientName: String get() = when {
+        isSpanish -> "Cliente"
+        isCatalan -> "Client"
+        else -> "Client"
+    }
+
+    val chatUnreadMessage: String get() = when {
+        isSpanish -> "Mensaje sin leer"
+        isCatalan -> "Missatge sense llegir"
+        else -> "Unread message"
+    }
+
+    // ==========================================
+    // CLIENT ALARM PANEL
+    // ==========================================
+    val yourAlarmTitle: String get() = when {
+        isSpanish -> "Tu alarma"
+        isCatalan -> "La teva alarma"
+        else -> "Your alarm"
+    }
+
+    val remindMeLabel: String get() = when {
+        isSpanish -> "Avisarme"
+        isCatalan -> "Avisa'm"
+        else -> "Remind me"
+    }
+
+    val beforeLabel: String get() = when {
+        isSpanish -> "antes"
+        isCatalan -> "abans"
+        else -> "before"
+    }
+
+    val noAlarmForThisPayment: String get() = when {
+        isSpanish -> "No recibirás avisos de este pago."
+        isCatalan -> "No rebràs avisos d'aquest pagament."
+        else -> "You won't receive alerts for this payment."
+    }
+
+    // ==========================================
+    // MESSAGES PANEL (client) & LEAVE GROUP
+    // ==========================================
+    val messagesWithManagerTitle: String get() = when {
+        isSpanish -> "Mensajes con el gestor"
+        isCatalan -> "Missatges amb el gestor"
+        else -> "Messages with the manager"
+    }
+
+    val chatManagerName: String get() = when {
+        isSpanish -> "El gestor"
+        isCatalan -> "El gestor"
+        else -> "The manager"
+    }
+
+    val tapToOpenConversation: String get() = when {
+        isSpanish -> "Toca para abrir la conversación"
+        isCatalan -> "Toca per obrir la conversa"
+        else -> "Tap to open the conversation"
+    }
+
+    val youHaveNewMessage: String get() = when {
+        isSpanish -> "Tienes un mensaje nuevo"
+        isCatalan -> "Tens un missatge nou"
+        else -> "You have a new message"
+    }
+
+    val leaveThisGroup: String get() = when {
+        isSpanish -> "Salir de este grupo"
+        isCatalan -> "Sortir d'aquest grup"
+        else -> "Leave this group"
+    }
+
+    fun leaveGroupConfirmTitle(groupName: String): String = when {
+        isSpanish -> "¿Salir de $groupName?"
+        isCatalan -> "Vols sortir de $groupName?"
+        else -> "Leave $groupName?"
+    }
+
+    val leaveGroupConfirmMsg: String get() = when {
+        isSpanish -> "Dejarás de participar en este grupo."
+        isCatalan -> "Deixaràs de participar en aquest grup."
+        else -> "You will stop participating in this group."
+    }
+
+    val leaveButtonLabel: String get() = when {
+        isSpanish -> "Salir"
+        isCatalan -> "Sortir"
+        else -> "Leave"
+    }
+
+    val couldNotLeaveGroup: String get() = when {
+        isSpanish -> "No se pudo salir del grupo."
+        isCatalan -> "No s'ha pogut sortir del grup."
+        else -> "Could not leave the group."
+    }
+
+    // ==========================================
+    // DEBT PANEL (member edit dialog)
+    // ==========================================
+    val debtPanelOneCycle: String get() = when {
+        isSpanish -> "Debe 1 cuota"
+        isCatalan -> "Deu 1 quota"
+        else -> "Owes 1 installment"
+    }
+
+    fun debtPanelMultipleCycles(count: Int): String = when {
+        isSpanish -> "Debe $count cuotas"
+        isCatalan -> "Deu $count quotes"
+        else -> "Owes $count installments"
+    }
+
+    fun debtPanelSinceDate(date: String): String = when {
+        isSpanish -> "Desde el $date"
+        isCatalan -> "Des del $date"
+        else -> "Since $date"
+    }
+
+    val debtPanelInstruction: String get() = when {
+        isSpanish -> "Apaga el interruptor cuando te haya pagado: la deuda se saldará por completo."
+        isCatalan -> "Apaga l'interruptor quan t'hagi pagat: el deute es liquidarà per complet."
+        else -> "Turn off the switch once they've paid you: the debt will be fully settled."
+    }
+
+    // ==========================================
+    // SUBSCRIPTION CARD: unpaid cycles badge
+    // ==========================================
+    val oneCyclePendingBadge: String get() = when {
+        isSpanish -> "1 cuota pendiente"
+        isCatalan -> "1 quota pendent"
+        else -> "1 payment pending"
+    }
+
+    fun cyclesPendingBadge(count: Int): String = when {
+        isSpanish -> "$count cuotas pendientes"
+        isCatalan -> "$count quotes pendents"
+        else -> "$count payments pending"
+    }
+
+    // ==========================================
+    // PASSWORD REQUIREMENTS
+    // ==========================================
+    val passwordMinChars: String get() = when {
+        isSpanish -> "Mínimo 6 caracteres"
+        isCatalan -> "Mínim 6 caràcters"
+        else -> "Minimum 6 characters"
+    }
+
+    val passwordTooShortWarning: String get() = when {
+        isSpanish -> "Demasiado corta: mínimo 6 caracteres"
+        isCatalan -> "Massa curta: mínim 6 caràcters"
+        else -> "Too short: minimum 6 characters"
+    }
 }

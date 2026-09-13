@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apleq.app.data.model.AppNotification
 import com.apleq.app.data.model.NotificationStatus
+import com.apleq.app.ui.util.I18n
 
 @Composable
 fun NotificationsDialog(
@@ -65,7 +66,7 @@ fun NotificationsDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Notificaciones",
+                        text = I18n.notificationsTitle,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -82,7 +83,7 @@ fun NotificationsDialog(
                                 modifier = Modifier.testTag("btn_mark_all_read")
                             ) {
                                 Text(
-                                    text = "Marcar leídas",
+                                    text = I18n.markAllRead,
                                     style = MaterialTheme.typography.labelSmall
                                 )
                             }
@@ -92,7 +93,7 @@ fun NotificationsDialog(
                             modifier = Modifier.testTag("btn_dismiss_all_notifications")
                         ) {
                             Text(
-                                text = "Borrar todas",
+                                text = I18n.deleteAllNotifications,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -120,7 +121,7 @@ fun NotificationsDialog(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "No tienes avisos pendientes.",
+                        text = I18n.noNotificationsPending,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -148,7 +149,7 @@ fun NotificationsDialog(
                 onClick = onDismiss,
                 modifier = Modifier.testTag("btn_close_notifications")
             ) {
-                Text("Cerrar")
+                Text(I18n.close)
             }
         }
     )
@@ -267,7 +268,7 @@ private fun NotificationItemRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Descartar aviso",
+                    contentDescription = I18n.dismissNotification,
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
@@ -288,7 +289,7 @@ private fun NotificationItemRow(
             ) {
                 Icon(
                     imageVector = if (notif.isRead) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    contentDescription = if (notif.isRead) "Marcar como no leída" else "Marcar como leída",
+                    contentDescription = if (notif.isRead) I18n.markAsUnread else I18n.markAsRead,
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )

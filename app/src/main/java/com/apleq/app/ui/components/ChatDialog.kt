@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.apleq.app.data.model.ChatMessage
+import com.apleq.app.ui.util.I18n
 
 @Composable
 fun ChatDialog(
@@ -55,7 +56,7 @@ fun ChatDialog(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (onBack != null) {
                             IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver a la lista")
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = I18n.chatBackToList)
                             }
                             Spacer(modifier = Modifier.width(4.dp))
                         }
@@ -65,7 +66,7 @@ fun ChatDialog(
                         }
                     }
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Cerrar")
+                        Icon(Icons.Default.Close, contentDescription = I18n.close)
                     }
                 }
                 HorizontalDivider()
@@ -82,7 +83,7 @@ fun ChatDialog(
                     if (messages.isEmpty()) {
                         item {
                             Text(
-                                "Aún no hay mensajes. Escribe el primero.",
+                                I18n.chatNoMessagesYet,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
@@ -125,7 +126,7 @@ fun ChatDialog(
                         value = text,
                         onValueChange = { text = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { Text("Escribe un mensaje...") },
+                        placeholder = { Text(I18n.chatMessagePlaceholder) },
                         shape = RoundedCornerShape(20.dp),
                         maxLines = 4
                     )
@@ -139,7 +140,7 @@ fun ChatDialog(
                             }
                         }
                     ) {
-                        Icon(Icons.Default.Send, contentDescription = "Enviar")
+                        Icon(Icons.Default.Send, contentDescription = I18n.chatSend)
                     }
                 }
             }
