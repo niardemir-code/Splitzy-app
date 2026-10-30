@@ -1808,4 +1808,321 @@ object I18n {
         isCatalan -> "Crear Subscripció"
         else -> "Create Subscription"
     }
+
+    // ==========================================
+    // ADD / EDIT SUBSCRIPTION DIALOG: alarm, sharing platforms, icon picker
+    // ==========================================
+    val subscriptionAlarmTitle: String get() = when {
+        isSpanish -> "Alarma de cobro de suscripción"
+        isCatalan -> "Alarma de cobrament de la subscripció"
+        else -> "Subscription billing alarm"
+    }
+
+    val subscriptionAlarmSubtitle: String get() = when {
+        isSpanish -> "Notificación antes de la fecha de cobro"
+        isCatalan -> "Notificació abans de la data de cobrament"
+        else -> "Notification before the billing date"
+    }
+
+    val subscriptionAlarmAmountHeader: String get() = when {
+        isSpanish -> "CANTIDAD"
+        isCatalan -> "QUANTITAT"
+        else -> "AMOUNT"
+    }
+
+    val subscriptionAlarmUnitHeader: String get() = when {
+        isSpanish -> "UNIDAD DE ANTELACIÓN"
+        isCatalan -> "UNITAT D'ANTELACIÓ"
+        else -> "LEAD TIME UNIT"
+    }
+
+    fun subscriptionAlarmUnitLabel(unitKey: String): String = when (unitKey.lowercase()) {
+        "same_day", "mismo_dia" -> when {
+            isSpanish -> "El mismo día"
+            isCatalan -> "El mateix dia"
+            else -> "Same day"
+        }
+        "hours", "horas" -> when {
+            isSpanish -> "Hora(s) antes"
+            isCatalan -> "Hora/es abans"
+            else -> "Hour(s) before"
+        }
+        "weeks", "semanas" -> when {
+            isSpanish -> "Semana(s) antes"
+            isCatalan -> "Setmana/es abans"
+            else -> "Week(s) before"
+        }
+        "months", "meses" -> when {
+            isSpanish -> "Mes(es) antes"
+            isCatalan -> "Mes/os abans"
+            else -> "Month(s) before"
+        }
+        else -> when {
+            isSpanish -> "Día(s) antes"
+            isCatalan -> "Dia/es abans"
+            else -> "Day(s) before"
+        }
+    }
+
+    val subscriptionAlarmSummarySameDay: String get() = when {
+        isSpanish -> "🔔 Avisar el mismo día del cobro"
+        isCatalan -> "🔔 Avisar el mateix dia del cobrament"
+        else -> "🔔 Notify on the billing day"
+    }
+
+    fun subscriptionAlarmSummaryLead(value: Int, unitLabelLowercase: String): String = when {
+        isSpanish -> "🔔 Avisar $value $unitLabelLowercase"
+        isCatalan -> "🔔 Avisar $value $unitLabelLowercase"
+        else -> "🔔 Notify $value $unitLabelLowercase"
+    }
+
+    val sharingPlatformsCardSubtitle: String get() = when {
+        isSpanish -> "Configura hasta 3 plataformas con su precio, divisa y periodicidad"
+        isCatalan -> "Configura fins a 3 plataformes amb el seu preu, divisa i periodicitat"
+        else -> "Set up to 3 platforms with their price, currency and billing period"
+    }
+
+    val addSharingPlatformButton: String get() = when {
+        isSpanish -> "Añadir plataforma de compartición"
+        isCatalan -> "Afegir plataforma de compartició"
+        else -> "Add sharing platform"
+    }
+
+    val noSharingPlatformsConfigured: String get() = when {
+        isSpanish -> "No has configurado plataformas de compartición aún. Pulsa el botón de arriba para añadir una plataforma con su precio, divisa y periodicidad."
+        isCatalan -> "Encara no has configurat cap plataforma de compartició. Prem el botó de dalt per afegir una plataforma amb el seu preu, divisa i periodicitat."
+        else -> "You haven't set up any sharing platforms yet. Tap the button above to add a platform with its price, currency and billing period."
+    }
+
+    val editPlatformIconDescription: String get() = when {
+        isSpanish -> "Editar plataforma"
+        isCatalan -> "Editar plataforma"
+        else -> "Edit platform"
+    }
+
+    val deletePlatformIconDescription: String get() = when {
+        isSpanish -> "Eliminar plataforma"
+        isCatalan -> "Eliminar plataforma"
+        else -> "Delete platform"
+    }
+
+    val sharingPlatformModalAddTitle: String get() = when {
+        isSpanish -> "Añadir Plataforma de Compartición"
+        isCatalan -> "Afegir plataforma de compartició"
+        else -> "Add Sharing Platform"
+    }
+
+    val sharingPlatformModalEditTitle: String get() = when {
+        isSpanish -> "Editar Plataforma de Compartición"
+        isCatalan -> "Editar plataforma de compartició"
+        else -> "Edit Sharing Platform"
+    }
+
+    val sharingPlatformFieldLabel: String get() = when {
+        isSpanish -> "Plataforma de compartición *"
+        isCatalan -> "Plataforma de compartició *"
+        else -> "Sharing platform *"
+    }
+
+    val sharingPlatformNamePlaceholder: String get() = when {
+        isSpanish -> "Nombre de la plataforma..."
+        isCatalan -> "Nom de la plataforma..."
+        else -> "Platform name..."
+    }
+
+    val sharingPlatformListButton: String get() = when {
+        isSpanish -> "Lista"
+        isCatalan -> "Llista"
+        else -> "List"
+    }
+
+    val sharingPlatformSelectPlaceholder: String get() = when {
+        isSpanish -> "Seleccionar plataforma..."
+        isCatalan -> "Selecciona una plataforma..."
+        else -> "Select platform..."
+    }
+
+    val sharingPlatformOtherCustom: String get() = when {
+        isSpanish -> "+ Otra personalizada..."
+        isCatalan -> "+ Una altra de personalitzada..."
+        else -> "+ Other (custom)..."
+    }
+
+    val sharingPlatformPricePerSlot: String get() = when {
+        isSpanish -> "Precio / slot *"
+        isCatalan -> "Preu / slot *"
+        else -> "Price / slot *"
+    }
+
+    val sharingPlatformCurrencyRequired: String get() = when {
+        isSpanish -> "Moneda *"
+        isCatalan -> "Moneda *"
+        else -> "Currency *"
+    }
+
+    val sharingPlatformPaymentFrequency: String get() = when {
+        isSpanish -> "Frecuencia de pago de la plataforma *"
+        isCatalan -> "Freqüència de pagament de la plataforma *"
+        else -> "Platform payment frequency *"
+    }
+
+    val sharingPlatformDefaultMethodLabel: String get() = when {
+        isSpanish -> "Método habitual por defecto (opcional)"
+        isCatalan -> "Mètode habitual per defecte (opcional)"
+        else -> "Usual payment method (optional)"
+    }
+
+    val sharingPlatformDefaultMethodPlaceholder: String get() = when {
+        isSpanish -> "Ej. Bizum, Sharesub Wallet, Joiin..."
+        isCatalan -> "Ex. Bizum, Sharesub Wallet, Joiin..."
+        else -> "E.g. Bizum, Sharesub Wallet, Joiin..."
+    }
+
+    val sharingPlatformFallbackName: String get() = when {
+        isSpanish -> "Plataforma"
+        isCatalan -> "Plataforma"
+        else -> "Platform"
+    }
+
+    fun sharingPlatformRateSummary(platformName: String, amount: String, symbol: String, suffix: String): String = when {
+        isSpanish -> "Tarifa: $platformName • $amount $symbol$suffix"
+        isCatalan -> "Tarifa: $platformName • $amount $symbol$suffix"
+        else -> "Rate: $platformName • $amount $symbol$suffix"
+    }
+
+    val sharingPlatformAddToListButton: String get() = when {
+        isSpanish -> "Añadir a la lista"
+        isCatalan -> "Afegir a la llista"
+        else -> "Add to list"
+    }
+
+    val sharingPlatformUpdateButton: String get() = when {
+        isSpanish -> "Actualizar"
+        isCatalan -> "Actualitzar"
+        else -> "Update"
+    }
+
+    val iconPickerTitle: String get() = when {
+        isSpanish -> "Elegir Icono para la Suscripción"
+        isCatalan -> "Triar una icona per a la subscripció"
+        else -> "Choose an Icon for the Subscription"
+    }
+
+    val iconPickerFallbackName: String get() = when {
+        isSpanish -> "Icono"
+        isCatalan -> "Icona"
+        else -> "Icon"
+    }
+
+    val iconPickerPreview: String get() = when {
+        isSpanish -> "Vista Previa"
+        isCatalan -> "Vista prèvia"
+        else -> "Preview"
+    }
+
+    val iconPickerGalleryPhoto: String get() = when {
+        isSpanish -> "Foto de la galería"
+        isCatalan -> "Foto de la galeria"
+        else -> "Gallery photo"
+    }
+
+    fun iconPickerSymbolPrefix(key: String): String = when {
+        isSpanish -> "Símbolo: $key"
+        isCatalan -> "Símbol: $key"
+        else -> "Symbol: $key"
+    }
+
+    val iconPickerLibraryTab: String get() = when {
+        isSpanish -> "Biblioteca de Iconos"
+        isCatalan -> "Biblioteca d'icones"
+        else -> "Icon Library"
+    }
+
+    val iconPickerGalleryTab: String get() = when {
+        isSpanish -> "Subir de la Galería"
+        isCatalan -> "Pujar de la galeria"
+        else -> "Upload from Gallery"
+    }
+
+    val iconPickerBackgroundColor: String get() = when {
+        isSpanish -> "Color de fondo"
+        isCatalan -> "Color de fons"
+        else -> "Background color"
+    }
+
+    val iconPickerSelectedDescription: String get() = when {
+        isSpanish -> "Seleccionado"
+        isCatalan -> "Seleccionat"
+        else -> "Selected"
+    }
+
+    val iconPickerSelectSymbol: String get() = when {
+        isSpanish -> "Seleccionar símbolo"
+        isCatalan -> "Selecciona un símbol"
+        else -> "Select symbol"
+    }
+
+    val iconPickerChange: String get() = when {
+        isSpanish -> "Cambiar"
+        isCatalan -> "Canviar"
+        else -> "Change"
+    }
+
+    val iconPickerRemoveImage: String get() = when {
+        isSpanish -> "Quitar imagen"
+        isCatalan -> "Treure la imatge"
+        else -> "Remove image"
+    }
+
+    val iconPickerChoosePhotoHint: String get() = when {
+        isSpanish -> "Elige una foto o logo desde tu dispositivo"
+        isCatalan -> "Tria una foto o un logo des del teu dispositiu"
+        else -> "Choose a photo or logo from your device"
+    }
+
+    val iconPickerSelectFromGallery: String get() = when {
+        isSpanish -> "Seleccionar de la galería"
+        isCatalan -> "Selecciona de la galeria"
+        else -> "Select from gallery"
+    }
+
+    val iconPickerApply: String get() = when {
+        isSpanish -> "Aplicar Icono"
+        isCatalan -> "Aplicar la icona"
+        else -> "Apply Icon"
+    }
+
+    /** Nombre mostrado de cada icono de la biblioteca. Si la clave no se conoce, se usa el texto original. */
+    fun getIconLabel(key: String, fallback: String): String = when (key.lowercase()) {
+        "movie" -> when { isSpanish -> "Películas"; isCatalan -> "Pel·lícules"; else -> "Movies" }
+        "tv" -> when { isSpanish -> "Series / TV"; isCatalan -> "Sèries / TV"; else -> "Series / TV" }
+        "videocam" -> when { isSpanish -> "Video"; isCatalan -> "Vídeo"; else -> "Video" }
+        "headphones" -> when { isSpanish -> "Música"; isCatalan -> "Música"; else -> "Music" }
+        "mic" -> when { isSpanish -> "Podcast / Audio"; isCatalan -> "Pòdcast / Àudio"; else -> "Podcast / Audio" }
+        "radio" -> "Radio"
+        "chat" -> when { isSpanish -> "Chat / IA"; isCatalan -> "Xat / IA"; else -> "Chat / AI" }
+        "auto_awesome" -> when { isSpanish -> "IA / Gemini"; isCatalan -> "IA / Gemini"; else -> "AI / Gemini" }
+        "code" -> when { isSpanish -> "Desarrollo"; isCatalan -> "Desenvolupament"; else -> "Development" }
+        "cloud" -> when { isSpanish -> "Nube / Almacenamiento"; isCatalan -> "Núvol / Emmagatzematge"; else -> "Cloud / Storage" }
+        "work" -> when { isSpanish -> "Trabajo"; isCatalan -> "Feina"; else -> "Work" }
+        "laptop" -> "Software"
+        "games" -> "Gaming"
+        "sports_esports" -> when { isSpanish -> "Consola"; isCatalan -> "Consola"; else -> "Console" }
+        "school" -> when { isSpanish -> "Educación"; isCatalan -> "Educació"; else -> "Education" }
+        "book" -> when { isSpanish -> "Libros / Lectura"; isCatalan -> "Llibres / Lectura"; else -> "Books / Reading" }
+        "fitness" -> when { isSpanish -> "Gimnasio / Deporte"; isCatalan -> "Gimnàs / Esport"; else -> "Gym / Sports" }
+        "soccer" -> when { isSpanish -> "Deportes"; isCatalan -> "Esports"; else -> "Sports" }
+        "shopping" -> when { isSpanish -> "Compras / Tienda"; isCatalan -> "Compres / Botiga"; else -> "Shopping / Store" }
+        "palette" -> when { isSpanish -> "Diseño"; isCatalan -> "Disseny"; else -> "Design" }
+        "newspaper" -> when { isSpanish -> "Noticias / Prensa"; isCatalan -> "Notícies / Premsa"; else -> "News / Press" }
+        "lock" -> when { isSpanish -> "Seguridad / VPN"; isCatalan -> "Seguretat / VPN"; else -> "Security / VPN" }
+        "key" -> when { isSpanish -> "Contraseñas / Vault"; isCatalan -> "Contrasenyes / Vault"; else -> "Passwords / Vault" }
+        "euro" -> when { isSpanish -> "Finanzas / Banco"; isCatalan -> "Finances / Banc"; else -> "Finance / Bank" }
+        "star" -> when { isSpanish -> "Favorito / Premium"; isCatalan -> "Preferit / Premium"; else -> "Favorite / Premium" }
+        "heart" -> when { isSpanish -> "Salud / Bienestar"; isCatalan -> "Salut / Benestar"; else -> "Health / Wellness" }
+        "subscriptions" -> when { isSpanish -> "Suscripción"; isCatalan -> "Subscripció"; else -> "Subscription" }
+        "widgets" -> when { isSpanish -> "Servicios"; isCatalan -> "Serveis"; else -> "Services" }
+        else -> fallback
+    }
 }
+

@@ -1,0 +1,766 @@
+# Prompt para AI Studio: Traducción (Batch 3B, castellano / catalán / inglés)
+
+Continúa en `AddEditSubscriptionDialog.kt` (aplica antes el Batch 3A). Cubre:
+- la **alarma de cobro** de la suscripción,
+- las **plataformas de compartición** (tarjeta, lista y ventana de añadir/editar),
+- el **selector de icono** (biblioteca, galería, colores),
+- los nombres de los iconos de la biblioteca (`IconLibrary`).
+
+Reglas:
+- Se reutilizan entradas existentes de `I18n.kt`: `cancel`, `platformsSectionTitle`, `currencyLabel`, `getBillingPeriodLabel(...)`, `getBillingPeriodSuffix(...)`.
+- Entradas nuevas con las tres ramas (`isSpanish`, `isCatalan`, `else` = inglés).
+- **No** se cambian los valores guardados: las claves de alarma (`same_day`, `hours`, `days`, `weeks`, `months`) y las claves de icono (`movie`, `tv`...) siguen igual. Solo cambia lo que se muestra.
+
+---
+
+## 1. `app/src/main/java/com/apleq/app/ui/util/I18n.kt`
+
+Añadir esta sección justo antes de la `}` final que cierra `object I18n` (después de la sección del Batch 3A):
+
+```kotlin
+    // ==========================================
+    // ADD / EDIT SUBSCRIPTION DIALOG: alarm, sharing platforms, icon picker
+    // ==========================================
+    val subscriptionAlarmTitle: String get() = when {
+        isSpanish -> "Alarma de cobro de suscripción"
+        isCatalan -> "Alarma de cobrament de la subscripció"
+        else -> "Subscription billing alarm"
+    }
+
+    val subscriptionAlarmSubtitle: String get() = when {
+        isSpanish -> "Notificación antes de la fecha de cobro"
+        isCatalan -> "Notificació abans de la data de cobrament"
+        else -> "Notification before the billing date"
+    }
+
+    val subscriptionAlarmAmountHeader: String get() = when {
+        isSpanish -> "CANTIDAD"
+        isCatalan -> "QUANTITAT"
+        else -> "AMOUNT"
+    }
+
+    val subscriptionAlarmUnitHeader: String get() = when {
+        isSpanish -> "UNIDAD DE ANTELACIÓN"
+        isCatalan -> "UNITAT D'ANTELACIÓ"
+        else -> "LEAD TIME UNIT"
+    }
+
+    fun subscriptionAlarmUnitLabel(unitKey: String): String = when (unitKey.lowercase()) {
+        "same_day", "mismo_dia" -> when {
+            isSpanish -> "El mismo día"
+            isCatalan -> "El mateix dia"
+            else -> "Same day"
+        }
+        "hours", "horas" -> when {
+            isSpanish -> "Hora(s) antes"
+            isCatalan -> "Hora/es abans"
+            else -> "Hour(s) before"
+        }
+        "weeks", "semanas" -> when {
+            isSpanish -> "Semana(s) antes"
+            isCatalan -> "Setmana/es abans"
+            else -> "Week(s) before"
+        }
+        "months", "meses" -> when {
+            isSpanish -> "Mes(es) antes"
+            isCatalan -> "Mes/os abans"
+            else -> "Month(s) before"
+        }
+        else -> when {
+            isSpanish -> "Día(s) antes"
+            isCatalan -> "Dia/es abans"
+            else -> "Day(s) before"
+        }
+    }
+
+    val subscriptionAlarmSummarySameDay: String get() = when {
+        isSpanish -> "🔔 Avisar el mismo día del cobro"
+        isCatalan -> "🔔 Avisar el mateix dia del cobrament"
+        else -> "🔔 Notify on the billing day"
+    }
+
+    fun subscriptionAlarmSummaryLead(value: Int, unitLabelLowercase: String): String = when {
+        isSpanish -> "🔔 Avisar $value $unitLabelLowercase"
+        isCatalan -> "🔔 Avisar $value $unitLabelLowercase"
+        else -> "🔔 Notify $value $unitLabelLowercase"
+    }
+
+    val sharingPlatformsCardSubtitle: String get() = when {
+        isSpanish -> "Configura hasta 3 plataformas con su precio, divisa y periodicidad"
+        isCatalan -> "Configura fins a 3 plataformes amb el seu preu, divisa i periodicitat"
+        else -> "Set up to 3 platforms with their price, currency and billing period"
+    }
+
+    val addSharingPlatformButton: String get() = when {
+        isSpanish -> "Añadir plataforma de compartición"
+        isCatalan -> "Afegir plataforma de compartició"
+        else -> "Add sharing platform"
+    }
+
+    val noSharingPlatformsConfigured: String get() = when {
+        isSpanish -> "No has configurado plataformas de compartición aún. Pulsa el botón de arriba para añadir una plataforma con su precio, divisa y periodicidad."
+        isCatalan -> "Encara no has configurat cap plataforma de compartició. Prem el botó de dalt per afegir una plataforma amb el seu preu, divisa i periodicitat."
+        else -> "You haven't set up any sharing platforms yet. Tap the button above to add a platform with its price, currency and billing period."
+    }
+
+    val editPlatformIconDescription: String get() = when {
+        isSpanish -> "Editar plataforma"
+        isCatalan -> "Editar plataforma"
+        else -> "Edit platform"
+    }
+
+    val deletePlatformIconDescription: String get() = when {
+        isSpanish -> "Eliminar plataforma"
+        isCatalan -> "Eliminar plataforma"
+        else -> "Delete platform"
+    }
+
+    val sharingPlatformModalAddTitle: String get() = when {
+        isSpanish -> "Añadir Plataforma de Compartición"
+        isCatalan -> "Afegir plataforma de compartició"
+        else -> "Add Sharing Platform"
+    }
+
+    val sharingPlatformModalEditTitle: String get() = when {
+        isSpanish -> "Editar Plataforma de Compartición"
+        isCatalan -> "Editar plataforma de compartició"
+        else -> "Edit Sharing Platform"
+    }
+
+    val sharingPlatformFieldLabel: String get() = when {
+        isSpanish -> "Plataforma de compartición *"
+        isCatalan -> "Plataforma de compartició *"
+        else -> "Sharing platform *"
+    }
+
+    val sharingPlatformNamePlaceholder: String get() = when {
+        isSpanish -> "Nombre de la plataforma..."
+        isCatalan -> "Nom de la plataforma..."
+        else -> "Platform name..."
+    }
+
+    val sharingPlatformListButton: String get() = when {
+        isSpanish -> "Lista"
+        isCatalan -> "Llista"
+        else -> "List"
+    }
+
+    val sharingPlatformSelectPlaceholder: String get() = when {
+        isSpanish -> "Seleccionar plataforma..."
+        isCatalan -> "Selecciona una plataforma..."
+        else -> "Select platform..."
+    }
+
+    val sharingPlatformOtherCustom: String get() = when {
+        isSpanish -> "+ Otra personalizada..."
+        isCatalan -> "+ Una altra de personalitzada..."
+        else -> "+ Other (custom)..."
+    }
+
+    val sharingPlatformPricePerSlot: String get() = when {
+        isSpanish -> "Precio / slot *"
+        isCatalan -> "Preu / slot *"
+        else -> "Price / slot *"
+    }
+
+    val sharingPlatformCurrencyRequired: String get() = when {
+        isSpanish -> "Moneda *"
+        isCatalan -> "Moneda *"
+        else -> "Currency *"
+    }
+
+    val sharingPlatformPaymentFrequency: String get() = when {
+        isSpanish -> "Frecuencia de pago de la plataforma *"
+        isCatalan -> "Freqüència de pagament de la plataforma *"
+        else -> "Platform payment frequency *"
+    }
+
+    val sharingPlatformDefaultMethodLabel: String get() = when {
+        isSpanish -> "Método habitual por defecto (opcional)"
+        isCatalan -> "Mètode habitual per defecte (opcional)"
+        else -> "Usual payment method (optional)"
+    }
+
+    val sharingPlatformDefaultMethodPlaceholder: String get() = when {
+        isSpanish -> "Ej. Bizum, Sharesub Wallet, Joiin..."
+        isCatalan -> "Ex. Bizum, Sharesub Wallet, Joiin..."
+        else -> "E.g. Bizum, Sharesub Wallet, Joiin..."
+    }
+
+    val sharingPlatformFallbackName: String get() = when {
+        isSpanish -> "Plataforma"
+        isCatalan -> "Plataforma"
+        else -> "Platform"
+    }
+
+    fun sharingPlatformRateSummary(platformName: String, amount: String, symbol: String, suffix: String): String = when {
+        isSpanish -> "Tarifa: $platformName • $amount $symbol$suffix"
+        isCatalan -> "Tarifa: $platformName • $amount $symbol$suffix"
+        else -> "Rate: $platformName • $amount $symbol$suffix"
+    }
+
+    val sharingPlatformAddToListButton: String get() = when {
+        isSpanish -> "Añadir a la lista"
+        isCatalan -> "Afegir a la llista"
+        else -> "Add to list"
+    }
+
+    val sharingPlatformUpdateButton: String get() = when {
+        isSpanish -> "Actualizar"
+        isCatalan -> "Actualitzar"
+        else -> "Update"
+    }
+
+    val iconPickerTitle: String get() = when {
+        isSpanish -> "Elegir Icono para la Suscripción"
+        isCatalan -> "Triar una icona per a la subscripció"
+        else -> "Choose an Icon for the Subscription"
+    }
+
+    val iconPickerFallbackName: String get() = when {
+        isSpanish -> "Icono"
+        isCatalan -> "Icona"
+        else -> "Icon"
+    }
+
+    val iconPickerPreview: String get() = when {
+        isSpanish -> "Vista Previa"
+        isCatalan -> "Vista prèvia"
+        else -> "Preview"
+    }
+
+    val iconPickerGalleryPhoto: String get() = when {
+        isSpanish -> "Foto de la galería"
+        isCatalan -> "Foto de la galeria"
+        else -> "Gallery photo"
+    }
+
+    fun iconPickerSymbolPrefix(key: String): String = when {
+        isSpanish -> "Símbolo: $key"
+        isCatalan -> "Símbol: $key"
+        else -> "Symbol: $key"
+    }
+
+    val iconPickerLibraryTab: String get() = when {
+        isSpanish -> "Biblioteca de Iconos"
+        isCatalan -> "Biblioteca d'icones"
+        else -> "Icon Library"
+    }
+
+    val iconPickerGalleryTab: String get() = when {
+        isSpanish -> "Subir de la Galería"
+        isCatalan -> "Pujar de la galeria"
+        else -> "Upload from Gallery"
+    }
+
+    val iconPickerBackgroundColor: String get() = when {
+        isSpanish -> "Color de fondo"
+        isCatalan -> "Color de fons"
+        else -> "Background color"
+    }
+
+    val iconPickerSelectedDescription: String get() = when {
+        isSpanish -> "Seleccionado"
+        isCatalan -> "Seleccionat"
+        else -> "Selected"
+    }
+
+    val iconPickerSelectSymbol: String get() = when {
+        isSpanish -> "Seleccionar símbolo"
+        isCatalan -> "Selecciona un símbol"
+        else -> "Select symbol"
+    }
+
+    val iconPickerChange: String get() = when {
+        isSpanish -> "Cambiar"
+        isCatalan -> "Canviar"
+        else -> "Change"
+    }
+
+    val iconPickerRemoveImage: String get() = when {
+        isSpanish -> "Quitar imagen"
+        isCatalan -> "Treure la imatge"
+        else -> "Remove image"
+    }
+
+    val iconPickerChoosePhotoHint: String get() = when {
+        isSpanish -> "Elige una foto o logo desde tu dispositivo"
+        isCatalan -> "Tria una foto o un logo des del teu dispositiu"
+        else -> "Choose a photo or logo from your device"
+    }
+
+    val iconPickerSelectFromGallery: String get() = when {
+        isSpanish -> "Seleccionar de la galería"
+        isCatalan -> "Selecciona de la galeria"
+        else -> "Select from gallery"
+    }
+
+    val iconPickerApply: String get() = when {
+        isSpanish -> "Aplicar Icono"
+        isCatalan -> "Aplicar la icona"
+        else -> "Apply Icon"
+    }
+
+    /** Nombre mostrado de cada icono de la biblioteca. Si la clave no se conoce, se usa el texto original. */
+    fun getIconLabel(key: String, fallback: String): String = when (key.lowercase()) {
+        "movie" -> when { isSpanish -> "Películas"; isCatalan -> "Pel·lícules"; else -> "Movies" }
+        "tv" -> when { isSpanish -> "Series / TV"; isCatalan -> "Sèries / TV"; else -> "Series / TV" }
+        "videocam" -> when { isSpanish -> "Video"; isCatalan -> "Vídeo"; else -> "Video" }
+        "headphones" -> when { isSpanish -> "Música"; isCatalan -> "Música"; else -> "Music" }
+        "mic" -> when { isSpanish -> "Podcast / Audio"; isCatalan -> "Pòdcast / Àudio"; else -> "Podcast / Audio" }
+        "radio" -> "Radio"
+        "chat" -> when { isSpanish -> "Chat / IA"; isCatalan -> "Xat / IA"; else -> "Chat / AI" }
+        "auto_awesome" -> when { isSpanish -> "IA / Gemini"; isCatalan -> "IA / Gemini"; else -> "AI / Gemini" }
+        "code" -> when { isSpanish -> "Desarrollo"; isCatalan -> "Desenvolupament"; else -> "Development" }
+        "cloud" -> when { isSpanish -> "Nube / Almacenamiento"; isCatalan -> "Núvol / Emmagatzematge"; else -> "Cloud / Storage" }
+        "work" -> when { isSpanish -> "Trabajo"; isCatalan -> "Feina"; else -> "Work" }
+        "laptop" -> "Software"
+        "games" -> "Gaming"
+        "sports_esports" -> when { isSpanish -> "Consola"; isCatalan -> "Consola"; else -> "Console" }
+        "school" -> when { isSpanish -> "Educación"; isCatalan -> "Educació"; else -> "Education" }
+        "book" -> when { isSpanish -> "Libros / Lectura"; isCatalan -> "Llibres / Lectura"; else -> "Books / Reading" }
+        "fitness" -> when { isSpanish -> "Gimnasio / Deporte"; isCatalan -> "Gimnàs / Esport"; else -> "Gym / Sports" }
+        "soccer" -> when { isSpanish -> "Deportes"; isCatalan -> "Esports"; else -> "Sports" }
+        "shopping" -> when { isSpanish -> "Compras / Tienda"; isCatalan -> "Compres / Botiga"; else -> "Shopping / Store" }
+        "palette" -> when { isSpanish -> "Diseño"; isCatalan -> "Disseny"; else -> "Design" }
+        "newspaper" -> when { isSpanish -> "Noticias / Prensa"; isCatalan -> "Notícies / Premsa"; else -> "News / Press" }
+        "lock" -> when { isSpanish -> "Seguridad / VPN"; isCatalan -> "Seguretat / VPN"; else -> "Security / VPN" }
+        "key" -> when { isSpanish -> "Contraseñas / Vault"; isCatalan -> "Contrasenyes / Vault"; else -> "Passwords / Vault" }
+        "euro" -> when { isSpanish -> "Finanzas / Banco"; isCatalan -> "Finances / Banc"; else -> "Finance / Bank" }
+        "star" -> when { isSpanish -> "Favorito / Premium"; isCatalan -> "Preferit / Premium"; else -> "Favorite / Premium" }
+        "heart" -> when { isSpanish -> "Salud / Bienestar"; isCatalan -> "Salut / Benestar"; else -> "Health / Wellness" }
+        "subscriptions" -> when { isSpanish -> "Suscripción"; isCatalan -> "Subscripció"; else -> "Subscription" }
+        "widgets" -> when { isSpanish -> "Servicios"; isCatalan -> "Serveis"; else -> "Services" }
+        else -> fallback
+    }
+```
+
+---
+
+## 2. `app/src/main/java/com/apleq/app/ui/components/AddEditSubscriptionDialog.kt`
+
+(El `import com.apleq.app.ui.util.I18n` ya se añadió en el Batch 3A.)
+
+### 2.1 Alarma de cobro
+
+```kotlin
+                                        text = "Alarma de cobro de suscripción",
+```
+→
+```kotlin
+                                        text = I18n.subscriptionAlarmTitle,
+```
+
+```kotlin
+                                        text = "Notificación antes de la fecha de cobro",
+```
+→
+```kotlin
+                                        text = I18n.subscriptionAlarmSubtitle,
+```
+
+```kotlin
+                                            text = "CANTIDAD",
+```
+→
+```kotlin
+                                            text = I18n.subscriptionAlarmAmountHeader,
+```
+
+```kotlin
+                                        text = "UNIDAD DE ANTELACIÓN",
+```
+→
+```kotlin
+                                        text = I18n.subscriptionAlarmUnitHeader,
+```
+
+Resumen de la alarma:
+```kotlin
+                                text = if (alarmUnit == "same_day") "🔔 Avisar el mismo día del cobro"
+                                else "🔔 Avisar $alarmValue ${getSubscriptionAlarmUnitLabel(alarmUnit).lowercase()}",
+```
+→
+```kotlin
+                                text = if (alarmUnit == "same_day") I18n.subscriptionAlarmSummarySameDay
+                                else I18n.subscriptionAlarmSummaryLead(alarmValue, getSubscriptionAlarmUnitLabel(alarmUnit).lowercase()),
+```
+
+Función auxiliar al final del fichero (la última del archivo): **sustituir su cuerpo entero** para que use `I18n`:
+```kotlin
+private fun getSubscriptionAlarmUnitLabel(unitKey: String): String {
+    return when (unitKey.lowercase()) {
+        "same_day", "mismo_dia" -> "El mismo día"
+        "hours", "horas" -> "Hora(s) antes"
+        "weeks", "semanas" -> "Semana(s) antes"
+        "months", "meses" -> "Mes(es) antes"
+        else -> "Día(s) antes"
+    }
+}
+```
+→
+```kotlin
+private fun getSubscriptionAlarmUnitLabel(unitKey: String): String {
+    return I18n.subscriptionAlarmUnitLabel(unitKey)
+}
+```
+
+### 2.2 Tarjeta de plataformas de compartición
+
+```kotlin
+                                        text = "Plataformas de compartición",
+```
+→
+```kotlin
+                                        text = I18n.platformsSectionTitle,
+```
+
+```kotlin
+                                        text = "Configura hasta 3 plataformas con su precio, divisa y periodicidad",
+```
+→
+```kotlin
+                                        text = I18n.sharingPlatformsCardSubtitle,
+```
+
+```kotlin
+                                Text("Añadir plataforma de compartición", fontWeight = FontWeight.SemiBold)
+```
+→
+```kotlin
+                                Text(I18n.addSharingPlatformButton, fontWeight = FontWeight.SemiBold)
+```
+
+```kotlin
+                                    text = "No has configurado plataformas de compartición aún. Pulsa el botón de arriba para añadir una plataforma con su precio, divisa y periodicidad.",
+```
+→
+```kotlin
+                                    text = I18n.noSharingPlatformsConfigured,
+```
+
+Precio mostrado en cada tarjeta de la lista (usa el sufijo traducido; el texto "/mes", "/año"... sale de `I18n`):
+```kotlin
+                                    "${String.format(Locale.getDefault(), "%.2f", numericP)} ${itemCurrency.symbol}${itemPeriod.suffix}"
+                                } else {
+                                    "0.00 ${itemCurrency.symbol}${itemPeriod.suffix}"
+                                }
+```
+→
+```kotlin
+                                    "${String.format(Locale.getDefault(), "%.2f", numericP)} ${itemCurrency.symbol}${I18n.getBillingPeriodSuffix(itemPeriod)}"
+                                } else {
+                                    "0.00 ${itemCurrency.symbol}${I18n.getBillingPeriodSuffix(itemPeriod)}"
+                                }
+```
+
+Iconos de editar y eliminar de cada plataforma:
+```kotlin
+                                                contentDescription = "Editar plataforma",
+```
+→
+```kotlin
+                                                contentDescription = I18n.editPlatformIconDescription,
+```
+
+```kotlin
+                                                contentDescription = "Eliminar plataforma",
+```
+→
+```kotlin
+                                                contentDescription = I18n.deletePlatformIconDescription,
+```
+
+### 2.3 Ventana de añadir / editar plataforma de compartición
+
+```kotlin
+                        text = if (isNew) "Añadir Plataforma de Compartición" else "Editar Plataforma de Compartición",
+```
+→
+```kotlin
+                        text = if (isNew) I18n.sharingPlatformModalAddTitle else I18n.sharingPlatformModalEditTitle,
+```
+
+```kotlin
+                            text = "Plataforma de compartición *",
+```
+→
+```kotlin
+                            text = I18n.sharingPlatformFieldLabel,
+```
+
+```kotlin
+                                    placeholder = { Text("Nombre de la plataforma...") },
+```
+→
+```kotlin
+                                    placeholder = { Text(I18n.sharingPlatformNamePlaceholder) },
+```
+
+```kotlin
+                                    Text("Lista")
+```
+→
+```kotlin
+                                    Text(I18n.sharingPlatformListButton)
+```
+
+```kotlin
+                                    value = editModalPlatformName.ifBlank { "Seleccionar plataforma..." },
+```
+→
+```kotlin
+                                    value = editModalPlatformName.ifBlank { I18n.sharingPlatformSelectPlaceholder },
+```
+
+```kotlin
+                                        text = { Text("+ Otra personalizada...") },
+```
+→
+```kotlin
+                                        text = { Text(I18n.sharingPlatformOtherCustom) },
+```
+
+```kotlin
+                                text = "Precio / slot *",
+```
+→
+```kotlin
+                                text = I18n.sharingPlatformPricePerSlot,
+```
+
+Sufijo del precio dentro del campo:
+```kotlin
+                                        text = editModalBillingPeriod.suffix,
+```
+→
+```kotlin
+                                        text = I18n.getBillingPeriodSuffix(editModalBillingPeriod),
+```
+
+```kotlin
+                                text = "Moneda *",
+```
+→
+```kotlin
+                                text = I18n.sharingPlatformCurrencyRequired,
+```
+
+```kotlin
+                            text = "Frecuencia de pago de la plataforma *",
+```
+→
+```kotlin
+                            text = I18n.sharingPlatformPaymentFrequency,
+```
+
+Desplegable de frecuencia de la plataforma:
+```kotlin
+                                value = editModalBillingPeriod.label,
+```
+→
+```kotlin
+                                value = I18n.getBillingPeriodLabel(editModalBillingPeriod),
+```
+
+```kotlin
+                                        text = { Text("${periodItem.label} (${periodItem.suffix})") },
+```
+→
+```kotlin
+                                        text = { Text("${I18n.getBillingPeriodLabel(periodItem)} (${I18n.getBillingPeriodSuffix(periodItem)})") },
+```
+
+```kotlin
+                        label = { Text("Método habitual por defecto (opcional)") },
+                        placeholder = { Text("Ej. Bizum, Sharesub Wallet, Joiin...") },
+```
+→
+```kotlin
+                        label = { Text(I18n.sharingPlatformDefaultMethodLabel) },
+                        placeholder = { Text(I18n.sharingPlatformDefaultMethodPlaceholder) },
+```
+
+Resumen de tarifa:
+```kotlin
+                                text = "Tarifa: ${editModalPlatformName.ifBlank { "Plataforma" }} • ${String.format(Locale.getDefault(), "%.2f", displayNum)} ${editModalCurrency.symbol}${editModalBillingPeriod.suffix}",
+```
+→
+```kotlin
+                                text = I18n.sharingPlatformRateSummary(
+                                    editModalPlatformName.ifBlank { I18n.sharingPlatformFallbackName },
+                                    String.format(Locale.getDefault(), "%.2f", displayNum),
+                                    editModalCurrency.symbol,
+                                    I18n.getBillingPeriodSuffix(editModalBillingPeriod)
+                                ),
+```
+
+Botones:
+```kotlin
+                    Text(if (isNew) "Añadir a la lista" else "Actualizar")
+```
+→
+```kotlin
+                    Text(if (isNew) I18n.sharingPlatformAddToListButton else I18n.sharingPlatformUpdateButton)
+```
+
+Botón "Cancelar" de esta ventana (el que está justo debajo de `modifier = Modifier.testTag("btn_cancel_modal_platform")`):
+```kotlin
+                    Text("Cancelar")
+```
+→
+```kotlin
+                    Text(I18n.cancel)
+```
+
+### 2.4 Selector de icono
+
+```kotlin
+                text = "Elegir Icono para la Suscripción",
+```
+→
+```kotlin
+                text = I18n.iconPickerTitle,
+```
+
+Nombre de respaldo del icono: aparece **dos veces** (vista previa y miniatura de la imagen). Sustituir **las dos**:
+```kotlin
+platformName = platformName.ifBlank { "Icono" },
+```
+→
+```kotlin
+platformName = platformName.ifBlank { I18n.iconPickerFallbackName },
+```
+
+```kotlin
+                                text = "Vista Previa",
+```
+→
+```kotlin
+                                text = I18n.iconPickerPreview,
+```
+
+```kotlin
+                                    "CUSTOM_IMAGE" -> "Foto de la galería"
+                                    else -> "Símbolo: $tempIconKey"
+```
+→
+```kotlin
+                                    "CUSTOM_IMAGE" -> I18n.iconPickerGalleryPhoto
+                                    else -> I18n.iconPickerSymbolPrefix(tempIconKey)
+```
+
+```kotlin
+                        text = { Text("Biblioteca de Iconos", fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
+```
+→
+```kotlin
+                        text = { Text(I18n.iconPickerLibraryTab, fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
+```
+
+```kotlin
+                        text = { Text("Subir de la Galería", fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
+```
+→
+```kotlin
+                        text = { Text(I18n.iconPickerGalleryTab, fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
+```
+
+```kotlin
+                            text = "Color de fondo",
+```
+→
+```kotlin
+                            text = I18n.iconPickerBackgroundColor,
+```
+
+```kotlin
+                                            contentDescription = "Seleccionado",
+```
+→
+```kotlin
+                                            contentDescription = I18n.iconPickerSelectedDescription,
+```
+
+```kotlin
+                            text = "Seleccionar símbolo",
+```
+→
+```kotlin
+                            text = I18n.iconPickerSelectSymbol,
+```
+
+Chips de la biblioteca (nombre traducido; la clave del icono no cambia):
+```kotlin
+                                    label = { Text(iconOption.label, fontSize = 11.sp) },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = iconOption.icon,
+                                            contentDescription = iconOption.label,
+```
+→
+```kotlin
+                                    label = { Text(I18n.getIconLabel(iconOption.key, iconOption.label), fontSize = 11.sp) },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = iconOption.icon,
+                                            contentDescription = I18n.getIconLabel(iconOption.key, iconOption.label),
+```
+
+Pestaña de galería:
+```kotlin
+                                            Text("Cambiar")
+```
+→
+```kotlin
+                                            Text(I18n.iconPickerChange)
+```
+
+```kotlin
+                                            Text("Quitar imagen", color = MaterialTheme.colorScheme.error)
+```
+→
+```kotlin
+                                            Text(I18n.iconPickerRemoveImage, color = MaterialTheme.colorScheme.error)
+```
+
+```kotlin
+                                    text = "Elige una foto o logo desde tu dispositivo",
+```
+→
+```kotlin
+                                    text = I18n.iconPickerChoosePhotoHint,
+```
+
+```kotlin
+                                    Text("Seleccionar de la galería")
+```
+→
+```kotlin
+                                    Text(I18n.iconPickerSelectFromGallery)
+```
+
+Botones del selector:
+```kotlin
+                Text("Aplicar Icono")
+```
+→
+```kotlin
+                Text(I18n.iconPickerApply)
+```
+
+Último "Cancelar" del fichero (el de `TextButton(onClick = onDismiss)` del selector de icono):
+```kotlin
+                Text("Cancelar")
+```
+→
+```kotlin
+                Text(I18n.cancel)
+```
+
+---
+
+## Comprobación final (para ti, al probar)
+Tras aplicar 3A y 3B no debería quedar ningún texto en castellano dentro de `AddEditSubscriptionDialog.kt` salvo estos datos, que no se tocan a propósito: `availableCategories`, `platformName = "Sharesub"` y la lista de respaldo `listOf("Sharesub", "Together Price", ...)` (nombres propios de servicios), y las claves internas de alarma e icono.
+
+Nota: los nombres de los colores de `IconLibrary.availableColors` ("Índigo", "Violeta"...) no se muestran en esta pantalla, así que no se tocan.

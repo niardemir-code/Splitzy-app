@@ -781,12 +781,12 @@ fun AddEditSubscriptionDialog(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
-                                        text = "Alarma de cobro de suscripción",
+                                        text = I18n.subscriptionAlarmTitle,
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "Notificación antes de la fecha de cobro",
+                                        text = I18n.subscriptionAlarmSubtitle,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -813,7 +813,7 @@ fun AddEditSubscriptionDialog(
                                 if (alarmUnit != "same_day") {
                                     Column(modifier = Modifier.weight(0.8f)) {
                                         Text(
-                                            text = "CANTIDAD",
+                                            text = I18n.subscriptionAlarmAmountHeader,
                                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -837,7 +837,7 @@ fun AddEditSubscriptionDialog(
 
                                 Column(modifier = Modifier.weight(1.2f)) {
                                     Text(
-                                        text = "UNIDAD DE ANTELACIÓN",
+                                        text = I18n.subscriptionAlarmUnitHeader,
                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -883,8 +883,8 @@ fun AddEditSubscriptionDialog(
 
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = if (alarmUnit == "same_day") "🔔 Avisar el mismo día del cobro"
-                                else "🔔 Avisar $alarmValue ${getSubscriptionAlarmUnitLabel(alarmUnit).lowercase()}",
+                                text = if (alarmUnit == "same_day") I18n.subscriptionAlarmSummarySameDay
+                                else I18n.subscriptionAlarmSummaryLead(alarmValue, getSubscriptionAlarmUnitLabel(alarmUnit).lowercase()),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -921,12 +921,12 @@ fun AddEditSubscriptionDialog(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
-                                        text = "Plataformas de compartición",
+                                        text = I18n.platformsSectionTitle,
                                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "Configura hasta 3 plataformas con su precio, divisa y periodicidad",
+                                        text = I18n.sharingPlatformsCardSubtitle,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -980,7 +980,7 @@ fun AddEditSubscriptionDialog(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Añadir plataforma de compartición", fontWeight = FontWeight.SemiBold)
+                                Text(I18n.addSharingPlatformButton, fontWeight = FontWeight.SemiBold)
                             }
                         }
 
@@ -994,7 +994,7 @@ fun AddEditSubscriptionDialog(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    text = "No has configurado plataformas de compartición aún. Pulsa el botón de arriba para añadir una plataforma con su precio, divisa y periodicidad.",
+                                    text = I18n.noSharingPlatformsConfigured,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(12.dp)
@@ -1007,9 +1007,9 @@ fun AddEditSubscriptionDialog(
                                 val itemPeriod = item.billingPeriod
                                 val formattedDisplayPrice = if (item.price.isNotBlank()) {
                                     val numericP = item.price.replace(',', '.').toDoubleOrNull() ?: 0.0
-                                    "${String.format(Locale.getDefault(), "%.2f", numericP)} ${itemCurrency.symbol}${itemPeriod.suffix}"
+                                    "${String.format(Locale.getDefault(), "%.2f", numericP)} ${itemCurrency.symbol}${I18n.getBillingPeriodSuffix(itemPeriod)}"
                                 } else {
-                                    "0.00 ${itemCurrency.symbol}${itemPeriod.suffix}"
+                                    "0.00 ${itemCurrency.symbol}${I18n.getBillingPeriodSuffix(itemPeriod)}"
                                 }
 
                                 Surface(
@@ -1087,7 +1087,7 @@ fun AddEditSubscriptionDialog(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Edit,
-                                                contentDescription = "Editar plataforma",
+                                                contentDescription = I18n.editPlatformIconDescription,
                                                 tint = MaterialTheme.colorScheme.primary
                                             )
                                         }
@@ -1101,7 +1101,7 @@ fun AddEditSubscriptionDialog(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Delete,
-                                                contentDescription = "Eliminar plataforma",
+                                                contentDescription = I18n.deletePlatformIconDescription,
                                                 tint = MaterialTheme.colorScheme.error
                                             )
                                         }
@@ -1305,7 +1305,7 @@ fun AddEditSubscriptionDialog(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isNew) "Añadir Plataforma de Compartición" else "Editar Plataforma de Compartición",
+                        text = if (isNew) I18n.sharingPlatformModalAddTitle else I18n.sharingPlatformModalEditTitle,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
@@ -1320,7 +1320,7 @@ fun AddEditSubscriptionDialog(
                     // 1. Selector de Nombre de Plataforma
                     Column {
                         Text(
-                            text = "Plataforma de compartición *",
+                            text = I18n.sharingPlatformFieldLabel,
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -1338,7 +1338,7 @@ fun AddEditSubscriptionDialog(
                                         editModalPlatformName = it
                                         editModalError = false
                                     },
-                                    placeholder = { Text("Nombre de la plataforma...") },
+                                    placeholder = { Text(I18n.sharingPlatformNamePlaceholder) },
                                     isError = editModalError && editModalPlatformName.isBlank(),
                                     modifier = Modifier
                                         .weight(1f)
@@ -1350,7 +1350,7 @@ fun AddEditSubscriptionDialog(
                                 TextButton(
                                     onClick = { editModalCustomPlatformInput = false }
                                 ) {
-                                    Text("Lista")
+                                    Text(I18n.sharingPlatformListButton)
                                 }
                             }
                         } else {
@@ -1359,7 +1359,7 @@ fun AddEditSubscriptionDialog(
                                 onExpandedChange = { editModalPlatformDropdownExpanded = it }
                             ) {
                                 OutlinedTextField(
-                                    value = editModalPlatformName.ifBlank { "Seleccionar plataforma..." },
+                                    value = editModalPlatformName.ifBlank { I18n.sharingPlatformSelectPlaceholder },
                                     onValueChange = {},
                                     readOnly = true,
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editModalPlatformDropdownExpanded) },
@@ -1395,7 +1395,7 @@ fun AddEditSubscriptionDialog(
                                     }
                                     HorizontalDivider()
                                     DropdownMenuItem(
-                                        text = { Text("+ Otra personalizada...") },
+                                        text = { Text(I18n.sharingPlatformOtherCustom) },
                                         leadingIcon = {
                                             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                                         },
@@ -1419,7 +1419,7 @@ fun AddEditSubscriptionDialog(
                     ) {
                         Column(modifier = Modifier.weight(0.50f)) {
                             Text(
-                                text = "Precio / slot *",
+                                text = I18n.sharingPlatformPricePerSlot,
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -1438,7 +1438,7 @@ fun AddEditSubscriptionDialog(
                                 },
                                 trailingIcon = {
                                     Text(
-                                        text = editModalBillingPeriod.suffix,
+                                        text = I18n.getBillingPeriodSuffix(editModalBillingPeriod),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(end = 12.dp)
@@ -1455,7 +1455,7 @@ fun AddEditSubscriptionDialog(
 
                         Column(modifier = Modifier.weight(0.50f)) {
                             Text(
-                                text = "Moneda *",
+                                text = I18n.sharingPlatformCurrencyRequired,
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -1508,7 +1508,7 @@ fun AddEditSubscriptionDialog(
                     // 4. Periodicidad de cobro / pago de la plataforma
                     Column {
                         Text(
-                            text = "Frecuencia de pago de la plataforma *",
+                            text = I18n.sharingPlatformPaymentFrequency,
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -1519,7 +1519,7 @@ fun AddEditSubscriptionDialog(
                             onExpandedChange = { editModalPeriodDropdownExpanded = it }
                         ) {
                             OutlinedTextField(
-                                value = editModalBillingPeriod.label,
+                                value = I18n.getBillingPeriodLabel(editModalBillingPeriod),
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editModalPeriodDropdownExpanded) },
@@ -1536,7 +1536,7 @@ fun AddEditSubscriptionDialog(
                             ) {
                                 BillingPeriod.entries.forEach { periodItem ->
                                     DropdownMenuItem(
-                                        text = { Text("${periodItem.label} (${periodItem.suffix})") },
+                                        text = { Text("${I18n.getBillingPeriodLabel(periodItem)} (${I18n.getBillingPeriodSuffix(periodItem)})") },
                                         onClick = {
                                             editModalBillingPeriod = periodItem
                                             editModalPeriodDropdownExpanded = false
@@ -1551,8 +1551,8 @@ fun AddEditSubscriptionDialog(
                     OutlinedTextField(
                         value = editModalDefaultMethod,
                         onValueChange = { editModalDefaultMethod = it },
-                        label = { Text("Método habitual por defecto (opcional)") },
-                        placeholder = { Text("Ej. Bizum, Sharesub Wallet, Joiin...") },
+                        label = { Text(I18n.sharingPlatformDefaultMethodLabel) },
+                        placeholder = { Text(I18n.sharingPlatformDefaultMethodPlaceholder) },
                         singleLine = false,
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth()
@@ -1577,7 +1577,12 @@ fun AddEditSubscriptionDialog(
                             Spacer(modifier = Modifier.width(8.dp))
                             val displayNum = editModalPriceText.replace(',', '.').toDoubleOrNull() ?: 0.0
                             Text(
-                                text = "Tarifa: ${editModalPlatformName.ifBlank { "Plataforma" }} • ${String.format(Locale.getDefault(), "%.2f", displayNum)} ${editModalCurrency.symbol}${editModalBillingPeriod.suffix}",
+                                text = I18n.sharingPlatformRateSummary(
+                                    editModalPlatformName.ifBlank { I18n.sharingPlatformFallbackName },
+                                    String.format(Locale.getDefault(), "%.2f", displayNum),
+                                    editModalCurrency.symbol,
+                                    I18n.getBillingPeriodSuffix(editModalBillingPeriod)
+                                ),
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
@@ -1616,7 +1621,7 @@ fun AddEditSubscriptionDialog(
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.testTag("btn_save_modal_platform")
                 ) {
-                    Text(if (isNew) "Añadir a la lista" else "Actualizar")
+                    Text(if (isNew) I18n.sharingPlatformAddToListButton else I18n.sharingPlatformUpdateButton)
                 }
             },
             dismissButton = {
@@ -1624,7 +1629,7 @@ fun AddEditSubscriptionDialog(
                     onClick = { editingPlatformIndex = null },
                     modifier = Modifier.testTag("btn_cancel_modal_platform")
                 ) {
-                    Text("Cancelar")
+                    Text(I18n.cancel)
                 }
             }
         )
@@ -1687,7 +1692,7 @@ private fun IconPickerDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Elegir Icono para la Suscripción",
+                text = I18n.iconPickerTitle,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
         },
@@ -1710,7 +1715,7 @@ private fun IconPickerDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         PlatformIconBadge(
-                            platformName = platformName.ifBlank { "Icono" },
+                            platformName = platformName.ifBlank { I18n.iconPickerFallbackName },
                             iconType = tempIconType,
                             iconKey = tempIconKey,
                             customImageUri = tempCustomImageUri,
@@ -1721,14 +1726,14 @@ private fun IconPickerDialog(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Vista Previa",
+                                text = I18n.iconPickerPreview,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
                                 text = when (tempIconType) {
-                                    "CUSTOM_IMAGE" -> "Foto de la galería"
-                                    else -> "Símbolo: $tempIconKey"
+                                    "CUSTOM_IMAGE" -> I18n.iconPickerGalleryPhoto
+                                    else -> I18n.iconPickerSymbolPrefix(tempIconKey)
                                 },
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                             )
@@ -1749,7 +1754,7 @@ private fun IconPickerDialog(
                             selectedTab = 0
                             tempIconType = "VECTOR"
                         },
-                        text = { Text("Biblioteca de Iconos", fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
+                        text = { Text(I18n.iconPickerLibraryTab, fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
                     )
                     Tab(
                         selected = selectedTab == 1,
@@ -1759,7 +1764,7 @@ private fun IconPickerDialog(
                                 tempIconType = "CUSTOM_IMAGE"
                             }
                         },
-                        text = { Text("Subir de la Galería", fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
+                        text = { Text(I18n.iconPickerGalleryTab, fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
                     )
                 }
 
@@ -1769,7 +1774,7 @@ private fun IconPickerDialog(
                     // TAB 0: Biblioteca de Iconos y Colores
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = "Color de fondo",
+                            text = I18n.iconPickerBackgroundColor,
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1804,7 +1809,7 @@ private fun IconPickerDialog(
                                     if (isColorSelected) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
-                                            contentDescription = "Seleccionado",
+                                            contentDescription = I18n.iconPickerSelectedDescription,
                                             tint = Color.White,
                                             modifier = Modifier.size(16.dp)
                                         )
@@ -1815,7 +1820,7 @@ private fun IconPickerDialog(
 
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Seleccionar símbolo",
+                            text = I18n.iconPickerSelectSymbol,
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1834,11 +1839,11 @@ private fun IconPickerDialog(
                                         tempIconKey = iconOption.key
                                         tempIconType = "VECTOR"
                                     },
-                                    label = { Text(iconOption.label, fontSize = 11.sp) },
+                                    label = { Text(I18n.getIconLabel(iconOption.key, iconOption.label), fontSize = 11.sp) },
                                     leadingIcon = {
                                         Icon(
                                             imageVector = iconOption.icon,
-                                            contentDescription = iconOption.label,
+                                            contentDescription = I18n.getIconLabel(iconOption.key, iconOption.label),
                                             modifier = Modifier.size(16.dp)
                                         )
                                     },
@@ -1872,7 +1877,7 @@ private fun IconPickerDialog(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     PlatformIconBadge(
-                                        platformName = platformName.ifBlank { "Icono" },
+                                        platformName = platformName.ifBlank { I18n.iconPickerFallbackName },
                                         iconType = "CUSTOM_IMAGE",
                                         customImageUri = tempCustomImageUri,
                                         size = 64.dp,
@@ -1889,7 +1894,7 @@ private fun IconPickerDialog(
                                         ) {
                                             Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
                                             Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Cambiar")
+                                            Text(I18n.iconPickerChange)
                                         }
 
                                         Spacer(modifier = Modifier.height(4.dp))
@@ -1903,7 +1908,7 @@ private fun IconPickerDialog(
                                         ) {
                                             Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(14.dp))
                                             Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Quitar imagen", color = MaterialTheme.colorScheme.error)
+                                            Text(I18n.iconPickerRemoveImage, color = MaterialTheme.colorScheme.error)
                                         }
                                     }
                                 }
@@ -1916,7 +1921,7 @@ private fun IconPickerDialog(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Elige una foto o logo desde tu dispositivo",
+                                    text = I18n.iconPickerChoosePhotoHint,
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
@@ -1927,7 +1932,7 @@ private fun IconPickerDialog(
                                 ) {
                                     Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Seleccionar de la galería")
+                                    Text(I18n.iconPickerSelectFromGallery)
                                 }
                             }
                         }
@@ -1943,24 +1948,18 @@ private fun IconPickerDialog(
                 },
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Aplicar Icono")
+                Text(I18n.iconPickerApply)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(I18n.cancel)
             }
         }
     )
 }
 
 private fun getSubscriptionAlarmUnitLabel(unitKey: String): String {
-    return when (unitKey.lowercase()) {
-        "same_day", "mismo_dia" -> "El mismo día"
-        "hours", "horas" -> "Hora(s) antes"
-        "weeks", "semanas" -> "Semana(s) antes"
-        "months", "meses" -> "Mes(es) antes"
-        else -> "Día(s) antes"
-    }
+    return I18n.subscriptionAlarmUnitLabel(unitKey)
 }
 
