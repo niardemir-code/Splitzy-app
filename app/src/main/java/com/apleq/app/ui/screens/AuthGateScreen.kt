@@ -56,6 +56,7 @@ import com.apleq.app.ui.components.EmailLoginDialog
 import com.apleq.app.ui.components.EmailRegisterDialog
 import com.apleq.app.ui.components.SplitzyLogo
 import com.apleq.app.ui.theme.Quicksand
+import com.apleq.app.ui.util.I18n
 import com.apleq.app.ui.viewmodel.SubscriptionViewModel
 
 @Composable
@@ -115,7 +116,7 @@ fun AuthGateScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Apleq",
+                    text = I18n.appName,
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontFamily = Quicksand,
                         fontWeight = FontWeight.Bold,
@@ -125,7 +126,7 @@ fun AuthGateScreen(
                 )
 
                 Text(
-                    text = "Control inteligente de suscripciones",
+                    text = I18n.appSubtitle,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -151,7 +152,7 @@ fun AuthGateScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Warning,
-                                    contentDescription = "Error",
+                                    contentDescription = I18n.authGateErrorIconDescription,
                                     tint = MaterialTheme.colorScheme.error,
                                     modifier = Modifier.size(22.dp)
                                 )
@@ -167,7 +168,7 @@ fun AuthGateScreen(
                                 onClick = { viewModel.clearAuthError() },
                                 modifier = Modifier.align(Alignment.End)
                             ) {
-                                Text("Aceptar", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                                Text(I18n.accept, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -194,7 +195,7 @@ fun AuthGateScreen(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Continuar con Google",
+                        text = I18n.continueWithGoogle,
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -208,7 +209,7 @@ fun AuthGateScreen(
                 ) {
                     HorizontalDivider(modifier = Modifier.weight(1f))
                     Text(
-                        text = "o con correo electrónico",
+                        text = I18n.orWithEmail,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 12.dp)
@@ -231,7 +232,7 @@ fun AuthGateScreen(
                         .testTag("btn_auth_gate_register_email"),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text("Registrarme con correo", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    Text(I18n.registerWithEmail, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -245,7 +246,7 @@ fun AuthGateScreen(
                     enabled = !isLoading,
                     modifier = Modifier.testTag("btn_auth_gate_login_email")
                 ) {
-                    Text("¿Ya tienes cuenta? Iniciar sesión con correo")
+                    Text(I18n.alreadyHaveAccountLoginWithEmail)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -261,13 +262,13 @@ fun AuthGateScreen(
                     ) {
                         BenefitRow(
                             icon = Icons.Default.Sync,
-                            title = "Sincronización en la Nube",
-                            subtitle = "Tus suscripciones y miembros seguros y accesibles en cualquier dispositivo."
+                            title = I18n.cloudSyncBenefitTitle,
+                            subtitle = I18n.cloudSyncBenefitSubtitle
                         )
                         BenefitRow(
                             icon = Icons.Default.Shield,
-                            title = "Privacidad y Control",
-                            subtitle = "Tus datos viajan encriptados y asociados únicamente a tu cuenta."
+                            title = I18n.privacyBenefitTitle,
+                            subtitle = I18n.privacyBenefitSubtitle
                         )
                     }
                 }

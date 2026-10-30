@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.apleq.app.ui.util.I18n
 
 @Composable
 fun JoinGroupDialog(
@@ -29,18 +30,18 @@ fun JoinGroupDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Unirse a un grupo") },
+        title = { Text(I18n.joinGroupDialogTitle) },
         text = {
             Column {
                 Text(
-                    "Introduce el código de invitación que te han compartido.",
+                    I18n.joinGroupDialogDescription,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = code,
                     onValueChange = { code = it.uppercase() },
-                    placeholder = { Text("Ej. 7K3-P9M") },
+                    placeholder = { Text(I18n.joinGroupCodePlaceholder) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -66,10 +67,10 @@ fun JoinGroupDialog(
                         if (ok) onDismiss()
                     }
                 }
-            ) { Text(if (loading) "Uniéndote..." else "Unirse") }
+            ) { Text(if (loading) I18n.joinGroupJoiningInProgress else I18n.joinGroupAction) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cerrar") }
+            TextButton(onClick = onDismiss) { Text(I18n.close) }
         }
     )
 }

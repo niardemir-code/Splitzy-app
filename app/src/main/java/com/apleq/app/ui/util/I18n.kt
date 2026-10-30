@@ -1417,4 +1417,85 @@ object I18n {
         isCatalan -> "Massa curta: mínim 6 caràcters"
         else -> "Too short: minimum 6 characters"
     }
+
+    // ==========================================
+    // AUTH GATE (login/register screen) & JOIN GROUP DIALOG
+    // ==========================================
+    val authGateErrorIconDescription: String get() = when {
+        isSpanish -> "Error"
+        isCatalan -> "Error"
+        else -> "Error"
+    }
+
+    val continueWithGoogle: String get() = when {
+        isSpanish -> "Continuar con Google"
+        isCatalan -> "Continua amb Google"
+        else -> "Continue with Google"
+    }
+
+    val registerWithEmail: String get() = when {
+        isSpanish -> "Registrarme con correo"
+        isCatalan -> "Registra'm amb correu"
+        else -> "Sign up with email"
+    }
+
+    val alreadyHaveAccountLoginWithEmail: String get() = when {
+        isSpanish -> "¿Ya tienes cuenta? Iniciar sesión con correo"
+        isCatalan -> "Ja tens compte? Inicia sessió amb correu"
+        else -> "Already have an account? Sign in with email"
+    }
+
+    val cloudSyncBenefitTitle: String get() = when {
+        isSpanish -> "Sincronización en la Nube"
+        isCatalan -> "Sincronització al núvol"
+        else -> "Cloud Sync"
+    }
+
+    val cloudSyncBenefitSubtitle: String get() = when {
+        isSpanish -> "Tus suscripciones y miembros seguros y accesibles en cualquier dispositivo."
+        isCatalan -> "Les teves subscripcions i membres, segurs i accessibles des de qualsevol dispositiu."
+        else -> "Your subscriptions and members, safe and accessible on any device."
+    }
+
+    val privacyBenefitTitle: String get() = when {
+        isSpanish -> "Privacidad y Control"
+        isCatalan -> "Privadesa i control"
+        else -> "Privacy & Control"
+    }
+
+    val privacyBenefitSubtitle: String get() = when {
+        isSpanish -> "Tus datos viajan encriptados y asociados únicamente a tu cuenta."
+        isCatalan -> "Les teves dades viatgen xifrades i associades únicament al teu compte."
+        else -> "Your data travels encrypted and is linked only to your account."
+    }
+
+    val joinGroupDialogTitle: String get() = when {
+        isSpanish -> "Unirse a un grupo"
+        isCatalan -> "Afegir-se a un grup"
+        else -> "Join a group"
+    }
+
+    val joinGroupDialogDescription: String get() = when {
+        isSpanish -> "Introduce el código de invitación que te han compartido."
+        isCatalan -> "Introdueix el codi d'invitació que t'han compartit."
+        else -> "Enter the invitation code that was shared with you."
+    }
+
+    val joinGroupCodePlaceholder: String get() = when {
+        isSpanish -> "Ej. 7K3-P9M"
+        isCatalan -> "Ex. 7K3-P9M"
+        else -> "E.g. 7K3-P9M"
+    }
+
+    val joinGroupJoiningInProgress: String get() = when {
+        isSpanish -> "Uniéndote..."
+        isCatalan -> "Afegint-te..."
+        else -> "Joining..."
+    }
+
+    val joinGroupAction: String get() = when {
+        isSpanish -> "Unirse"
+        isCatalan -> "Afegir-me"
+        else -> "Join"
+    }
 }
