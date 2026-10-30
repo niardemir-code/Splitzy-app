@@ -1498,4 +1498,103 @@ object I18n {
         isCatalan -> "Afegir-me"
         else -> "Join"
     }
+
+    // ==========================================
+    // APP MENU SHEET & SETTINGS (platforms section)
+    // ==========================================
+    val menuDefaultSubtitle: String get() = when {
+        isSpanish -> "Gestión de suscripciones compartidas"
+        isCatalan -> "Gestió de subscripcions compartides"
+        else -> "Shared subscription management"
+    }
+
+    val menuSettingsSubtitle: String get() = when {
+        isSpanish -> "Tema, apariencia y plataformas de compartición"
+        isCatalan -> "Tema, aparença i plataformes de compartició"
+        else -> "Theme, appearance and sharing platforms"
+    }
+
+    val menuBackupTitle: String get() = when {
+        isSpanish -> "Copia de Seguridad y Restauración"
+        isCatalan -> "Còpia de seguretat i restauració"
+        else -> "Backup & Restore"
+    }
+
+    val menuBackupSubtitle: String get() = when {
+        isSpanish -> "Exportar o importar tus suscripciones en formato JSON"
+        isCatalan -> "Exporta o importa les teves subscripcions en format JSON"
+        else -> "Export or import your subscriptions as JSON"
+    }
+
+    fun menuCloudSyncConnectedAs(email: String): String = when {
+        isSpanish -> "Conectado como $email"
+        isCatalan -> "Connectat com a $email"
+        else -> "Connected as $email"
+    }
+
+    val menuCloudSyncSignInPrompt: String get() = when {
+        isSpanish -> "Inicia sesión con Google para sincronizar"
+        isCatalan -> "Inicia la sessió amb Google per sincronitzar"
+        else -> "Sign in with Google to sync"
+    }
+
+    val menuFooterNote: String get() = when {
+        isSpanish -> "Apleq • Privacidad local y sincronización segura"
+        isCatalan -> "Apleq • Privadesa local i sincronització segura"
+        else -> "Apleq • Local privacy and secure sync"
+    }
+
+    val settingsPlatformsIntro: String get() = when {
+        isSpanish -> "Personaliza al 100% las plataformas que usas para compartir gastos. Modifica sus nombres, colores o añade nuevas."
+        isCatalan -> "Personalitza al 100% les plataformes que fas servir per compartir despeses. Modifica'n els noms, els colors o afegeix-ne de noves."
+        else -> "Fully customize the platforms you use to share costs. Edit their names and colors, or add new ones."
+    }
+
+    val settingsNoPlatformsTitle: String get() = when {
+        isSpanish -> "No hay plataformas creadas"
+        isCatalan -> "No hi ha plataformes creades"
+        else -> "No platforms created"
+    }
+
+    val settingsNoPlatformsDesc: String get() = when {
+        isSpanish -> "Puedes crear una plataforma personalizada o restaurar las 6 plataformas iniciales."
+        isCatalan -> "Pots crear una plataforma personalitzada o restaurar les 6 plataformes inicials."
+        else -> "You can create a custom platform or restore the 6 default platforms."
+    }
+
+    val settingsResetPlatformsButton: String get() = when {
+        isSpanish -> "Restablecer plataformas iniciales"
+        isCatalan -> "Restableix les plataformes inicials"
+        else -> "Reset default platforms"
+    }
+
+    val settingsAddCustomPlatform: String get() = when {
+        isSpanish -> "Añadir nueva plataforma personalizada"
+        isCatalan -> "Afegir una nova plataforma personalitzada"
+        else -> "Add new custom platform"
+    }
+
+    val settingsRestoreSixPlatforms: String get() = when {
+        isSpanish -> "Restaurar las 6 plataformas iniciales"
+        isCatalan -> "Restaurar les 6 plataformes inicials"
+        else -> "Restore the 6 default platforms"
+    }
+
+    fun platformPreviewPill(name: String): String = when {
+        isSpanish -> "Vista: $name"
+        isCatalan -> "Vista: $name"
+        else -> "Preview: $name"
+    }
+
+    fun editPlatformDescription(name: String): String = when {
+        isSpanish -> "Editar $name"
+        isCatalan -> "Editar $name"
+        else -> "Edit $name"
+    }
+
+    fun deletePlatformDescription(name: String): String = when {
+        isSpanish -> "Eliminar $name"
+        isCatalan -> "Eliminar $name"
+        else -> "Delete $name"
+    }
 }

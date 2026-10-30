@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apleq.app.ui.theme.Quicksand
+import com.apleq.app.ui.util.I18n
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +91,7 @@ fun AppMenuSheet(
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Apleq",
+                            text = I18n.appName,
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontFamily = Quicksand,
                                 fontWeight = FontWeight.Bold,
@@ -116,7 +117,7 @@ fun AppMenuSheet(
                         !userName.isNullOrBlank() && !userEmail.isNullOrBlank() -> "$userName · $userEmail"
                         !userName.isNullOrBlank() -> userName
                         !userEmail.isNullOrBlank() -> userEmail
-                        else -> "Gestión de suscripciones compartidas"
+                        else -> I18n.menuDefaultSubtitle
                     }
                     Text(
                         text = userLabel,
@@ -155,7 +156,7 @@ fun AppMenuSheet(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Configuración",
+                            contentDescription = I18n.settingsTitle,
                             tint = Color.White,
                             modifier = Modifier.size(24.dp)
                         )
@@ -165,12 +166,12 @@ fun AppMenuSheet(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Configuración",
+                            text = I18n.settingsTitle,
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            text = "Tema, apariencia y plataformas de compartición",
+                            text = I18n.menuSettingsSubtitle,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
@@ -190,8 +191,8 @@ fun AppMenuSheet(
             // Other Quick Actions
             AppMenuItemRow(
                 icon = Icons.Default.Backup,
-                title = "Copia de Seguridad y Restauración",
-                subtitle = "Exportar o importar tus suscripciones en formato JSON",
+                title = I18n.menuBackupTitle,
+                subtitle = I18n.menuBackupSubtitle,
                 iconTint = MaterialTheme.colorScheme.secondary,
                 iconBg = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
                 onClick = onOpenBackupRestore,
@@ -202,8 +203,8 @@ fun AppMenuSheet(
 
             AppMenuItemRow(
                 icon = Icons.Default.CloudSync,
-                title = "Sincronización en la Nube",
-                subtitle = if (!userEmail.isNullOrBlank()) "Conectado como $userEmail" else "Inicia sesión con Google para sincronizar",
+                title = I18n.cloudSyncTitle,
+                subtitle = if (!userEmail.isNullOrBlank()) I18n.menuCloudSyncConnectedAs(userEmail) else I18n.menuCloudSyncSignInPrompt,
                 iconTint = MaterialTheme.colorScheme.tertiary,
                 iconBg = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
                 onClick = onOpenCloudSync,
@@ -228,7 +229,7 @@ fun AppMenuSheet(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Apleq • Privacidad local y sincronización segura",
+                    text = I18n.menuFooterNote,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

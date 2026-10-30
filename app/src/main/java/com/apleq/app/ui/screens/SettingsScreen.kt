@@ -357,7 +357,7 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "Personaliza al 100% las plataformas que usas para compartir gastos. Modifica sus nombres, colores o añade nuevas.",
+                        text = I18n.settingsPlatformsIntro,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -380,13 +380,13 @@ fun SettingsScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "No hay plataformas creadas",
+                                text = I18n.settingsNoPlatformsTitle,
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Puedes crear una plataforma personalizada o restaurar las 6 plataformas iniciales.",
+                                text = I18n.settingsNoPlatformsDesc,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -397,7 +397,7 @@ fun SettingsScreen(
                             ) {
                                 Icon(Icons.Default.RestartAlt, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Restablecer plataformas iniciales")
+                                Text(I18n.settingsResetPlatformsButton)
                             }
                         }
                     }
@@ -428,7 +428,7 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Añadir nueva plataforma personalizada",
+                            text = I18n.settingsAddCustomPlatform,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -452,7 +452,7 @@ fun SettingsScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Restaurar las 6 plataformas iniciales")
+                            Text(I18n.settingsRestoreSixPlatforms)
                         }
                     }
                 }
@@ -604,7 +604,7 @@ private fun PlatformItemCard(
                     color = platformColor.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = "Vista: ${platform.name}",
+                        text = I18n.platformPreviewPill(platform.name),
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                         color = platformColor,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -621,7 +621,7 @@ private fun PlatformItemCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Editar ${platform.name}",
+                    contentDescription = I18n.editPlatformDescription(platform.name),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
@@ -636,7 +636,7 @@ private fun PlatformItemCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar ${platform.name}",
+                    contentDescription = I18n.deletePlatformDescription(platform.name),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(20.dp)
                 )
