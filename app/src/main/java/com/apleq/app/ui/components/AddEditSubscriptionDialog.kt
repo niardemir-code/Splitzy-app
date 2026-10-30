@@ -98,6 +98,7 @@ import com.apleq.app.data.model.IconLibrary
 import com.apleq.app.data.model.PlatformPriceItem
 import com.apleq.app.data.model.PlatformPricingHelper
 import com.apleq.app.data.model.SharingPlatforms
+import com.apleq.app.ui.util.I18n
 import com.apleq.app.ui.util.ImageStorageHelper
 import kotlinx.coroutines.delay
 import java.util.Locale
@@ -286,7 +287,7 @@ fun AddEditSubscriptionDialog(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (isEditing) "Editar Suscripción" else "Nueva Suscripción",
+                    text = if (isEditing) I18n.editSubscriptionDialogTitle else I18n.newSubscription,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
@@ -315,7 +316,7 @@ fun AddEditSubscriptionDialog(
                     ) {
                         Box(contentAlignment = Alignment.BottomEnd) {
                             PlatformIconBadge(
-                                platformName = platformName.ifBlank { "Suscripción" },
+                                platformName = platformName.ifBlank { I18n.subscriptionFallbackName },
                                 iconType = iconType,
                                 iconKey = iconKey,
                                 customImageUri = customImageUri,
@@ -333,7 +334,7 @@ fun AddEditSubscriptionDialog(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
-                                    contentDescription = "Cambiar icono",
+                                    contentDescription = I18n.changeIconDescription,
                                     tint = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.size(12.dp)
                                 )
@@ -344,13 +345,13 @@ fun AddEditSubscriptionDialog(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = platformName.ifBlank { "Nombre del servicio / suscripción" },
+                                text = platformName.ifBlank { I18n.subscriptionNameHeaderPlaceholder },
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = if (platformName.isNotBlank()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Toca aquí para personalizar icono o imagen",
+                                text = I18n.tapToCustomizeIcon,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -367,11 +368,11 @@ fun AddEditSubscriptionDialog(
                         platformName = it
                         platformNameError = it.isBlank()
                     },
-                    label = { Text("Nombre del servicio / suscripción *") },
-                    placeholder = { Text("Ej: Netflix, Spotify, ChatGPT, Gimnasio, Canal+...") },
+                    label = { Text(I18n.subscriptionNameFieldLabel) },
+                    placeholder = { Text(I18n.subscriptionNameFieldPlaceholder) },
                     isError = platformNameError,
                     supportingText = if (platformNameError) {
-                        { Text("El nombre del servicio es obligatorio") }
+                        { Text(I18n.subscriptionNameRequired) }
                     } else null,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -389,10 +390,10 @@ fun AddEditSubscriptionDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedTextField(
-                        value = category,
+                        value = I18n.getSubscriptionCategoryLabel(category),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Categoría de la suscripción *") },
+                        label = { Text(I18n.subscriptionCategoryFieldLabel) },
                         leadingIcon = { Icon(Icons.Default.Category, contentDescription = null) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryDropdownExpanded) },
                         modifier = Modifier
@@ -407,7 +408,7 @@ fun AddEditSubscriptionDialog(
                     ) {
                         availableCategories.forEach { catOption ->
                             DropdownMenuItem(
-                                text = { Text(catOption) },
+                                text = { Text(I18n.getSubscriptionCategoryLabel(catOption)) },
                                 onClick = {
                                     category = catOption
                                     categoryDropdownExpanded = false
@@ -426,11 +427,11 @@ fun AddEditSubscriptionDialog(
                         mainUserName = it
                         mainUserError = it.isBlank()
                     },
-                    label = { Text("Titular / Usuario Principal *") },
-                    placeholder = { Text("Ej: Carlos (Yo)") },
+                    label = { Text(I18n.mainUserFieldLabel) },
+                    placeholder = { Text(I18n.mainUserFieldPlaceholder) },
                     isError = mainUserError,
                     supportingText = if (mainUserError) {
-                        { Text("El titular es obligatorio") }
+                        { Text(I18n.mainUserRequired) }
                     } else null,
                     leadingIcon = {
                         Icon(Icons.Default.Person, contentDescription = null)
@@ -456,7 +457,7 @@ fun AddEditSubscriptionDialog(
                             costText = it
                             costError = it.replace(',', '.').toDoubleOrNull() == null
                         },
-                        label = { Text("Precio") },
+                        label = { Text(I18n.priceFieldLabelPlain) },
                         placeholder = { Text("0.00") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         isError = costError && costText.isNotBlank(),
@@ -478,7 +479,7 @@ fun AddEditSubscriptionDialog(
                             value = "${selectedCurrency.flag} ${selectedCurrency.code} (${selectedCurrency.symbol})",
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Moneda") },
+                            label = { Text(I18n.currencyLabel) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyDropdownExpanded)
                             },
@@ -541,13 +542,13 @@ fun AddEditSubscriptionDialog(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Conversión a Euros: ≈ ${CurrencyManager.formatInEur(costInEur)}",
+                                        text = I18n.conversionToEuros(CurrencyManager.formatInEur(costInEur)),
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
                                 }
                                 Text(
-                                    text = "Tipo de cambio: 1 ${selectedCurrency.code} ≈ ${String.format(Locale.getDefault(), "%.4f", CurrencyManager.getRateToEur(selectedCurrency.code))} €",
+                                    text = I18n.exchangeRateLine(selectedCurrency.code, String.format(Locale.getDefault(), "%.4f", CurrencyManager.getRateToEur(selectedCurrency.code))),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                                     modifier = Modifier.padding(start = 24.dp)
@@ -564,7 +565,7 @@ fun AddEditSubscriptionDialog(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Equivalente mensual: ≈ ${CurrencyManager.formatInEur(monthlyCostInEur)} / mes",
+                                        text = I18n.monthlyEquivalentLine(CurrencyManager.formatInEur(monthlyCostInEur)),
                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSecondaryContainer
                                     )
@@ -583,10 +584,10 @@ fun AddEditSubscriptionDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedTextField(
-                        value = billingPeriod.label,
+                        value = I18n.getBillingPeriodLabel(billingPeriod),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Frecuencia / Periodo de cobro *") },
+                        label = { Text(I18n.billingFrequencyFieldLabel) },
                         leadingIcon = { Icon(Icons.Default.Timelapse, contentDescription = null) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = billingPeriodDropdownExpanded) },
                         modifier = Modifier
@@ -608,7 +609,7 @@ fun AddEditSubscriptionDialog(
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Text(
-                                            text = periodOption.label,
+                                            text = I18n.getBillingPeriodLabel(periodOption),
                                             fontWeight = if (billingPeriod == periodOption) FontWeight.Bold else FontWeight.Normal
                                         )
                                         if (billingPeriod == periodOption) {
@@ -639,8 +640,8 @@ fun AddEditSubscriptionDialog(
                         onValueChange = {
                             billingDayText = it.filter { ch -> ch.isDigit() }.take(2)
                         },
-                        label = { Text("Día de cobro (1-31)") },
-                        placeholder = { Text("Día (1-31)") },
+                        label = { Text(I18n.billingDayFieldLabelMonthly) },
+                        placeholder = { Text(I18n.billingDayPlaceholderMonthly) },
                         leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier
@@ -661,8 +662,8 @@ fun AddEditSubscriptionDialog(
                             onValueChange = {
                                 billingDayText = it.filter { ch -> ch.isDigit() }.take(2)
                             },
-                            label = { Text("Día (1-31)") },
-                            placeholder = { Text("Día") },
+                            label = { Text(I18n.billingDayFieldLabelShort) },
+                            placeholder = { Text(I18n.billingDayPlaceholderShort) },
                             leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
@@ -679,20 +680,13 @@ fun AddEditSubscriptionDialog(
                             modifier = Modifier.weight(0.60f)
                         ) {
                             OutlinedTextField(
-                                value = if (billingMonth != null) BillingPeriod.getMonthName(billingMonth!!) else "",
+                                value = if (billingMonth != null) I18n.getMonthName(billingMonth!!) else "",
                                 onValueChange = {},
                                 readOnly = true,
                                 label = {
-                                    Text(
-                                        when (billingPeriod) {
-                                            BillingPeriod.YEARLY -> "Mes renovación"
-                                            BillingPeriod.SEMI_ANNUAL -> "Mes inicio"
-                                            BillingPeriod.QUARTERLY -> "Mes inicio"
-                                            else -> "Mes cobro"
-                                        }
-                                    )
+                                    Text(I18n.billingMonthFieldLabel(billingPeriod))
                                 },
-                                placeholder = { Text("Seleccionar mes") },
+                                placeholder = { Text(I18n.selectMonthPlaceholder) },
                                 trailingIcon = {
                                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = monthDropdownExpanded)
                                 },
@@ -710,7 +704,7 @@ fun AddEditSubscriptionDialog(
                             ) {
                                 BillingPeriod.months.forEach { monthItem ->
                                     DropdownMenuItem(
-                                        text = { Text("${monthItem.number}. ${monthItem.name}") },
+                                        text = { Text("${monthItem.number}. ${I18n.getMonthName(monthItem.number)}") },
                                         onClick = {
                                             billingMonth = monthItem.number
                                             monthDropdownExpanded = false
@@ -730,7 +724,7 @@ fun AddEditSubscriptionDialog(
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         ) {
                             Text(
-                                text = "📅 ${BillingPeriod.formatSchedule(currentDayVal, currentMonthVal, billingPeriod)}",
+                                text = "📅 ${I18n.formatSchedule(currentDayVal, currentMonthVal, billingPeriod)}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
@@ -745,7 +739,7 @@ fun AddEditSubscriptionDialog(
                 OutlinedTextField(
                     value = freeSlotsText,
                     onValueChange = { freeSlotsText = it.filter { ch -> ch.isDigit() }.take(3) },
-                    label = { Text("Huecos libres (plazas para otros)") },
+                    label = { Text(I18n.freeSlotsFieldLabel) },
                     placeholder = { Text("0") },
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -1124,8 +1118,8 @@ fun AddEditSubscriptionDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Notas adicionales (opcional)") },
-                    placeholder = { Text("Ej: Acceso de administrador, Bizum...") },
+                    label = { Text(I18n.optionalNotes) },
+                    placeholder = { Text(I18n.notesFieldPlaceholder) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("input_sub_notes"),
@@ -1150,7 +1144,7 @@ fun AddEditSubscriptionDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Eliminar Suscripción",
+                            contentDescription = I18n.deleteSubscriptionIconDescription,
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -1166,7 +1160,7 @@ fun AddEditSubscriptionDialog(
                         onClick = onDismiss,
                         modifier = Modifier.testTag("cancel_sub_btn")
                     ) {
-                        Text("Cancelar")
+                        Text(I18n.cancel)
                     }
 
                     val parsedCurrentCost = costText.replace(',', '.').toDoubleOrNull()
@@ -1253,7 +1247,7 @@ fun AddEditSubscriptionDialog(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(if (isEditing) "Guardar Cambios" else "Crear Suscripción")
+                        Text(if (isEditing) I18n.saveChangesButton else I18n.createSubscriptionButton)
                     }
                 }
             }
@@ -1266,9 +1260,9 @@ fun AddEditSubscriptionDialog(
     if (showConfirmDeleteDialog && subscriptionToEdit != null) {
         AlertDialog(
             onDismissRequest = { showConfirmDeleteDialog = false },
-            title = { Text("Eliminar Suscripción") },
+            title = { Text(I18n.deleteSubscriptionConfirmTitle) },
             text = {
-                Text("¿Estás seguro de que deseas eliminar la suscripción a \"${subscriptionToEdit.platformName}\"? Esta acción no se puede deshacer.")
+                Text(I18n.deleteSubscriptionConfirmMessage(subscriptionToEdit.platformName))
             },
             confirmButton = {
                 Button(
@@ -1279,12 +1273,12 @@ fun AddEditSubscriptionDialog(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Eliminar")
+                    Text(I18n.delete)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showConfirmDeleteDialog = false }) {
-                    Text("Cancelar")
+                    Text(I18n.cancel)
                 }
             }
         )

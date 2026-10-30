@@ -1597,4 +1597,215 @@ object I18n {
         isCatalan -> "Eliminar $name"
         else -> "Delete $name"
     }
+
+    // ==========================================
+    // ADD / EDIT SUBSCRIPTION DIALOG (main form)
+    // ==========================================
+    val editSubscriptionDialogTitle: String get() = when {
+        isSpanish -> "Editar Suscripción"
+        isCatalan -> "Editar Subscripció"
+        else -> "Edit Subscription"
+    }
+
+    val changeIconDescription: String get() = when {
+        isSpanish -> "Cambiar icono"
+        isCatalan -> "Canviar icona"
+        else -> "Change icon"
+    }
+
+    val subscriptionNameHeaderPlaceholder: String get() = when {
+        isSpanish -> "Nombre del servicio / suscripción"
+        isCatalan -> "Nom del servei / subscripció"
+        else -> "Service / subscription name"
+    }
+
+    val tapToCustomizeIcon: String get() = when {
+        isSpanish -> "Toca aquí para personalizar icono o imagen"
+        isCatalan -> "Toca aquí per personalitzar la icona o la imatge"
+        else -> "Tap here to customize icon or image"
+    }
+
+    val subscriptionNameFieldLabel: String get() = when {
+        isSpanish -> "Nombre del servicio / suscripción *"
+        isCatalan -> "Nom del servei / subscripció *"
+        else -> "Service / subscription name *"
+    }
+
+    val subscriptionNameFieldPlaceholder: String get() = when {
+        isSpanish -> "Ej: Netflix, Spotify, ChatGPT, Gimnasio, Canal+..."
+        isCatalan -> "Ex: Netflix, Spotify, ChatGPT, Gimnàs, Canal+..."
+        else -> "E.g. Netflix, Spotify, ChatGPT, Gym, Canal+..."
+    }
+
+    val subscriptionNameRequired: String get() = when {
+        isSpanish -> "El nombre del servicio es obligatorio"
+        isCatalan -> "El nom del servei és obligatori"
+        else -> "The service name is required"
+    }
+
+    val subscriptionCategoryFieldLabel: String get() = when {
+        isSpanish -> "Categoría de la suscripción *"
+        isCatalan -> "Categoria de la subscripció *"
+        else -> "Subscription category *"
+    }
+
+    fun getSubscriptionCategoryLabel(category: String): String = when (category) {
+        "Streaming" -> "Streaming"
+        "Música" -> when {
+            isSpanish -> "Música"
+            isCatalan -> "Música"
+            else -> "Music"
+        }
+        "Productividad" -> when {
+            isSpanish -> "Productividad"
+            isCatalan -> "Productivitat"
+            else -> "Productivity"
+        }
+        "Gaming" -> when {
+            isSpanish -> "Gaming"
+            isCatalan -> "Jocs"
+            else -> "Gaming"
+        }
+        "Educación" -> when {
+            isSpanish -> "Educación"
+            isCatalan -> "Educació"
+            else -> "Education"
+        }
+        "Salud" -> when {
+            isSpanish -> "Salud"
+            isCatalan -> "Salut"
+            else -> "Health"
+        }
+        "Estilo de vida" -> when {
+            isSpanish -> "Estilo de vida"
+            isCatalan -> "Estil de vida"
+            else -> "Lifestyle"
+        }
+        "Seguridad" -> when {
+            isSpanish -> "Seguridad"
+            isCatalan -> "Seguretat"
+            else -> "Security"
+        }
+        "Finanzas" -> when {
+            isSpanish -> "Finanzas"
+            isCatalan -> "Finances"
+            else -> "Finance"
+        }
+        "General" -> "General"
+        else -> category
+    }
+
+    val mainUserFieldLabel: String get() = when {
+        isSpanish -> "Titular / Usuario Principal *"
+        isCatalan -> "Titular / Usuari Principal *"
+        else -> "Account Holder / Main User *"
+    }
+
+    val mainUserFieldPlaceholder: String get() = when {
+        isSpanish -> "Ej: Carlos (Yo)"
+        isCatalan -> "Ex: Carles (Jo)"
+        else -> "E.g. Charlie (Me)"
+    }
+
+    val mainUserRequired: String get() = when {
+        isSpanish -> "El titular es obligatorio"
+        isCatalan -> "El titular és obligatori"
+        else -> "The account holder is required"
+    }
+
+    val priceFieldLabelPlain: String get() = when {
+        isSpanish -> "Precio"
+        isCatalan -> "Preu"
+        else -> "Price"
+    }
+
+    fun conversionToEuros(amount: String): String = when {
+        isSpanish -> "Conversión a Euros: ≈ $amount"
+        isCatalan -> "Conversió a Euros: ≈ $amount"
+        else -> "Conversion to Euros: ≈ $amount"
+    }
+
+    fun exchangeRateLine(currencyCode: String, rate: String): String = when {
+        isSpanish -> "Tipo de cambio: 1 $currencyCode ≈ $rate €"
+        isCatalan -> "Tipus de canvi: 1 $currencyCode ≈ $rate €"
+        else -> "Exchange rate: 1 $currencyCode ≈ $rate €"
+    }
+
+    fun monthlyEquivalentLine(monthlyAmount: String): String = when {
+        isSpanish -> "Equivalente mensual: ≈ $monthlyAmount / mes"
+        isCatalan -> "Equivalent mensual: ≈ $monthlyAmount / mes"
+        else -> "Monthly equivalent: ≈ $monthlyAmount / month"
+    }
+
+    val billingFrequencyFieldLabel: String get() = when {
+        isSpanish -> "Frecuencia / Periodo de cobro *"
+        isCatalan -> "Freqüència / Període de cobrament *"
+        else -> "Billing frequency / period *"
+    }
+
+    val billingDayFieldLabelMonthly: String get() = when {
+        isSpanish -> "Día de cobro (1-31)"
+        isCatalan -> "Dia de cobrament (1-31)"
+        else -> "Billing day (1-31)"
+    }
+
+    val billingDayPlaceholderMonthly: String get() = when {
+        isSpanish -> "Día (1-31)"
+        isCatalan -> "Dia (1-31)"
+        else -> "Day (1-31)"
+    }
+
+    val billingDayFieldLabelShort: String get() = when {
+        isSpanish -> "Día (1-31)"
+        isCatalan -> "Dia (1-31)"
+        else -> "Day (1-31)"
+    }
+
+    val billingDayPlaceholderShort: String get() = when {
+        isSpanish -> "Día"
+        isCatalan -> "Dia"
+        else -> "Day"
+    }
+
+    fun billingMonthFieldLabel(period: BillingPeriod): String = when {
+        isSpanish -> "Mes de cobro (${period.label.lowercase()})"
+        isCatalan -> "Mes de cobrament (${getBillingPeriodLabel(period).lowercase()})"
+        else -> "Billing month (${getBillingPeriodLabel(period).lowercase()})"
+    }
+
+    val selectMonthPlaceholder: String get() = when {
+        isSpanish -> "Seleccionar mes"
+        isCatalan -> "Seleccionar mes"
+        else -> "Select month"
+    }
+
+    val freeSlotsFieldLabel: String get() = when {
+        isSpanish -> "Huecos libres (plazas para otros)"
+        isCatalan -> "Llocs lliures (places per a altres)"
+        else -> "Free slots (seats for others)"
+    }
+
+    val notesFieldPlaceholder: String get() = when {
+        isSpanish -> "Ej: Acceso de administrador, Bizum..."
+        isCatalan -> "Ex: Accés d'administrador, Bizum..."
+        else -> "E.g. Admin access, Bizum..."
+    }
+
+    val deleteSubscriptionIconDescription: String get() = when {
+        isSpanish -> "Eliminar Suscripción"
+        isCatalan -> "Eliminar Subscripció"
+        else -> "Delete Subscription"
+    }
+
+    val saveChangesButton: String get() = when {
+        isSpanish -> "Guardar Cambios"
+        isCatalan -> "Desar Canvis"
+        else -> "Save Changes"
+    }
+
+    val createSubscriptionButton: String get() = when {
+        isSpanish -> "Crear Suscripción"
+        isCatalan -> "Crear Subscripció"
+        else -> "Create Subscription"
+    }
 }
