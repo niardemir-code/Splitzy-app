@@ -2577,6 +2577,145 @@ object I18n {
         isCatalan -> "Restaurar ara"
         else -> "Restore now"
     }
+
+    // ==========================================
+    // BATCH 6: RESTORE MODE, REMINDER DIALOG, EMAIL AUTH DIALOGS, SUBSCRIPTION CARD
+    // ==========================================
+    val restoreHowToApply: String get() = when {
+        isSpanish -> "¿Cómo deseas aplicar la restauración?"
+        isCatalan -> "Com vols aplicar la restauració?"
+        else -> "How do you want to apply the restore?"
+    }
+
+    fun reminderMessageReadyFor(memberName: String): String = when {
+        isSpanish -> "Mensaje listo para enviar a $memberName:"
+        isCatalan -> "Missatge a punt per enviar a $memberName:"
+        else -> "Message ready to send to $memberName:"
+    }
+
+    val reminderClipLabel: String get() = when {
+        isSpanish -> "Recordatorio"
+        isCatalan -> "Recordatori"
+        else -> "Reminder"
+    }
+
+    val reminderShareChooser: String get() = when {
+        isSpanish -> "Enviar recordatorio por..."
+        isCatalan -> "Enviar recordatori per..."
+        else -> "Send reminder via..."
+    }
+
+    val reminderDefaultPlanName: String get() = when {
+        isSpanish -> "Cuenta Compartida"
+        isCatalan -> "Compte Compartit"
+        else -> "Shared Account"
+    }
+
+    fun reminderPeriodLabel(unit: String, value: Int, fallback: String): String {
+        val freqVal = if (value > 0) value else 1
+        return when (unit) {
+            "months" -> when {
+                isSpanish -> if (freqVal == 1) "mensual" else "cada $freqVal meses"
+                isCatalan -> if (freqVal == 1) "mensual" else "cada $freqVal mesos"
+                else -> if (freqVal == 1) "monthly" else "every $freqVal months"
+            }
+            "years" -> when {
+                isSpanish -> if (freqVal == 1) "anual" else "cada $freqVal años"
+                isCatalan -> if (freqVal == 1) "anual" else "cada $freqVal anys"
+                else -> if (freqVal == 1) "yearly" else "every $freqVal years"
+            }
+            "weeks" -> when {
+                isSpanish -> if (freqVal == 1) "semanal" else "cada $freqVal semanas"
+                isCatalan -> if (freqVal == 1) "setmanal" else "cada $freqVal setmanes"
+                else -> if (freqVal == 1) "weekly" else "every $freqVal weeks"
+            }
+            "days" -> when {
+                isSpanish -> if (freqVal == 1) "diaria" else "cada $freqVal días"
+                isCatalan -> if (freqVal == 1) "diària" else "cada $freqVal dies"
+                else -> if (freqVal == 1) "daily" else "every $freqVal days"
+            }
+            else -> fallback.lowercase()
+        }
+    }
+
+    val emailRegisterTitle: String get() = when {
+        isSpanish -> "Crear cuenta con correo"
+        isCatalan -> "Crear compte amb correu"
+        else -> "Create account with email"
+    }
+
+    val confirmPasswordLabel: String get() = when {
+        isSpanish -> "Repite la contraseña"
+        isCatalan -> "Repeteix la contrasenya"
+        else -> "Repeat password"
+    }
+
+    val passwordsDoNotMatch: String get() = when {
+        isSpanish -> "Las contraseñas no coinciden"
+        isCatalan -> "Les contrasenyes no coincideixen"
+        else -> "Passwords do not match"
+    }
+
+    val emailCreating: String get() = when {
+        isSpanish -> "Creando..."
+        isCatalan -> "Creant..."
+        else -> "Creating..."
+    }
+
+    val emailCreateMyAccount: String get() = when {
+        isSpanish -> "Crear mi cuenta"
+        isCatalan -> "Crear el meu compte"
+        else -> "Create my account"
+    }
+
+    val emailLoginTitle: String get() = when {
+        isSpanish -> "Iniciar sesión con correo"
+        isCatalan -> "Iniciar sessió amb correu"
+        else -> "Sign in with email"
+    }
+
+    val emailLoggingIn: String get() = when {
+        isSpanish -> "Entrando..."
+        isCatalan -> "Entrant..."
+        else -> "Signing in..."
+    }
+
+    val alarmActiveDescription: String get() = when {
+        isSpanish -> "Alarma activada"
+        isCatalan -> "Alarma activada"
+        else -> "Alarm active"
+    }
+
+    val unreadMessageDescription: String get() = when {
+        isSpanish -> "Mensaje sin leer"
+        isCatalan -> "Missatge sense llegir"
+        else -> "Unread message"
+    }
+
+    val paymentAlarmActiveDescription: String get() = when {
+        isSpanish -> "Alarma de pago activada"
+        isCatalan -> "Alarma de pagament activada"
+        else -> "Payment alarm active"
+    }
+
+    val shareInviteDescription: String get() = when {
+        isSpanish -> "Compartir invitación"
+        isCatalan -> "Compartir invitació"
+        else -> "Share invite"
+    }
+
+    val inviteToSlot: String get() = when {
+        isSpanish -> "Invitar a un hueco"
+        isCatalan -> "Convidar a un buit"
+        else -> "Invite to a slot"
+    }
+
+    fun slotsFullHint(capacity: Int): String = when {
+        isSpanish -> "Has alcanzado los $capacity huecos. Aumenta los huecos para añadir más."
+        isCatalan -> "Has assolit els $capacity buits. Augmenta els buits per afegir-ne més."
+        else -> "You have reached $capacity slots. Increase slots to add more."
+    }
 }
+
 
 

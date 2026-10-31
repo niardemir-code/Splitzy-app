@@ -455,7 +455,7 @@ fun RestoreConfirmationDialog(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "¿Cómo deseas aplicar la restauración?",
+                        text = I18n.restoreHowToApply,
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     )
 

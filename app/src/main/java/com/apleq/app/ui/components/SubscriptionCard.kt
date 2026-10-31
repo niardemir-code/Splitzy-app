@@ -314,7 +314,7 @@ fun SubscriptionCard(
                             Spacer(modifier = Modifier.width(6.dp))
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "Alarma activada",
+                                contentDescription = I18n.alarmActiveDescription,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(13.dp)
                             )
@@ -548,7 +548,7 @@ fun SubscriptionCard(
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Email,
-                                                    contentDescription = "Mensaje sin leer",
+                                                    contentDescription = I18n.unreadMessageDescription,
                                                     tint = MaterialTheme.colorScheme.primary,
                                                     modifier = Modifier.size(16.dp)
                                                 )
@@ -601,7 +601,7 @@ fun SubscriptionCard(
                                                     if (member.enableAlarm) {
                                                         Icon(
                                                             imageVector = Icons.Default.Notifications,
-                                                            contentDescription = "Alarma de pago activada",
+                                                            contentDescription = I18n.paymentAlarmActiveDescription,
                                                             tint = MaterialTheme.colorScheme.primary,
                                                             modifier = Modifier.size(13.dp)
                                                         )
@@ -644,14 +644,14 @@ fun SubscriptionCard(
                                                         putExtra(android.content.Intent.EXTRA_TEXT, lines.joinToString("\n"))
                                                     }
                                                     context.startActivity(
-                                                        android.content.Intent.createChooser(sendIntent, "Compartir invitación")
+                                                        android.content.Intent.createChooser(sendIntent, I18n.shareInviteDescription)
                                                     )
                                                 },
                                                 modifier = Modifier.size(30.dp)
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Share,
-                                                    contentDescription = "Compartir invitación",
+                                                    contentDescription = I18n.shareInviteDescription,
                                                     modifier = Modifier.size(16.dp),
                                                     tint = MaterialTheme.colorScheme.primary
                                                 )
@@ -806,13 +806,13 @@ fun SubscriptionCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Invitar a un hueco")
+                    Text(I18n.inviteToSlot)
                 }
             }
             if (isFull) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Has alcanzado los $capacity huecos. Aumenta los huecos para añadir más.",
+                    text = I18n.slotsFullHint(capacity),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

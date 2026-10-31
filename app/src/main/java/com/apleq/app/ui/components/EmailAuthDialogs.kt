@@ -59,13 +59,13 @@ fun EmailRegisterDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isLoading) onDismiss() },
-        title = { Text("Crear cuenta con correo") },
+        title = { Text(I18n.emailRegisterTitle) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Tu nombre") },
+                    label = { Text(I18n.accountNameLabel) },
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
@@ -74,7 +74,7 @@ fun EmailRegisterDialog(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Correo electrónico") },
+                    label = { Text(I18n.emailLabel) },
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -84,7 +84,7 @@ fun EmailRegisterDialog(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña") },
+                    label = { Text(I18n.passwordLabel) },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     isError = passwordTooShort,
                     supportingText = {
@@ -116,11 +116,11 @@ fun EmailRegisterDialog(
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("Repite la contraseña") },
+                    label = { Text(I18n.confirmPasswordLabel) },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     isError = !passwordsMatch,
                     supportingText = {
-                        if (!passwordsMatch) Text("Las contraseñas no coinciden")
+                        if (!passwordsMatch) Text(I18n.passwordsDoNotMatch)
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
@@ -139,11 +139,11 @@ fun EmailRegisterDialog(
                     CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
                 }
-                Text(if (isLoading) "Creando..." else "Crear mi cuenta")
+                Text(if (isLoading) I18n.emailCreating else I18n.emailCreateMyAccount)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancelar") }
+            TextButton(onClick = onDismiss, enabled = !isLoading) { Text(I18n.cancel) }
         }
     )
 }
@@ -163,13 +163,13 @@ fun EmailLoginDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isLoading) onDismiss() },
-        title = { Text("Iniciar sesión con correo") },
+        title = { Text(I18n.emailLoginTitle) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Correo electrónico") },
+                    label = { Text(I18n.emailLabel) },
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -179,7 +179,7 @@ fun EmailLoginDialog(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña") },
+                    label = { Text(I18n.passwordLabel) },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -202,11 +202,11 @@ fun EmailLoginDialog(
                 enabled = email.isNotBlank() && password.isNotBlank() && !isLoading,
                 onClick = { onLogin(email.trim(), password) }
             ) {
-                Text(if (isLoading) "Entrando..." else "Iniciar sesión")
+                Text(if (isLoading) I18n.emailLoggingIn else I18n.tabSignIn)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancelar") }
+            TextButton(onClick = onDismiss, enabled = !isLoading) { Text(I18n.cancel) }
         }
     )
 }

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.apleq.app.data.local.MemberEntity
 import com.apleq.app.data.local.SubscriptionEntity
 import com.apleq.app.data.model.CurrencyManager
+import com.apleq.app.ui.util.I18n
 import java.util.Locale
 
 @Composable
@@ -69,18 +70,24 @@ fun ReminderMessageDialog(
             memberPlatformPricing?.currencyItem?.symbol ?: "€"
         }
         val memberPeriodLabel = if (member.paymentFrequencyUnit.isNotBlank()) {
-            val freqVal = if (member.paymentFrequencyValue > 0) member.paymentFrequencyValue else 1
-            when (member.paymentFrequencyUnit) {
-                "months" -> if (freqVal == 1) "mensual" else "cada $freqVal meses"
-                "years" -> if (freqVal == 1) "anual" else "cada $freqVal años"
-                "weeks" -> if (freqVal == 1) "semanal" else "cada $freqVal semanas"
-                "days" -> if (freqVal == 1) "diaria" else "cada $freqVal días"
-                else -> memberPlatformPricing?.billingPeriodObj?.label?.lowercase() ?: "mensual"
-            }
+            I18n.reminderPeriodLabel(
+                unit = member.paymentFrequencyUnit,
+                value = member.paymentFrequencyValue,
+                fallback = memberPlatformPricing?.billingPeriodObj?.label?.lowercase() ?: I18n.monthlySuffix
+            )
         } else {
-            memberPlatformPricing?.billingPeriodObj?.label?.lowercase() ?: "mensual"
+            memberPlatformPricing?.billingPeriodObj?.label?.lowercase() ?: I18n.monthlySuffix
         }
-        "¡Hola ${member.memberName}! Te recuerdo la cuota $memberPeriodLabel de ${String.format(Locale.getDefault(), "%.2f", memberAmount)} $memberCurrencySymbol para la suscripción compartida de ${subscription.platformName} (${subscription.customPlanName.ifBlank { "Cuenta Compartida" }}). ¡Muchas gracias!"
+        val planName = subscription.customPlanName.ifBlank { I18n.reminderDefaultPlanName }
+        val formattedAmount = String.format(Locale.getDefault(), "%.2f", memberAmount)
+        I18n.buildReminderMessage(
+            memberName = member.memberName,
+            periodLabel = memberPeriodLabel,
+            amount = formattedAmount,
+            currencySymbol = memberCurrencySymbol,
+            platformName = subscription.platformName,
+            planName = planName
+        )
     }
 
     var messageText by remember { mutableStateOf(defaultMessage) }
@@ -97,7 +104,7 @@ fun ReminderMessageDialog(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Recordatorio de Pago",
+                    text = I18n.paymentReminderTitle,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
@@ -105,7 +112,7 @@ fun ReminderMessageDialog(
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Mensaje listo para enviar a ${member.memberName}:",
+                    text = I18n.reminderMessageReadyFor(member.memberName),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -132,16 +139,16 @@ fun ReminderMessageDialog(
                     OutlinedButton(
                         onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("Recordatorio", messageText)
+                            val clip = ClipData.newPlainText(I18n.reminderClipLabel, messageText)
                             clipboard.setPrimaryClip(clip)
-                            Toast.makeText(context, "Mensaje copiado al portapapeles", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, I18n.messageCopied, Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Copiar")
+                        Text(I18n.copy)
                     }
 
                     Button(
@@ -151,7 +158,7 @@ fun ReminderMessageDialog(
                                 putExtra(Intent.EXTRA_TEXT, messageText)
                                 type = "text/plain"
                             }
-                            val shareIntent = Intent.createChooser(sendIntent, "Enviar recordatorio por...")
+                            val shareIntent = Intent.createChooser(sendIntent, I18n.reminderShareChooser)
                             context.startActivity(shareIntent)
                         },
                         modifier = Modifier.weight(1f),
@@ -159,14 +166,14 @@ fun ReminderMessageDialog(
                     ) {
                         Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Compartir")
+                        Text(I18n.share)
                     }
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cerrar")
+                Text(I18n.close)
             }
         },
         modifier = modifier
