@@ -872,11 +872,11 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 replaceExisting = replaceExisting
             )
             if (result.success) {
-                _backupStatusMessage.value = "¡Restauración completada con éxito! (${result.subscriptionsRestored} suscripciones, ${result.membersRestored} miembros)"
+                _backupStatusMessage.value = I18n.restoreSuccessMessage(result.subscriptionsRestored, result.membersRestored)
                 dismissRestorePreview()
                 closeBackupRestoreDialog()
             } else {
-                _backupStatusMessage.value = "Error al restaurar: ${result.errorMessage}"
+                _backupStatusMessage.value = I18n.restoreErrorMessage(result.errorMessage)
             }
         }
     }

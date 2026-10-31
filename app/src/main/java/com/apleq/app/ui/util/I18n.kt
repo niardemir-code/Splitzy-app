@@ -3266,6 +3266,75 @@ object I18n {
         isCatalan -> "Segur que vols eliminar a '$memberName' d'aquesta subscripció? Aquesta acció no es pot desfer."
         else -> "Are you sure you want to delete '$memberName' from this subscription? This action cannot be undone."
     }
+
+    // ==========================================
+    // BATCH 10: INVITE SHARE MESSAGE, RESTORE RESULT & BACKUP ERRORS
+    // ==========================================
+    val inviteShareIntro: String get() = when {
+        isSpanish -> "Te invito a compartir gastos en Apleq."
+        isCatalan -> "Et convido a compartir despeses a Apleq."
+        else -> "I'm inviting you to share expenses on Apleq."
+    }
+
+    fun inviteShareCode(code: String): String = when {
+        isSpanish -> "Únete con este código: $code"
+        isCatalan -> "Uneix-t'hi amb aquest codi: $code"
+        else -> "Join with this code: $code"
+    }
+
+    fun inviteShareDownload(url: String): String = when {
+        isSpanish -> "Descarga la app: $url"
+        isCatalan -> "Descarrega l'app: $url"
+        else -> "Download the app: $url"
+    }
+
+    fun inviteShareWeb(url: String): String = when {
+        isSpanish -> "O regístrate en la web: $url"
+        isCatalan -> "O registra't al web: $url"
+        else -> "Or sign up on the web: $url"
+    }
+
+    val inviteShareSubject: String get() = when {
+        isSpanish -> "Invitación a Apleq"
+        isCatalan -> "Invitació a Apleq"
+        else -> "Invitation to Apleq"
+    }
+
+    fun restoreSuccessMessage(subscriptions: Int, members: Int): String = when {
+        isSpanish -> "¡Restauración completada con éxito! ($subscriptions suscripciones, $members miembros)"
+        isCatalan -> "Restauració completada amb èxit! ($subscriptions subscripcions, $members membres)"
+        else -> "Restore completed successfully! ($subscriptions subscriptions, $members members)"
+    }
+
+    fun restoreErrorMessage(detail: String?): String = when {
+        isSpanish -> "Error al restaurar: $detail"
+        isCatalan -> "Error en restaurar: $detail"
+        else -> "Restore error: $detail"
+    }
+
+    val backupUnknownDate: String get() = when {
+        isSpanish -> "Fecha desconocida"
+        isCatalan -> "Data desconeguda"
+        else -> "Unknown date"
+    }
+
+    val backupFileInvalidOrCorrupt: String get() = when {
+        isSpanish -> "Archivo de copia de seguridad no válido o dañado"
+        isCatalan -> "Arxiu de còpia de seguretat no vàlid o malmès"
+        else -> "Invalid or corrupted backup file"
+    }
+
+    val backupInvalidFileFormat: String get() = when {
+        isSpanish -> "Formato de archivo inválido (sin suscripciones)"
+        isCatalan -> "Format d'arxiu invàlid (sense subscripcions)"
+        else -> "Invalid file format (no subscriptions)"
+    }
+
+    val backupProcessingError: String get() = when {
+        isSpanish -> "Error al procesar la copia de seguridad"
+        isCatalan -> "Error en processar la còpia de seguretat"
+        else -> "Error processing the backup"
+    }
 }
 
 

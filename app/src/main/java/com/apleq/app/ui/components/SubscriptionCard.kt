@@ -633,14 +633,14 @@ fun SubscriptionCard(
                                                     val webUrl = ""   // TODO Fase B: URL de registro en la web
                                                     val appUrl = ""   // TODO Fase B: URL de descarga (Google Play)
                                                     val lines = mutableListOf(
-                                                        "Te invito a compartir gastos en Apleq.",
-                                                        "Únete con este código: $prettyCode"
+                                                        I18n.inviteShareIntro,
+                                                        I18n.inviteShareCode(prettyCode)
                                                     )
-                                                    if (appUrl.isNotBlank()) lines.add("Descarga la app: $appUrl")
-                                                    if (webUrl.isNotBlank()) lines.add("O regístrate en la web: $webUrl")
+                                                    if (appUrl.isNotBlank()) lines.add(I18n.inviteShareDownload(appUrl))
+                                                    if (webUrl.isNotBlank()) lines.add(I18n.inviteShareWeb(webUrl))
                                                     val sendIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                                                         type = "text/plain"
-                                                        putExtra(android.content.Intent.EXTRA_SUBJECT, "Invitación a Apleq")
+                                                        putExtra(android.content.Intent.EXTRA_SUBJECT, I18n.inviteShareSubject)
                                                         putExtra(android.content.Intent.EXTRA_TEXT, lines.joinToString("\n"))
                                                     }
                                                     context.startActivity(

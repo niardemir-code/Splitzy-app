@@ -16,6 +16,7 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.apleq.app.ui.util.I18n
 
 data class BackupPreview(
     val exportDate: String,
@@ -134,14 +135,14 @@ object BackupManager {
     fun parseBackupPreview(jsonString: String): BackupPreview {
         return try {
             val root = JSONObject(jsonString)
-            val exportDate = root.optString("exportDate", "Fecha desconocida")
+            val exportDate = root.optString("exportDate", I18n.backupUnknownDate)
             val subsArray = root.optJSONArray("subscriptions") ?: JSONArray()
             val membersArray = root.optJSONArray("members") ?: JSONArray()
 
             val namesList = mutableListOf<String>()
             for (i in 0 until minOf(5, subsArray.length())) {
                 val item = subsArray.getJSONObject(i)
-                val name = item.optString("platformName", "Suscripción")
+                val name = item.optString("platformName", I18n.subscriptionFallbackName)
                 namesList.add(name)
             }
 
@@ -159,7 +160,7 @@ object BackupManager {
                 membersCount = 0,
                 sampleSubscriptions = emptyList(),
                 isValid = false,
-                errorMessage = e.localizedMessage ?: "Archivo de copia de seguridad no válido o dañado"
+                errorMessage = e.localizedMessage ?: I18n.backupFileInvalidOrCorrupt
             )
         }
     }
@@ -173,7 +174,7 @@ object BackupManager {
         return try {
             val root = JSONObject(jsonString)
             val subsArray = root.optJSONArray("subscriptions")
-                ?: return RestoreResult(false, errorMessage = "Formato de archivo inválido (sin suscripciones)")
+                ?: return RestoreResult(false, errorMessage = I18n.backupInvalidFileFormat)
             val membersArray = root.optJSONArray("members") ?: JSONArray()
 
             if (replaceExisting) {
@@ -203,7 +204,7 @@ object BackupManager {
 
                 val subEntity = SubscriptionEntity(
                     id = 0, // Auto-generate new primary key
-                    platformName = obj.optString("platformName", "Suscripción"),
+                    platformName = obj.optString("platformName", I18n.subscriptionFallbackName),
                     customPlanName = obj.optString("customPlanName", ""),
                     mainUserName = obj.optString("mainUserName", "Titular"),
                     mainUserContact = obj.optString("mainUserContact", ""),
@@ -288,7 +289,7 @@ object BackupManager {
         } catch (e: Exception) {
             RestoreResult(
                 success = false,
-                errorMessage = e.localizedMessage ?: "Error al procesar la copia de seguridad"
+                errorMessage = e.localizedMessage ?: I18n.backupProcessingError
             )
         }
     }
