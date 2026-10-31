@@ -2324,9 +2324,9 @@ object I18n {
     }
 
     val accountDeleteConfirmBody: String get() = when {
-        isSpanish -> "Esta acción es irreversible. Se borrarán todas tus suscripciones, y dejarás de aparecer en los grupos de otros donde participas (esas plazas quedarán libres). No podrás recuperar tu cuenta ni tus datos."
-        isCatalan -> "Aquesta acció és irreversible. S'esborraran totes les teves subscripcions i deixaràs d'aparèixer als grups d'altres persones on participes (aquestes places quedaran lliures). No podràs recuperar el teu compte ni les teves dades."
-        else -> "This action is irreversible. All your subscriptions will be deleted, and you will no longer appear in other people's groups you take part in (those slots will be freed). You won't be able to recover your account or your data."
+        isSpanish -> "Esta acción es irreversible. Se borrarán todas tus suscripciones. En los grupos de otras personas donde participas, tu plaza quedará como «pendiente de eliminar» y quien gestiona el grupo podrá conservar tu nombre y tus pagos hasta que la retire. No podrás recuperar tu cuenta ni tus datos."
+        isCatalan -> "Aquesta acció és irreversible. S'esborraran totes les teves subscripcions. Als grups d'altres persones on participes, la teva plaça quedarà com a «pendent d'eliminar» i qui gestiona el grup podrà conservar el teu nom i els teus pagaments fins que la retiri. No podràs recuperar el teu compte ni les teves dades."
+        else -> "This action is irreversible. All your subscriptions will be deleted. In other people's groups you take part in, your seat will be marked as “pending removal” and the group's organiser may keep your name and payments until they remove it. You won't be able to recover your account or your data."
     }
 
     val accountDeleting: String get() = when {
