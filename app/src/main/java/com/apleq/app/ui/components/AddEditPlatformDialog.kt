@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.apleq.app.data.local.SharingPlatformEntity
 import com.apleq.app.data.model.SharingPlatforms
+import com.apleq.app.ui.util.I18n
 
 // Curated modern color palette for sharing platforms
 val PRESET_PLATFORM_COLORS = listOf(
@@ -130,12 +131,12 @@ fun AddEditPlatformDialog(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = if (platformToEdit == null) "Nueva plataforma" else "Editar plataforma",
+                            text = if (platformToEdit == null) I18n.platformDialogNewTitle else I18n.platformDialogEditTitle,
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Personaliza el nombre y color de la plataforma",
+                            text = I18n.platformDialogSubtitle,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -146,7 +147,7 @@ fun AddEditPlatformDialog(
 
                 // Field: Platform Name
                 Text(
-                    text = "Nombre de la plataforma *",
+                    text = I18n.platformNameLabel,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -157,10 +158,10 @@ fun AddEditPlatformDialog(
                         name = it
                         if (it.isNotBlank()) nameError = false
                     },
-                    placeholder = { Text("Ej. Price Together, Sharingful...") },
+                    placeholder = { Text(I18n.platformNamePlaceholder) },
                     isError = nameError,
                     supportingText = if (nameError) {
-                        { Text("Introduce un nombre para la plataforma") }
+                        { Text(I18n.platformNameRequiredError) }
                     } else null,
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
@@ -178,7 +179,7 @@ fun AddEditPlatformDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Color identificativo",
+                        text = I18n.platformColorLabel,
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -229,7 +230,7 @@ fun AddEditPlatformDialog(
                             if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
-                                    contentDescription = "Seleccionado",
+                                    contentDescription = I18n.iconPickerSelectedDescription,
                                     tint = Color.White,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -250,7 +251,7 @@ fun AddEditPlatformDialog(
                             selectedColorHex = "#$filtered"
                         }
                     },
-                    label = { Text("Código de color Hex personalizado") },
+                    label = { Text(I18n.platformHexLabel) },
                     prefix = { Text("# ", fontWeight = FontWeight.Bold) },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
@@ -266,7 +267,7 @@ fun AddEditPlatformDialog(
 
                 // Live Preview Card ("Vista previa")
                 Text(
-                    text = "VISTA PREVIA",
+                    text = I18n.platformPreviewHeader,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.sp
@@ -288,7 +289,7 @@ fun AddEditPlatformDialog(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Así se verá en la lista de usuarios y filtros:",
+                            text = I18n.platformPreviewIntro,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -314,7 +315,7 @@ fun AddEditPlatformDialog(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = name.ifBlank { "Nombre plataforma" },
+                                        text = name.ifBlank { I18n.platformPreviewFallbackName },
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                         color = currentColor
                                     )
@@ -336,7 +337,7 @@ fun AddEditPlatformDialog(
                         onClick = onDismiss,
                         modifier = Modifier.testTag("btn_cancel_platform")
                     ) {
-                        Text("Cancelar")
+                        Text(I18n.cancel)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
@@ -359,7 +360,7 @@ fun AddEditPlatformDialog(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.testTag("btn_save_platform")
                     ) {
-                        Text(if (platformToEdit == null) "Añadir plataforma" else "Guardar cambios")
+                        Text(if (platformToEdit == null) I18n.platformDialogAddButton else I18n.platformDialogSaveButton)
                     }
                 }
             }
@@ -385,13 +386,13 @@ fun DeletePlatformConfirmDialog(
         },
         title = {
             Text(
-                text = "¿Eliminar plataforma?",
+                text = I18n.deletePlatformConfirmTitle,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
         },
         text = {
             Text(
-                text = "¿Estás seguro de que deseas eliminar la plataforma \"${platform.name}\"? Desaparecerá de los selectores y listas de la aplicación."
+                text = I18n.deletePlatformConfirmMessage(platform.name)
             )
         },
         confirmButton = {
@@ -401,7 +402,7 @@ fun DeletePlatformConfirmDialog(
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.testTag("btn_confirm_delete_platform")
             ) {
-                Text("Eliminar")
+                Text(I18n.delete)
             }
         },
         dismissButton = {
@@ -409,7 +410,7 @@ fun DeletePlatformConfirmDialog(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("Cancelar")
+                Text(I18n.cancel)
             }
         }
     )

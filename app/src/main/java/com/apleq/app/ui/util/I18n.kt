@@ -2124,5 +2124,92 @@ object I18n {
         "widgets" -> when { isSpanish -> "Servicios"; isCatalan -> "Serveis"; else -> "Services" }
         else -> fallback
     }
+
+    // ==========================================
+    // ADD / EDIT PLATFORM DIALOG & DELETE PLATFORM CONFIRM
+    // ==========================================
+    val platformDialogNewTitle: String get() = when {
+        isSpanish -> "Nueva plataforma"
+        isCatalan -> "Nova plataforma"
+        else -> "New platform"
+    }
+
+    val platformDialogEditTitle: String get() = when {
+        isSpanish -> "Editar plataforma"
+        isCatalan -> "Editar plataforma"
+        else -> "Edit platform"
+    }
+
+    val platformDialogSubtitle: String get() = when {
+        isSpanish -> "Personaliza el nombre y color de la plataforma"
+        isCatalan -> "Personalitza el nom i el color de la plataforma"
+        else -> "Customize the platform's name and color"
+    }
+
+    val platformNamePlaceholder: String get() = when {
+        isSpanish -> "Ej. Price Together, Sharingful..."
+        isCatalan -> "Ex. Price Together, Sharingful..."
+        else -> "E.g. Price Together, Sharingful..."
+    }
+
+    val platformNameRequiredError: String get() = when {
+        isSpanish -> "Introduce un nombre para la plataforma"
+        isCatalan -> "Introdueix un nom per a la plataforma"
+        else -> "Enter a name for the platform"
+    }
+
+    val platformColorLabel: String get() = when {
+        isSpanish -> "Color identificativo"
+        isCatalan -> "Color identificatiu"
+        else -> "Identifying color"
+    }
+
+    val platformHexLabel: String get() = when {
+        isSpanish -> "Código de color Hex personalizado"
+        isCatalan -> "Codi de color Hex personalitzat"
+        else -> "Custom Hex color code"
+    }
+
+    val platformPreviewHeader: String get() = when {
+        isSpanish -> "VISTA PREVIA"
+        isCatalan -> "VISTA PRÈVIA"
+        else -> "PREVIEW"
+    }
+
+    val platformPreviewIntro: String get() = when {
+        isSpanish -> "Así se verá en la lista de usuarios y filtros:"
+        isCatalan -> "Així es veurà a la llista d'usuaris i filtres:"
+        else -> "This is how it will look in the user list and filters:"
+    }
+
+    val platformPreviewFallbackName: String get() = when {
+        isSpanish -> "Nombre plataforma"
+        isCatalan -> "Nom de la plataforma"
+        else -> "Platform name"
+    }
+
+    val platformDialogAddButton: String get() = when {
+        isSpanish -> "Añadir plataforma"
+        isCatalan -> "Afegir plataforma"
+        else -> "Add platform"
+    }
+
+    val platformDialogSaveButton: String get() = when {
+        isSpanish -> "Guardar cambios"
+        isCatalan -> "Desar els canvis"
+        else -> "Save changes"
+    }
+
+    val deletePlatformConfirmTitle: String get() = when {
+        isSpanish -> "¿Eliminar plataforma?"
+        isCatalan -> "Eliminar la plataforma?"
+        else -> "Delete platform?"
+    }
+
+    fun deletePlatformConfirmMessage(platformName: String): String = when {
+        isSpanish -> "¿Estás seguro de que deseas eliminar la plataforma \"$platformName\"? Desaparecerá de los selectores y listas de la aplicación."
+        isCatalan -> "Segur que vols eliminar la plataforma \"$platformName\"? Desapareixerà dels selectors i de les llistes de l'aplicació."
+        else -> "Are you sure you want to delete the platform \"$platformName\"? It will disappear from the app's selectors and lists."
+    }
 }
 
