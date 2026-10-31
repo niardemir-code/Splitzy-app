@@ -208,10 +208,10 @@ fun HomeScreen(
                     ) {
                         SplitzyLogo(size = 38.dp)
                         Spacer(modifier = Modifier.width(10.dp))
-                        Column {
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Apleq",
+                                    text = I18n.appName,
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontFamily = Quicksand,
                                         fontWeight = FontWeight.Bold,
@@ -223,7 +223,7 @@ fun HomeScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Default.Tune,
-                                    contentDescription = "Menú",
+                                    contentDescription = I18n.homeMenuDescription,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -231,13 +231,14 @@ fun HomeScreen(
                             Text(
                                 text = if (authState is com.apleq.app.data.remote.AuthState.Authenticated) {
                                     val user = (authState as com.apleq.app.data.remote.AuthState.Authenticated).user
-                                    user.displayName?.takeIf { it.isNotBlank() } ?: user.email ?: "Apleq"
+                                    user.displayName?.takeIf { it.isNotBlank() }?.trim()?.substringBefore(' ') ?: user.email ?: I18n.appName
                                 } else {
                                     I18n.appSubtitle
                                 },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
+                                softWrap = false,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
@@ -268,7 +269,7 @@ fun HomeScreen(
                                     Icons.Default.Notifications
                                 else
                                     Icons.Default.NotificationsNone,
-                                contentDescription = "Notificaciones"
+                                contentDescription = I18n.notificationsTitle
                             )
                         }
                     }
@@ -366,8 +367,8 @@ fun HomeScreen(
             ) {
                 ExtendedFloatingActionButton(
                     onClick = { showJoinDialog = true },
-                    icon = { Icon(Icons.Default.GroupAdd, contentDescription = "Unirse", modifier = Modifier.size(18.dp)) },
-                    text = { Text("Unirse", fontWeight = FontWeight.Bold, fontSize = 13.sp) },
+                    icon = { Icon(Icons.Default.GroupAdd, contentDescription = I18n.joinGroupAction, modifier = Modifier.size(18.dp)) },
+                    text = { Text(I18n.joinGroupAction, fontWeight = FontWeight.Bold, fontSize = 13.sp) },
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     shape = RoundedCornerShape(16.dp)
@@ -595,7 +596,7 @@ fun HomeScreen(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Unirse a un grupo")
+                                Text(I18n.joinGroupDialogTitle)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
@@ -632,7 +633,7 @@ fun HomeScreen(
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "Participo en (${participatingGroups.size})",
+                        text = I18n.participatingInTitle(participatingGroups.size),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black,
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
@@ -749,7 +750,7 @@ fun HomeScreen(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Email,
-                                                contentDescription = "Mensaje sin leer del gestor",
+                                                contentDescription = I18n.unreadManagerMessageDescription,
                                                 tint = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.size(17.dp)
                                             )
@@ -768,7 +769,7 @@ fun HomeScreen(
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                                 ) {
                                     Text(
-                                        text = "Cliente",
+                                        text = I18n.chatDefaultClientName,
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary,
@@ -780,21 +781,21 @@ fun HomeScreen(
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                             Spacer(modifier = Modifier.height(12.dp))
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("Tu parte:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(I18n.yourShare, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text("${String.format("%.2f", myAmount)} $myCurrencySymbol", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                             }
                             if (nextPaymentFormatted.isNotBlank()) {
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text("Próximo pago:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(I18n.nextPaymentLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     Text(nextPaymentFormatted, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                                 }
                             }
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("Estado:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(I18n.paymentStatusLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(
-                                    text = if (isPaid) "Pagado" else "Pendiente",
+                                    text = if (isPaid) I18n.paymentStatusPaid else I18n.paymentStatusPending,
                                     style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold,
                                     color = if (isPaid) androidx.compose.ui.graphics.Color(0xFF10B981) else androidx.compose.ui.graphics.Color(0xFFF59E0B)
@@ -992,7 +993,7 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     ) {
                         Text(
-                            "Cliente",
+                            I18n.chatDefaultClientName,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
@@ -1005,30 +1006,30 @@ fun HomeScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (showOwnerName && ownerName.isNotBlank()) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Titular:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${I18n.mainUserOwner}:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(ownerName, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                         }
                     }
                     if (platform.isNotBlank()) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Plataforma:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${I18n.sharingPlatformFallbackName}:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(platform, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                         }
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Tu parte:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(I18n.yourShare, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text("${String.format("%.2f", myAmount)} $myCurrencySymbol", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                     }
                     if (nextPaymentFormatted.isNotBlank()) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Próximo pago:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(I18n.nextPaymentLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(nextPaymentFormatted, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                         }
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Estado:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(I18n.paymentStatusLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(
-                            text = if (isPaid) "Pagado" else "Pendiente",
+                            text = if (isPaid) I18n.paymentStatusPaid else I18n.paymentStatusPending,
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             color = if (isPaid) androidx.compose.ui.graphics.Color(0xFF10B981) else androidx.compose.ui.graphics.Color(0xFFF59E0B)
@@ -1078,7 +1079,7 @@ fun HomeScreen(
                                         },
                                         modifier = Modifier.size(28.dp)
                                     ) {
-                                        Icon(Icons.Default.Remove, contentDescription = "Menos días", modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Remove, contentDescription = I18n.fewerDaysDescription, modifier = Modifier.size(16.dp))
                                     }
                                     Text(
                                         text = "$alarmDays ${I18n.timeUnitLabel("days", alarmDays)}",
@@ -1093,7 +1094,7 @@ fun HomeScreen(
                                         },
                                         modifier = Modifier.size(28.dp)
                                     ) {
-                                        Icon(Icons.Default.Add, contentDescription = "Más días", modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Add, contentDescription = I18n.moreDaysDescription, modifier = Modifier.size(16.dp))
                                     }
                                     Text(
                                         I18n.beforeLabel,
@@ -1255,7 +1256,7 @@ fun HomeScreen(
                     enabled = !isLeavingGroup,
                     onClick = { groupPendingLeave = null; leaveGroupError = null }
                 ) {
-                    Text("Cancelar")
+                    Text(I18n.cancel)
                 }
             }
         )

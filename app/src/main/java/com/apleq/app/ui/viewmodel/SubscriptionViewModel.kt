@@ -20,6 +20,7 @@ import com.apleq.app.data.repository.SubscriptionRepository
 import com.apleq.app.data.util.AppThemeMode
 import com.apleq.app.data.util.calculateNextCycleDate
 import com.apleq.app.data.util.ThemePreferences
+import com.apleq.app.ui.util.I18n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -724,7 +725,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             val cleaned = code.uppercase().filter { it.isLetterOrDigit() }
             if (cleaned.length != 6) {
-                onResult(false, "El código no es válido.")
+                onResult(false, I18n.claimInviteInvalidCode)
                 return@launch
             }
             try {
@@ -732,9 +733,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 functions.getHttpsCallable("claimSlot")
                     .call(hashMapOf("code" to cleaned))
                     .await()
-                onResult(true, "¡Te has unido al grupo!")
+                onResult(true, I18n.claimInviteSuccess)
             } catch (e: Exception) {
-                val msg = e.message ?: "No se pudo unir. Revisa el código."
+                val msg = e.message ?: I18n.claimInviteDefaultError
                 onResult(false, msg)
             }
         }
@@ -744,9 +745,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             val result = authService.deleteAccount()
             if (result.isSuccess) {
-                onResult(true, "Cuenta eliminada correctamente.")
+                onResult(true, I18n.deleteAccountSuccess)
             } else {
-                onResult(false, result.exceptionOrNull()?.message ?: "No se pudo eliminar la cuenta.")
+                onResult(false, result.exceptionOrNull()?.message ?: I18n.deleteAccountDefaultError)
             }
         }
     }

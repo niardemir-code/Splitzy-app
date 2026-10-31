@@ -2715,6 +2715,93 @@ object I18n {
         isCatalan -> "Has assolit els $capacity buits. Augmenta els buits per afegir-ne més."
         else -> "You have reached $capacity slots. Increase slots to add more."
     }
+
+    // ==========================================
+    // BATCH 7: HOME SCREEN & VIEWMODEL MESSAGES
+    // ==========================================
+    val homeMenuDescription: String get() = when {
+        isSpanish -> "Menú"
+        isCatalan -> "Menú"
+        else -> "Menu"
+    }
+
+    val unreadManagerMessageDescription: String get() = when {
+        isSpanish -> "Mensaje sin leer del gestor"
+        isCatalan -> "Missatge sense llegir del gestor"
+        else -> "Unread manager message"
+    }
+
+    fun participatingInTitle(count: Int): String = when {
+        isSpanish -> "Participo en ($count)"
+        isCatalan -> "Participo en ($count)"
+        else -> "Participating in ($count)"
+    }
+
+    val nextPaymentLabel: String get() = when {
+        isSpanish -> "Próximo pago:"
+        isCatalan -> "Pròxim pagament:"
+        else -> "Next payment:"
+    }
+
+    val paymentStatusLabel: String get() = when {
+        isSpanish -> "Estado:"
+        isCatalan -> "Estat:"
+        else -> "Status:"
+    }
+
+    val paymentStatusPaid: String get() = when {
+        isSpanish -> "Pagado"
+        isCatalan -> "Pagat"
+        else -> "Paid"
+    }
+
+    val paymentStatusPending: String get() = when {
+        isSpanish -> "Pendiente"
+        isCatalan -> "Pendent"
+        else -> "Pending"
+    }
+
+    val fewerDaysDescription: String get() = when {
+        isSpanish -> "Menos días"
+        isCatalan -> "Menys dies"
+        else -> "Fewer days"
+    }
+
+    val moreDaysDescription: String get() = when {
+        isSpanish -> "Más días"
+        isCatalan -> "Més dies"
+        else -> "More days"
+    }
+
+    val claimInviteInvalidCode: String get() = when {
+        isSpanish -> "El código no es válido."
+        isCatalan -> "El codi no és vàlid."
+        else -> "Invalid code."
+    }
+
+    val claimInviteSuccess: String get() = when {
+        isSpanish -> "¡Te has unido al grupo!"
+        isCatalan -> "T'has unit al grup!"
+        else -> "You have joined the group!"
+    }
+
+    val claimInviteDefaultError: String get() = when {
+        isSpanish -> "No se pudo unir. Revisa el código."
+        isCatalan -> "No s'ha pogut unir. Revisa el codi."
+        else -> "Could not join. Check the code."
+    }
+
+    val deleteAccountSuccess: String get() = when {
+        isSpanish -> "Cuenta eliminada correctamente."
+        isCatalan -> "Compte eliminat correctament."
+        else -> "Account deleted successfully."
+    }
+
+    val deleteAccountDefaultError: String get() = when {
+        isSpanish -> "No se pudo eliminar la cuenta."
+        isCatalan -> "No s'ha pogut eliminar el compte."
+        else -> "Could not delete account."
+    }
 }
 
 
