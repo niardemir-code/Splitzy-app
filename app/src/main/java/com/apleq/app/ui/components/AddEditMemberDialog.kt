@@ -291,7 +291,7 @@ fun AddEditMemberDialog(
                         }
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = if (isEditing) "Editar Usuario" else "Añadir Usuario",
+                            text = if (isEditing) I18n.editMemberTitle else I18n.addMemberTitle,
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -303,7 +303,7 @@ fun AddEditMemberDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Cerrar",
+                            contentDescription = I18n.close,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -321,7 +321,7 @@ fun AddEditMemberDialog(
                 ) {
                     // NOMBRE O APODO
                     Text(
-                        text = "NOMBRE O APODO *",
+                        text = I18n.memberFormNameHeader,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -332,10 +332,10 @@ fun AddEditMemberDialog(
                             memberName = it
                             nameError = it.isBlank()
                         },
-                        placeholder = { Text("Ej. Daniel Álvarez (danielalvarez)") },
+                        placeholder = { Text(I18n.memberFormNamePlaceholder) },
                         isError = nameError,
                         supportingText = if (nameError) {
-                            { Text("El nombre es obligatorio") }
+                            { Text(I18n.memberFormNameRequired) }
                         } else null,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -349,7 +349,7 @@ fun AddEditMemberDialog(
 
                     // PLATAFORMA DE COMPARTICIÓN
                     Text(
-                        text = "PLATAFORMA DE COMPARTICIÓN",
+                        text = I18n.memberFormPlatformHeader,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -367,9 +367,9 @@ fun AddEditMemberDialog(
                         val displayPlatformText = if (sharingPlatform.isNotBlank()) {
                             sharingPlatform
                         } else if (platformPrices.isNotEmpty()) {
-                            "Seleccionar plataforma configurada..."
+                            I18n.memberFormSelectPlatform
                         } else {
-                            "Sin plataformas configuradas en la suscripción"
+                            I18n.memberFormNoPlatformsConfigured
                         }
 
                         OutlinedTextField(
@@ -402,7 +402,7 @@ fun AddEditMemberDialog(
                             supportingText = if (platformPrices.isEmpty()) {
                                 {
                                     Text(
-                                        text = "Añade tarifas de plataforma editando la suscripción para asignarlas aquí.",
+                                        text = I18n.memberFormAddPlatformRatesHint,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.error
                                     )
@@ -418,7 +418,7 @@ fun AddEditMemberDialog(
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            text = "Sin plataforma",
+                                            text = I18n.memberFormNoPlatform,
                                             fontWeight = if (sharingPlatform.isBlank()) FontWeight.Bold else FontWeight.Normal,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -490,7 +490,7 @@ fun AddEditMemberDialog(
 
                     // IMPORTE APORTADO /mes & MONEDA
                     Text(
-                        text = "IMPORTE APORTADO /mes",
+                        text = I18n.memberFormContributionHeader,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -569,7 +569,7 @@ fun AddEditMemberDialog(
 
                     // MÉTODO HABITUAL
                     Text(
-                        text = "MÉTODO HABITUAL",
+                        text = I18n.memberFormMethodHeader,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -577,7 +577,7 @@ fun AddEditMemberDialog(
                     OutlinedTextField(
                         value = paymentMethod,
                         onValueChange = { paymentMethod = it },
-                        placeholder = { Text("Ej. Transferencia Sharesub a Revolut, Bizum...") },
+                        placeholder = { Text(I18n.memberFormMethodPlaceholder) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("input_member_payment_method"),
@@ -612,7 +612,7 @@ fun AddEditMemberDialog(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Fecha de unión",
+                                        text = I18n.memberFormJoinDate,
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -644,7 +644,7 @@ fun AddEditMemberDialog(
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.CalendarMonth,
-                                            contentDescription = "Cambiar fecha",
+                                            contentDescription = I18n.memberFormChangeDate,
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                     }
@@ -692,7 +692,7 @@ fun AddEditMemberDialog(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Fecha próximo pago",
+                                        text = I18n.memberFormNextPaymentDate,
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -725,7 +725,7 @@ fun AddEditMemberDialog(
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.CalendarMonth,
-                                            contentDescription = "Cambiar fecha",
+                                            contentDescription = I18n.memberFormChangeDate,
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                     }
@@ -744,7 +744,7 @@ fun AddEditMemberDialog(
 
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Calculada según la periodicidad o editable a mano.",
+                                text = I18n.memberFormNextPaymentHint,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -775,12 +775,12 @@ fun AddEditMemberDialog(
                                             )
                                             Spacer(modifier = Modifier.width(6.dp))
                                             Text(
-                                                text = "Frecuencia del pago",
+                                                text = I18n.memberFormFrequencyTitle,
                                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                                             )
                                         }
                                         Text(
-                                            text = "Automático",
+                                            text = I18n.memberFormFrequencyAuto,
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -796,7 +796,7 @@ fun AddEditMemberDialog(
                                         // CADA (NÚMERO)
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = "CADA",
+                                                text = I18n.memberFormEveryHeader,
                                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -817,7 +817,7 @@ fun AddEditMemberDialog(
                                                     Column {
                                                         Icon(
                                                             imageVector = Icons.Default.KeyboardArrowUp,
-                                                            contentDescription = "Incrementar",
+                                                            contentDescription = I18n.memberFormIncrease,
                                                             modifier = Modifier
                                                                 .size(16.dp)
                                                                 .clickable {
@@ -827,7 +827,7 @@ fun AddEditMemberDialog(
                                                         )
                                                         Icon(
                                                             imageVector = Icons.Default.KeyboardArrowDown,
-                                                            contentDescription = "Decrementar",
+                                                            contentDescription = I18n.memberFormDecrease,
                                                             modifier = Modifier
                                                                 .size(16.dp)
                                                                 .clickable {
@@ -849,7 +849,7 @@ fun AddEditMemberDialog(
                                         // UNIDAD
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = "UNIDAD",
+                                                text = I18n.memberFormUnitHeader,
                                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -893,7 +893,7 @@ fun AddEditMemberDialog(
 
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = "• Se repite cada $paymentFrequencyValue ${getFrequencyUnitLabel(paymentFrequencyUnit).lowercase()}.",
+                                        text = I18n.memberFormRepeatsEvery(paymentFrequencyValue, getFrequencyUnitLabel(paymentFrequencyUnit).lowercase()),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -930,11 +930,11 @@ fun AddEditMemberDialog(
                                             Spacer(modifier = Modifier.width(6.dp))
                                             Column {
                                                 Text(
-                                                    text = "Alarma de aviso para el gestor",
+                                                    text = I18n.memberFormAlarmTitle,
                                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                                                 )
                                                 Text(
-                                                    text = "Notificación antes del vencimiento",
+                                                    text = I18n.memberFormAlarmSubtitle,
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -960,7 +960,7 @@ fun AddEditMemberDialog(
                                             if (alarmUnit != "same_day") {
                                                 Column(modifier = Modifier.weight(0.8f)) {
                                                     Text(
-                                                        text = "CANTIDAD",
+                                                        text = I18n.subscriptionAlarmAmountHeader,
                                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
@@ -982,7 +982,7 @@ fun AddEditMemberDialog(
 
                                             Column(modifier = Modifier.weight(1.2f)) {
                                                 Text(
-                                                    text = "UNIDAD DE ANTELACIÓN",
+                                                    text = I18n.subscriptionAlarmUnitHeader,
                                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -1027,8 +1027,8 @@ fun AddEditMemberDialog(
 
                                         Spacer(modifier = Modifier.height(6.dp))
                                         Text(
-                                            text = if (alarmUnit == "same_day") "🔔 Avisar el mismo día del cobro"
-                                            else "🔔 Avisar $alarmValue ${getAlarmUnitLabel(alarmUnit).lowercase()}",
+                                            text = if (alarmUnit == "same_day") I18n.memberFormAlarmSummarySameDay
+                                            else I18n.memberFormAlarmSummary(alarmValue, getAlarmUnitLabel(alarmUnit).lowercase()),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.primary
                                         )
@@ -1042,7 +1042,7 @@ fun AddEditMemberDialog(
 
                     // TELÉFONO O CORREO
                     Text(
-                        text = "TELÉFONO O CORREO (OPCIONAL)",
+                        text = I18n.memberFormContactHeader,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1050,7 +1050,7 @@ fun AddEditMemberDialog(
                     OutlinedTextField(
                         value = memberContact,
                         onValueChange = { memberContact = it },
-                        placeholder = { Text("Ej. +34 600 000 000 o email@ejemplo.com") },
+                        placeholder = { Text(I18n.memberFormContactPlaceholder) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Phone,
@@ -1070,7 +1070,7 @@ fun AddEditMemberDialog(
 
                     // NOTAS O PERFIL ASIGNADO
                     Text(
-                        text = "NOTAS O PERFIL ASIGNADO (OPCIONAL)",
+                        text = I18n.memberFormNotesHeader,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1078,7 +1078,7 @@ fun AddEditMemberDialog(
                     OutlinedTextField(
                         value = notesOrProfile,
                         onValueChange = { notesOrProfile = it },
-                        placeholder = { Text("Ej. Perfil 3 (PIN: 1234)") },
+                        placeholder = { Text(I18n.memberFormNotesPlaceholder) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("input_member_notes"),
@@ -1091,7 +1091,7 @@ fun AddEditMemberDialog(
 
                     // ESTADOS Y ALERTAS
                     Text(
-                        text = "ESTADOS Y ALERTAS DEL USUARIO",
+                        text = I18n.memberFormStatusHeader,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1118,12 +1118,12 @@ fun AddEditMemberDialog(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Pendiente de pago",
+                                    text = I18n.memberFormPendingPayment,
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = if (isPendingPayment) Color(0xFFC2410C) else MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "Marca al usuario si aún no ha realizado su pago",
+                                    text = I18n.memberFormPendingPaymentDesc,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1197,12 +1197,12 @@ fun AddEditMemberDialog(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Pendiente de eliminar",
+                                    text = I18n.memberFormPendingRemoval,
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = if (isPendingRemoval) Color(0xFFB91C1C) else MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "Indica que este usuario va a dejar la suscripción",
+                                    text = I18n.memberFormPendingRemovalDesc,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1243,12 +1243,12 @@ fun AddEditMemberDialog(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Pendiente dar de alta",
+                                    text = I18n.memberFormPendingActivation,
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = if (isPendingRegistration) Color(0xFF1D4ED8) else MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "Para miembros que aún no están activos en la cuenta",
+                                    text = I18n.memberFormPendingActivationDesc,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1294,7 +1294,7 @@ fun AddEditMemberDialog(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Eliminar",
+                                text = I18n.delete,
                                 fontWeight = FontWeight.SemiBold,
                                 maxLines = 1,
                                 softWrap = false
@@ -1360,7 +1360,7 @@ fun AddEditMemberDialog(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Guardar",
+                            text = I18n.save,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             softWrap = false
@@ -1390,12 +1390,12 @@ fun AddEditMemberDialog(
                     }
                     activeDatePickerTarget = null
                 }) {
-                    Text("Aceptar", fontWeight = FontWeight.Bold)
+                    Text(I18n.accept, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { activeDatePickerTarget = null }) {
-                    Text("Cancelar")
+                    Text(I18n.cancel)
                 }
             }
         ) {
@@ -1407,8 +1407,8 @@ fun AddEditMemberDialog(
     if (showConfirmDeleteDialog && memberToEdit != null && onDelete != null) {
         AlertDialog(
             onDismissRequest = { showConfirmDeleteDialog = false },
-            title = { Text("¿Eliminar usuario?") },
-            text = { Text("¿Estás seguro de que deseas eliminar a '${memberToEdit.memberName}' de esta suscripción? Esta acción no se puede deshacer.") },
+            title = { Text(I18n.deleteMemberConfirmTitle) },
+            text = { Text(I18n.deleteMemberConfirmMessage(memberToEdit.memberName)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -1417,12 +1417,12 @@ fun AddEditMemberDialog(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Eliminar")
+                    Text(I18n.delete)
                 }
             },
             dismissButton = {
                 OutlinedButton(onClick = { showConfirmDeleteDialog = false }) {
-                    Text("Cancelar")
+                    Text(I18n.cancel)
                 }
             }
         )
@@ -1450,20 +1450,9 @@ private fun parseDateStrToMillis(dateStr: String?): Long? {
 }
 
 private fun getFrequencyUnitLabel(unitKey: String): String {
-    return when (unitKey.lowercase()) {
-        "days", "dias", "días" -> "Día(s)"
-        "weeks", "semanas" -> "Semana(s)"
-        "years", "anos", "años" -> "Año(s)"
-        else -> "Mes(es)"
-    }
+    return I18n.memberFrequencyUnitLabel(unitKey)
 }
 
 private fun getAlarmUnitLabel(unitKey: String): String {
-    return when (unitKey.lowercase()) {
-        "same_day", "mismo_dia" -> "El mismo día"
-        "hours", "horas" -> "Hora(s) antes"
-        "weeks", "semanas" -> "Semana(s) antes"
-        "months", "meses" -> "Mes(es) antes"
-        else -> "Día(s) antes"
-    }
+    return I18n.subscriptionAlarmUnitLabel(unitKey)
 }

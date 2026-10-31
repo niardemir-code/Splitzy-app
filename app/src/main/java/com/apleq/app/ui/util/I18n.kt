@@ -3006,6 +3006,266 @@ object I18n {
         isCatalan -> "⚠️ Error en depurar: $detail"
         else -> "⚠️ Error cleaning up: $detail"
     }
+
+    // ==========================================
+    // BATCH 9: ADD / EDIT MEMBER DIALOG
+    // ==========================================
+    val memberFormNameHeader: String get() = when {
+        isSpanish -> "NOMBRE O APODO *"
+        isCatalan -> "NOM O SOBRENOM *"
+        else -> "NAME OR NICKNAME *"
+    }
+
+    val memberFormNamePlaceholder: String get() = when {
+        isSpanish -> "Ej. Daniel Álvarez (danielalvarez)"
+        isCatalan -> "Ex. Daniel Álvarez (danielalvarez)"
+        else -> "E.g. Daniel Álvarez (danielalvarez)"
+    }
+
+    val memberFormNameRequired: String get() = when {
+        isSpanish -> "El nombre es obligatorio"
+        isCatalan -> "El nom és obligatori"
+        else -> "Name is required"
+    }
+
+    val memberFormPlatformHeader: String get() = when {
+        isSpanish -> "PLATAFORMA DE COMPARTICIÓN"
+        isCatalan -> "PLATAFORMA DE COMPARTICIÓ"
+        else -> "SHARING PLATFORM"
+    }
+
+    val memberFormSelectPlatform: String get() = when {
+        isSpanish -> "Seleccionar plataforma configurada..."
+        isCatalan -> "Seleccionar plataforma configurada..."
+        else -> "Select configured platform..."
+    }
+
+    val memberFormNoPlatformsConfigured: String get() = when {
+        isSpanish -> "Sin plataformas configuradas en la suscripción"
+        isCatalan -> "Sense plataformes configurades a la subscripció"
+        else -> "No platforms configured in subscription"
+    }
+
+    val memberFormAddPlatformRatesHint: String get() = when {
+        isSpanish -> "Añade tarifas de plataforma editando la suscripción para asignarlas aquí."
+        isCatalan -> "Afegeix tarifes de plataforma editant la subscripció per assignar-les aquí."
+        else -> "Add platform rates by editing the subscription to assign them here."
+    }
+
+    val memberFormNoPlatform: String get() = when {
+        isSpanish -> "Sin plataforma"
+        isCatalan -> "Sense plataforma"
+        else -> "No platform"
+    }
+
+    val memberFormContributionHeader: String get() = when {
+        isSpanish -> "IMPORTE APORTADO /mes"
+        isCatalan -> "IMPORT APORTAT /mes"
+        else -> "CONTRIBUTION AMOUNT /mo"
+    }
+
+    val memberFormMethodHeader: String get() = when {
+        isSpanish -> "MÉTODO HABITUAL"
+        isCatalan -> "MÈTODE HABITUAL"
+        else -> "USUAL METHOD"
+    }
+
+    val memberFormMethodPlaceholder: String get() = when {
+        isSpanish -> "Ej. Transferencia Sharesub a Revolut, Bizum..."
+        isCatalan -> "Ex. Transferència Sharesub a Revolut, Bizum..."
+        else -> "E.g. Sharesub transfer to Revolut, Bizum..."
+    }
+
+    val memberFormJoinDate: String get() = when {
+        isSpanish -> "Fecha de unión"
+        isCatalan -> "Data d'unió"
+        else -> "Join date"
+    }
+
+    val memberFormChangeDate: String get() = when {
+        isSpanish -> "Cambiar fecha"
+        isCatalan -> "Canviar data"
+        else -> "Change date"
+    }
+
+    val memberFormNextPaymentDate: String get() = when {
+        isSpanish -> "Fecha próximo pago"
+        isCatalan -> "Data proper pagament"
+        else -> "Next payment date"
+    }
+
+    val memberFormNextPaymentHint: String get() = when {
+        isSpanish -> "Calculada según la periodicidad o editable a mano."
+        isCatalan -> "Calculada segons la periodicitat o editable a mà."
+        else -> "Calculated based on frequency or editable manually."
+    }
+
+    val memberFormFrequencyTitle: String get() = when {
+        isSpanish -> "Frecuencia del pago"
+        isCatalan -> "Freqüència del pagament"
+        else -> "Payment frequency"
+    }
+
+    val memberFormFrequencyAuto: String get() = when {
+        isSpanish -> "Automático"
+        isCatalan -> "Automàtic"
+        else -> "Automatic"
+    }
+
+    val memberFormEveryHeader: String get() = when {
+        isSpanish -> "CADA"
+        isCatalan -> "CADA"
+        else -> "EVERY"
+    }
+
+    val memberFormIncrease: String get() = when {
+        isSpanish -> "Incrementar"
+        isCatalan -> "Incrementar"
+        else -> "Increase"
+    }
+
+    val memberFormDecrease: String get() = when {
+        isSpanish -> "Decrementar"
+        isCatalan -> "Decrementar"
+        else -> "Decrease"
+    }
+
+    val memberFormUnitHeader: String get() = when {
+        isSpanish -> "UNIDAD"
+        isCatalan -> "UNITAT"
+        else -> "UNIT"
+    }
+
+    fun memberFrequencyUnitLabel(unitKey: String): String = when (unitKey.lowercase()) {
+        "days", "dias", "días" -> when {
+            isSpanish -> "Día(s)"
+            isCatalan -> "Dia(es)"
+            else -> "Day(s)"
+        }
+        "weeks", "semanas" -> when {
+            isSpanish -> "Semana(s)"
+            isCatalan -> "Setmana(es)"
+            else -> "Week(s)"
+        }
+        "years", "anos", "años" -> when {
+            isSpanish -> "Año(s)"
+            isCatalan -> "Any(s)"
+            else -> "Year(s)"
+        }
+        else -> when {
+            isSpanish -> "Mes(es)"
+            isCatalan -> "Mes(os)"
+            else -> "Month(s)"
+        }
+    }
+
+    fun memberFormRepeatsEvery(count: Int, unitLabel: String): String = when {
+        isSpanish -> "• Se repite cada $count $unitLabel."
+        isCatalan -> "• Es repeteix cada $count $unitLabel."
+        else -> "• Repeats every $count $unitLabel."
+    }
+
+    val memberFormAlarmTitle: String get() = when {
+        isSpanish -> "Alarma de aviso para el gestor"
+        isCatalan -> "Alarma d'avís per al gestor"
+        else -> "Reminder alarm for manager"
+    }
+
+    val memberFormAlarmSubtitle: String get() = when {
+        isSpanish -> "Notificación antes del vencimiento"
+        isCatalan -> "Notificació abans del venciment"
+        else -> "Notification before due date"
+    }
+
+    val memberFormAlarmSummarySameDay: String get() = when {
+        isSpanish -> "🔔 Avisar el mismo día del cobro"
+        isCatalan -> "🔔 Avisar el mateix dia del cobrament"
+        else -> "🔔 Remind on the day of charge"
+    }
+
+    fun memberFormAlarmSummary(value: Int, unitLabel: String): String = when {
+        isSpanish -> "🔔 Avisar $value $unitLabel"
+        isCatalan -> "🔔 Avisar $value $unitLabel"
+        else -> "🔔 Remind $value $unitLabel"
+    }
+
+    val memberFormContactHeader: String get() = when {
+        isSpanish -> "TELÉFONO O CORREO (OPCIONAL)"
+        isCatalan -> "TELÈFON O CORREU (OPCIONAL)"
+        else -> "PHONE OR EMAIL (OPTIONAL)"
+    }
+
+    val memberFormContactPlaceholder: String get() = when {
+        isSpanish -> "Ej. +34 600 000 000 o email@ejemplo.com"
+        isCatalan -> "Ex. +34 600 000 000 o email@exemple.com"
+        else -> "E.g. +34 600 000 000 or email@example.com"
+    }
+
+    val memberFormNotesHeader: String get() = when {
+        isSpanish -> "NOTAS O PERFIL ASIGNADO (OPCIONAL)"
+        isCatalan -> "NOTES O PERFIL ASSIGNAT (OPCIONAL)"
+        else -> "NOTES OR ASSIGNED PROFILE (OPTIONAL)"
+    }
+
+    val memberFormNotesPlaceholder: String get() = when {
+        isSpanish -> "Ej. Perfil 3 (PIN: 1234)"
+        isCatalan -> "Ex. Perfil 3 (PIN: 1234)"
+        else -> "E.g. Profile 3 (PIN: 1234)"
+    }
+
+    val memberFormStatusHeader: String get() = when {
+        isSpanish -> "ESTADOS Y ALERTAS DEL USUARIO"
+        isCatalan -> "ESTATS I ALERTES DE L'USUARI"
+        else -> "USER STATUS AND ALERTS"
+    }
+
+    val memberFormPendingPayment: String get() = when {
+        isSpanish -> "Pendiente de pago"
+        isCatalan -> "Pendent de pagament"
+        else -> "Pending payment"
+    }
+
+    val memberFormPendingPaymentDesc: String get() = when {
+        isSpanish -> "Marca al usuario si aún no ha realizado su pago"
+        isCatalan -> "Marca l'usuari si encara no ha fet el seu pagament"
+        else -> "Marks the user if they have not yet made their payment"
+    }
+
+    val memberFormPendingRemoval: String get() = when {
+        isSpanish -> "Pendiente de eliminar"
+        isCatalan -> "Pendent d'eliminar"
+        else -> "Pending removal"
+    }
+
+    val memberFormPendingRemovalDesc: String get() = when {
+        isSpanish -> "Indica que este usuario va a dejar la suscripción"
+        isCatalan -> "Indica que aquest usuari deixarà la subscripció"
+        else -> "Indicates that this user is going to leave the subscription"
+    }
+
+    val memberFormPendingActivation: String get() = when {
+        isSpanish -> "Pendiente dar de alta"
+        isCatalan -> "Pendent de donar d'alta"
+        else -> "Pending activation"
+    }
+
+    val memberFormPendingActivationDesc: String get() = when {
+        isSpanish -> "Para miembros que aún no están activos en la cuenta"
+        isCatalan -> "Per a membres que encara no estan actius al compte"
+        else -> "For members who are not yet active on the account"
+    }
+
+    val deleteMemberConfirmTitle: String get() = when {
+        isSpanish -> "¿Eliminar usuario?"
+        isCatalan -> "Eliminar usuari?"
+        else -> "Delete user?"
+    }
+
+    fun deleteMemberConfirmMessage(memberName: String): String = when {
+        isSpanish -> "¿Estás seguro de que deseas eliminar a '$memberName' de esta suscripción? Esta acción no se puede deshacer."
+        isCatalan -> "Segur que vols eliminar a '$memberName' d'aquesta subscripció? Aquesta acció no es pot desfer."
+        else -> "Are you sure you want to delete '$memberName' from this subscription? This action cannot be undone."
+    }
 }
 
 
