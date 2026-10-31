@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import com.apleq.app.data.util.BackupManager
 import com.apleq.app.data.util.BackupPreview
 import com.apleq.app.ui.theme.ProfitGreen
+import com.apleq.app.ui.util.I18n
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -90,9 +91,9 @@ fun BackupRestoreDialog(
                 val success = BackupManager.writeBackupToUri(context, uri, json)
                 isProcessing = false
                 if (success) {
-                    Toast.makeText(context, "✅ Copia de seguridad guardada correctamente", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, I18n.backupToastSaved, Toast.LENGTH_LONG).show()
                 } else {
-                    Toast.makeText(context, "❌ Error al guardar el archivo", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, I18n.backupToastSaveError, Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -110,7 +111,7 @@ fun BackupRestoreDialog(
                 if (content != null) {
                     onPreviewBackup(content)
                 } else {
-                    Toast.makeText(context, "❌ No se pudo leer el archivo seleccionado", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, I18n.backupToastReadError, Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -152,7 +153,7 @@ fun BackupRestoreDialog(
                 }
                 Column {
                     Text(
-                        text = "Copia y Restauración",
+                        text = I18n.backupDialogTitle,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
@@ -190,7 +191,7 @@ fun BackupRestoreDialog(
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = "Puedes guardar y restaurar tus copias en tu almacenamiento local, Google Drive o Microsoft OneDrive mediante el selector del sistema o compartirlas a la nube.",
+                            text = I18n.backupInfoText,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -198,7 +199,7 @@ fun BackupRestoreDialog(
                 }
 
                 Text(
-                    text = "Crear copia de seguridad",
+                    text = I18n.backupCreateSection,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -236,11 +237,11 @@ fun BackupRestoreDialog(
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Guardar archivo de copia",
+                                text = I18n.backupSaveFileTitle,
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                             )
                             Text(
-                                text = "Elige guardar en Local, Google Drive o OneDrive",
+                                text = I18n.backupSaveFileSubtitle,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -263,13 +264,13 @@ fun BackupRestoreDialog(
                                 val sendIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "application/json"
                                     putExtra(Intent.EXTRA_STREAM, uri)
-                                    putExtra(Intent.EXTRA_SUBJECT, "Copia de Seguridad - Gestor de Suscripciones")
+                                    putExtra(Intent.EXTRA_SUBJECT, I18n.backupShareEmailSubject)
                                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                 }
-                                val chooser = Intent.createChooser(sendIntent, "Guardar en Google Drive, OneDrive o Enviar...")
+                                val chooser = Intent.createChooser(sendIntent, I18n.backupShareChooserTitle)
                                 context.startActivity(chooser)
                             } else {
-                                Toast.makeText(context, "Error al preparar el archivo para compartir", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, I18n.backupToastShareError, Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
@@ -300,11 +301,11 @@ fun BackupRestoreDialog(
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Enviar o Subir a la nube",
+                                text = I18n.backupShareTitle,
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                             )
                             Text(
-                                text = "Sube a Google Drive, OneDrive, Gmail, etc.",
+                                text = I18n.backupShareSubtitle,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -320,7 +321,7 @@ fun BackupRestoreDialog(
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
                 Text(
-                    text = "Restauración de datos",
+                    text = I18n.backupRestoreSection,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -357,11 +358,11 @@ fun BackupRestoreDialog(
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Restaurar desde archivo",
+                                text = I18n.backupRestoreFileTitle,
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                             )
                             Text(
-                                text = "Selecciona desde Local, Google Drive o OneDrive",
+                                text = I18n.backupRestoreFileSubtitle,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -377,7 +378,7 @@ fun BackupRestoreDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismissRequest) {
-                Text("Cerrar")
+                Text(I18n.close)
             }
         }
     )
@@ -404,7 +405,7 @@ fun RestoreConfirmationDialog(
         },
         title = {
             Text(
-                text = if (preview.isValid) "Restaurar copia de seguridad" else "Copia no válida",
+                text = if (preview.isValid) I18n.backupPreviewTitleValid else I18n.backupPreviewTitleInvalid,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
         },
@@ -415,7 +416,7 @@ fun RestoreConfirmationDialog(
             ) {
                 if (preview.isValid) {
                     Text(
-                        text = "Se ha leído correctamente el archivo de copia:",
+                        text = I18n.backupPreviewReadOk,
                         style = MaterialTheme.typography.bodyMedium
                     )
 
@@ -430,20 +431,20 @@ fun RestoreConfirmationDialog(
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = "📅 Fecha: ${preview.exportDate}",
+                                text = I18n.backupPreviewDate(preview.exportDate),
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
                             )
                             Text(
-                                text = "💳 Suscripciones: ${preview.subscriptionsCount}",
+                                text = I18n.backupPreviewSubscriptions(preview.subscriptionsCount),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                text = "👥 Miembros/Usuarios: ${preview.membersCount}",
+                                text = I18n.backupPreviewMembers(preview.membersCount),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             if (preview.sampleSubscriptions.isNotEmpty()) {
                                 Text(
-                                    text = "Incluye: ${preview.sampleSubscriptions.joinToString(", ")}...",
+                                    text = I18n.backupPreviewIncludes(preview.sampleSubscriptions.joinToString(", ")),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -470,7 +471,7 @@ fun RestoreConfirmationDialog(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Reemplazar todo",
+                                text = I18n.backupReplaceAll,
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = if (replaceExisting) FontWeight.Bold else FontWeight.Normal
                                 )
@@ -485,7 +486,7 @@ fun RestoreConfirmationDialog(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Fusionar datos",
+                                text = I18n.backupMerge,
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = if (!replaceExisting) FontWeight.Bold else FontWeight.Normal
                                 )
@@ -495,16 +496,16 @@ fun RestoreConfirmationDialog(
 
                     Text(
                         text = if (replaceExisting) {
-                            "⚠️ 'Reemplazar todo' eliminará los datos actuales y dejará exactamente el contenido de la copia."
+                            I18n.backupReplaceWarning
                         } else {
-                            "ℹ️ 'Fusionar datos' mantendrá tus suscripciones actuales y añadirá las de la copia de seguridad."
+                            I18n.backupMergeInfo
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = if (replaceExisting) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     Text(
-                        text = "El archivo no contiene un formato de copia de seguridad válido:\n${preview.errorMessage}",
+                        text = I18n.backupInvalidFormat(preview.errorMessage),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -517,13 +518,13 @@ fun RestoreConfirmationDialog(
                     onClick = { onConfirm(replaceExisting) },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Restaurar ahora")
+                    Text(I18n.backupRestoreNow)
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(I18n.cancel)
             }
         }
     )

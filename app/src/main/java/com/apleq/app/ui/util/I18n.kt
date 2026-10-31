@@ -2211,5 +2211,372 @@ object I18n {
         isCatalan -> "Segur que vols eliminar la plataforma \"$platformName\"? Desapareixerà dels selectors i de les llistes de l'aplicació."
         else -> "Are you sure you want to delete the platform \"$platformName\"? It will disappear from the app's selectors and lists."
     }
+
+    // ==========================================
+    // AUTH / ACCOUNT & SYNC DIALOG
+    // ==========================================
+    val accountTitleAuthenticated: String get() = when {
+        isSpanish -> "Mi Cuenta & Sincronización"
+        isCatalan -> "El meu compte i sincronització"
+        else -> "My Account & Sync"
+    }
+
+    val accountCreateAccount: String get() = when {
+        isSpanish -> "Crear cuenta"
+        isCatalan -> "Crear compte"
+        else -> "Create account"
+    }
+
+    val accountTitleLogin: String get() = when {
+        isSpanish -> "Acceso Multidispositivo"
+        isCatalan -> "Accés multidispositiu"
+        else -> "Multi-device access"
+    }
+
+    val accountSubtitleAuthenticated: String get() = when {
+        isSpanish -> "Sincronizado con la nube (Firestore)"
+        isCatalan -> "Sincronitzat amb el núvol (Firestore)"
+        else -> "Synced with the cloud (Firestore)"
+    }
+
+    val accountSubtitleLogin: String get() = when {
+        isSpanish -> "Usa tu cuenta en Android y Web"
+        isCatalan -> "Fes servir el teu compte a Android i a la web"
+        else -> "Use your account on Android and Web"
+    }
+
+    val accountConnectingToCloud: String get() = when {
+        isSpanish -> "Conectando con la nube..."
+        isCatalan -> "Connectant amb el núvol..."
+        else -> "Connecting to the cloud..."
+    }
+
+    val accountRetry: String get() = when {
+        isSpanish -> "Reintentar"
+        isCatalan -> "Torna-ho a provar"
+        else -> "Retry"
+    }
+
+    val accountOpeningAccountPicker: String get() = when {
+        isSpanish -> "Abriendo selector de cuentas..."
+        isCatalan -> "Obrint el selector de comptes..."
+        else -> "Opening account picker..."
+    }
+
+    val accountProfilePhotoDescription: String get() = when {
+        isSpanish -> "Foto de perfil"
+        isCatalan -> "Foto de perfil"
+        else -> "Profile picture"
+    }
+
+    val accountRegisteredUserFallback: String get() = when {
+        isSpanish -> "Usuario registrado"
+        isCatalan -> "Usuari registrat"
+        else -> "Registered user"
+    }
+
+    val accountSyncSectionTitle: String get() = when {
+        isSpanish -> "Sincronización en la nube"
+        isCatalan -> "Sincronització al núvol"
+        else -> "Cloud sync"
+    }
+
+    val accountSyncSectionDescription: String get() = when {
+        isSpanish -> "Tus datos se guardan de forma segura y se sincronizan en tiempo real con el esquema unificado users/{userId}/subscriptions."
+        isCatalan -> "Les teves dades es desen de manera segura i se sincronitzen en temps real amb l'esquema unificat users/{userId}/subscriptions."
+        else -> "Your data is stored securely and synced in real time using the unified users/{userId}/subscriptions schema."
+    }
+
+    val accountUploadToCloud: String get() = when {
+        isSpanish -> "Subir a la nube"
+        isCatalan -> "Puja al núvol"
+        else -> "Upload to cloud"
+    }
+
+    val accountDownload: String get() = when {
+        isSpanish -> "Descargar"
+        isCatalan -> "Baixa"
+        else -> "Download"
+    }
+
+    val accountCleanDatabase: String get() = when {
+        isSpanish -> "🧹 Limpiar y Depurar Base de Datos en la Nube"
+        isCatalan -> "🧹 Netejar i depurar la base de dades al núvol"
+        else -> "🧹 Clean & Tidy Cloud Database"
+    }
+
+    val accountSignOut: String get() = when {
+        isSpanish -> "Cerrar sesión"
+        isCatalan -> "Tanca la sessió"
+        else -> "Sign out"
+    }
+
+    val accountDeleteMyAccount: String get() = when {
+        isSpanish -> "Eliminar mi cuenta"
+        isCatalan -> "Elimina el meu compte"
+        else -> "Delete my account"
+    }
+
+    val accountDeleteConfirmTitle: String get() = when {
+        isSpanish -> "¿Eliminar tu cuenta?"
+        isCatalan -> "Eliminar el teu compte?"
+        else -> "Delete your account?"
+    }
+
+    val accountDeleteConfirmBody: String get() = when {
+        isSpanish -> "Esta acción es irreversible. Se borrarán todas tus suscripciones, y dejarás de aparecer en los grupos de otros donde participas (esas plazas quedarán libres). No podrás recuperar tu cuenta ni tus datos."
+        isCatalan -> "Aquesta acció és irreversible. S'esborraran totes les teves subscripcions i deixaràs d'aparèixer als grups d'altres persones on participes (aquestes places quedaran lliures). No podràs recuperar el teu compte ni les teves dades."
+        else -> "This action is irreversible. All your subscriptions will be deleted, and you will no longer appear in other people's groups you take part in (those slots will be freed). You won't be able to recover your account or your data."
+    }
+
+    val accountDeleting: String get() = when {
+        isSpanish -> "Eliminando..."
+        isCatalan -> "Eliminant..."
+        else -> "Deleting..."
+    }
+
+    val accountDeleteConfirmButton: String get() = when {
+        isSpanish -> "Sí, eliminar mi cuenta"
+        isCatalan -> "Sí, elimina el meu compte"
+        else -> "Yes, delete my account"
+    }
+
+    val accountTabLogin: String get() = when {
+        isSpanish -> "Iniciar sesión"
+        isCatalan -> "Inicia la sessió"
+        else -> "Sign in"
+    }
+
+    val accountNameLabel: String get() = when {
+        isSpanish -> "Tu nombre"
+        isCatalan -> "El teu nom"
+        else -> "Your name"
+    }
+
+    val accountNamePlaceholder: String get() = when {
+        isSpanish -> "Ej. Víctor Oliver"
+        isCatalan -> "Ex. Víctor Oliver"
+        else -> "E.g. Victor Oliver"
+    }
+
+    val accountEmailLabel: String get() = when {
+        isSpanish -> "Tu Correo electrónico"
+        isCatalan -> "El teu correu electrònic"
+        else -> "Your email"
+    }
+
+    val accountEmailPlaceholder: String get() = when {
+        isSpanish -> "ejemplo@gmail.com"
+        isCatalan -> "exemple@gmail.com"
+        else -> "example@gmail.com"
+    }
+
+    val accountPasswordLabelRegister: String get() = when {
+        isSpanish -> "Crear contraseña (mínimo 6 caracteres)"
+        isCatalan -> "Crea una contrasenya (mínim 6 caràcters)"
+        else -> "Create password (minimum 6 characters)"
+    }
+
+    val accountPasswordLabelLogin: String get() = when {
+        isSpanish -> "Tu Contraseña"
+        isCatalan -> "La teva contrasenya"
+        else -> "Your password"
+    }
+
+    val accountShowPasswordDescription: String get() = when {
+        isSpanish -> "Ver contraseña"
+        isCatalan -> "Mostra la contrasenya"
+        else -> "Show password"
+    }
+
+    val accountSubmitRegister: String get() = when {
+        isSpanish -> "Registrarme con Correo"
+        isCatalan -> "Registra'm amb correu"
+        else -> "Sign up with Email"
+    }
+
+    val accountOrAlsoSeparator: String get() = when {
+        isSpanish -> " o también "
+        isCatalan -> " o també "
+        else -> " or also "
+    }
+
+    // ==========================================
+    // BACKUP & RESTORE DIALOG
+    // ==========================================
+    val backupDialogTitle: String get() = when {
+        isSpanish -> "Copia y Restauración"
+        isCatalan -> "Còpia i restauració"
+        else -> "Backup & Restore"
+    }
+
+    val backupInfoText: String get() = when {
+        isSpanish -> "Puedes guardar y restaurar tus copias en tu almacenamiento local, Google Drive o Microsoft OneDrive mediante el selector del sistema o compartirlas a la nube."
+        isCatalan -> "Pots desar i restaurar les teves còpies a l'emmagatzematge local, a Google Drive o a Microsoft OneDrive mitjançant el selector del sistema, o compartir-les al núvol."
+        else -> "You can save and restore your backups on local storage, Google Drive or Microsoft OneDrive using the system picker, or share them to the cloud."
+    }
+
+    val backupCreateSection: String get() = when {
+        isSpanish -> "Crear copia de seguridad"
+        isCatalan -> "Crear còpia de seguretat"
+        else -> "Create backup"
+    }
+
+    val backupSaveFileTitle: String get() = when {
+        isSpanish -> "Guardar archivo de copia"
+        isCatalan -> "Desar el fitxer de còpia"
+        else -> "Save backup file"
+    }
+
+    val backupSaveFileSubtitle: String get() = when {
+        isSpanish -> "Elige guardar en Local, Google Drive o OneDrive"
+        isCatalan -> "Tria si vols desar-lo en local, a Google Drive o a OneDrive"
+        else -> "Choose to save to Local, Google Drive or OneDrive"
+    }
+
+    val backupShareTitle: String get() = when {
+        isSpanish -> "Enviar o Subir a la nube"
+        isCatalan -> "Enviar o pujar al núvol"
+        else -> "Send or Upload to the cloud"
+    }
+
+    val backupShareSubtitle: String get() = when {
+        isSpanish -> "Sube a Google Drive, OneDrive, Gmail, etc."
+        isCatalan -> "Puja a Google Drive, OneDrive, Gmail, etc."
+        else -> "Upload to Google Drive, OneDrive, Gmail, etc."
+    }
+
+    val backupRestoreSection: String get() = when {
+        isSpanish -> "Restauración de datos"
+        isCatalan -> "Restauració de dades"
+        else -> "Data restore"
+    }
+
+    val backupRestoreFileTitle: String get() = when {
+        isSpanish -> "Restaurar desde archivo"
+        isCatalan -> "Restaurar des d'un fitxer"
+        else -> "Restore from file"
+    }
+
+    val backupRestoreFileSubtitle: String get() = when {
+        isSpanish -> "Selecciona desde Local, Google Drive o OneDrive"
+        isCatalan -> "Selecciona des de local, Google Drive o OneDrive"
+        else -> "Select from Local, Google Drive or OneDrive"
+    }
+
+    val backupShareEmailSubject: String get() = when {
+        isSpanish -> "Copia de Seguridad - Gestor de Suscripciones"
+        isCatalan -> "Còpia de seguretat - Gestor de subscripcions"
+        else -> "Backup - Subscription Manager"
+    }
+
+    val backupShareChooserTitle: String get() = when {
+        isSpanish -> "Guardar en Google Drive, OneDrive o Enviar..."
+        isCatalan -> "Desar a Google Drive, OneDrive o enviar..."
+        else -> "Save to Google Drive, OneDrive or Send..."
+    }
+
+    val backupToastSaved: String get() = when {
+        isSpanish -> "✅ Copia de seguridad guardada correctamente"
+        isCatalan -> "✅ Còpia de seguretat desada correctament"
+        else -> "✅ Backup saved successfully"
+    }
+
+    val backupToastSaveError: String get() = when {
+        isSpanish -> "❌ Error al guardar el archivo"
+        isCatalan -> "❌ Error en desar el fitxer"
+        else -> "❌ Error saving the file"
+    }
+
+    val backupToastReadError: String get() = when {
+        isSpanish -> "❌ No se pudo leer el archivo seleccionado"
+        isCatalan -> "❌ No s'ha pogut llegir el fitxer seleccionat"
+        else -> "❌ Could not read the selected file"
+    }
+
+    val backupToastShareError: String get() = when {
+        isSpanish -> "Error al preparar el archivo para compartir"
+        isCatalan -> "Error en preparar el fitxer per compartir"
+        else -> "Error preparing the file to share"
+    }
+
+    val backupPreviewTitleValid: String get() = when {
+        isSpanish -> "Restaurar copia de seguridad"
+        isCatalan -> "Restaurar la còpia de seguretat"
+        else -> "Restore backup"
+    }
+
+    val backupPreviewTitleInvalid: String get() = when {
+        isSpanish -> "Copia no válida"
+        isCatalan -> "Còpia no vàlida"
+        else -> "Invalid backup"
+    }
+
+    val backupPreviewReadOk: String get() = when {
+        isSpanish -> "Se ha leído correctamente el archivo de copia:"
+        isCatalan -> "S'ha llegit correctament el fitxer de còpia:"
+        else -> "The backup file was read successfully:"
+    }
+
+    fun backupPreviewDate(date: String): String = when {
+        isSpanish -> "📅 Fecha: $date"
+        isCatalan -> "📅 Data: $date"
+        else -> "📅 Date: $date"
+    }
+
+    fun backupPreviewSubscriptions(count: Int): String = when {
+        isSpanish -> "💳 Suscripciones: $count"
+        isCatalan -> "💳 Subscripcions: $count"
+        else -> "💳 Subscriptions: $count"
+    }
+
+    fun backupPreviewMembers(count: Int): String = when {
+        isSpanish -> "👥 Miembros/Usuarios: $count"
+        isCatalan -> "👥 Membres/Usuaris: $count"
+        else -> "👥 Members/Users: $count"
+    }
+
+    fun backupPreviewIncludes(list: String): String = when {
+        isSpanish -> "Incluye: $list..."
+        isCatalan -> "Inclou: $list..."
+        else -> "Includes: $list..."
+    }
+
+    val backupReplaceAll: String get() = when {
+        isSpanish -> "Reemplazar todo"
+        isCatalan -> "Substitueix-ho tot"
+        else -> "Replace all"
+    }
+
+    val backupMerge: String get() = when {
+        isSpanish -> "Fusionar datos"
+        isCatalan -> "Fusiona les dades"
+        else -> "Merge data"
+    }
+
+    val backupReplaceWarning: String get() = when {
+        isSpanish -> "⚠️ 'Reemplazar todo' eliminará los datos actuales y dejará exactamente el contenido de la copia."
+        isCatalan -> "⚠️ «Substitueix-ho tot» eliminarà les dades actuals i deixarà exactament el contingut de la còpia."
+        else -> "⚠️ 'Replace all' will delete the current data and leave exactly the contents of the backup."
+    }
+
+    val backupMergeInfo: String get() = when {
+        isSpanish -> "ℹ️ 'Fusionar datos' mantendrá tus suscripciones actuales y añadirá las de la copia de seguridad."
+        isCatalan -> "ℹ️ «Fusiona les dades» mantindrà les teves subscripcions actuals i hi afegirà les de la còpia de seguretat."
+        else -> "ℹ️ 'Merge data' will keep your current subscriptions and add those from the backup."
+    }
+
+    fun backupInvalidFormat(error: String?): String = when {
+        isSpanish -> "El archivo no contiene un formato de copia de seguridad válido:\n$error"
+        isCatalan -> "El fitxer no conté un format de còpia de seguretat vàlid:\n$error"
+        else -> "The file does not contain a valid backup format:\n$error"
+    }
+
+    val backupRestoreNow: String get() = when {
+        isSpanish -> "Restaurar ahora"
+        isCatalan -> "Restaurar ara"
+        else -> "Restore now"
+    }
 }
+
 

@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.apleq.app.data.remote.AuthState
+import com.apleq.app.ui.util.I18n
 import com.google.firebase.auth.FirebaseUser
 
 @Composable
@@ -109,11 +110,11 @@ fun AuthAccountDialog(
                 }
                 Column {
                     Text(
-                        text = if (authState is AuthState.Authenticated) "Mi Cuenta & Sincronización" else if (isRegisterMode) "Crear cuenta" else "Acceso Multidispositivo",
+                        text = if (authState is AuthState.Authenticated) I18n.accountTitleAuthenticated else if (isRegisterMode) I18n.accountCreateAccount else I18n.accountTitleLogin,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
-                        text = if (authState is AuthState.Authenticated) "Sincronizado con la nube (Firestore)" else "Usa tu cuenta en Android y Web",
+                        text = if (authState is AuthState.Authenticated) I18n.accountSubtitleAuthenticated else I18n.accountSubtitleLogin,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -139,7 +140,7 @@ fun AuthAccountDialog(
                                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = "Conectando con la nube...",
+                                    text = I18n.accountConnectingToCloud,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -177,7 +178,7 @@ fun AuthAccountDialog(
                                         onClick = onClearError,
                                         modifier = Modifier.align(Alignment.End)
                                     ) {
-                                        Text("Reintentar", color = MaterialTheme.colorScheme.error)
+                                        Text(I18n.accountRetry, color = MaterialTheme.colorScheme.error)
                                     }
                                 }
                             }
@@ -195,7 +196,7 @@ fun AuthAccountDialog(
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
-                                    text = "Abriendo selector de cuentas...",
+                                    text = I18n.accountOpeningAccountPicker,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -251,7 +252,7 @@ fun AuthAccountDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismissRequest) {
-                Text("Cerrar")
+                Text(I18n.close)
             }
         }
     )
@@ -285,7 +286,7 @@ private fun AuthenticatedUserView(
             if (user.photoUrl != null) {
                 AsyncImage(
                     model = user.photoUrl,
-                    contentDescription = "Foto de perfil",
+                    contentDescription = I18n.accountProfilePhotoDescription,
                     modifier = Modifier
                         .size(46.dp)
                         .clip(CircleShape)
@@ -310,7 +311,7 @@ private fun AuthenticatedUserView(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = user.displayName ?: "Usuario registrado",
+                    text = user.displayName ?: I18n.accountRegisteredUserFallback,
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -326,12 +327,12 @@ private fun AuthenticatedUserView(
     Spacer(modifier = Modifier.height(4.dp))
 
     Text(
-        text = "Sincronización en la nube",
+        text = I18n.accountSyncSectionTitle,
         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
     )
 
     Text(
-        text = "Tus datos se guardan de forma segura y se sincronizan en tiempo real con el esquema unificado users/{userId}/subscriptions.",
+        text = I18n.accountSyncSectionDescription,
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -356,7 +357,7 @@ private fun AuthenticatedUserView(
                 Icon(Icons.Default.CloudSync, contentDescription = null, modifier = Modifier.size(18.dp))
             }
             Spacer(modifier = Modifier.width(6.dp))
-            Text("Subir a la nube", fontSize = 13.sp)
+            Text(I18n.accountUploadToCloud, fontSize = 13.sp)
         }
 
         OutlinedButton(
@@ -367,7 +368,7 @@ private fun AuthenticatedUserView(
         ) {
             Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(6.dp))
-            Text("Descargar", fontSize = 13.sp)
+            Text(I18n.accountDownload, fontSize = 13.sp)
         }
     }
 
@@ -381,7 +382,7 @@ private fun AuthenticatedUserView(
             contentColor = MaterialTheme.colorScheme.primary
         )
     ) {
-        Text("🧹 Limpiar y Depurar Base de Datos en la Nube", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text(I18n.accountCleanDatabase, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
     }
 
     HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -394,7 +395,7 @@ private fun AuthenticatedUserView(
     ) {
         Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(8.dp))
-        Text("Cerrar sesión")
+        Text(I18n.accountSignOut)
     }
 
     Spacer(modifier = Modifier.height(4.dp))
@@ -406,20 +407,16 @@ private fun AuthenticatedUserView(
     ) {
         Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.width(6.dp))
-        Text("Eliminar mi cuenta", fontSize = 12.sp)
+        Text(I18n.accountDeleteMyAccount, fontSize = 12.sp)
     }
 
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { if (!isDeleting) showDeleteConfirm = false },
-            title = { Text("¿Eliminar tu cuenta?", color = MaterialTheme.colorScheme.error) },
+            title = { Text(I18n.accountDeleteConfirmTitle, color = MaterialTheme.colorScheme.error) },
             text = {
                 Column {
-                    Text(
-                        "Esta acción es irreversible. Se borrarán todas tus suscripciones, y dejarás de " +
-                            "aparecer en los grupos de otros donde participas (esas plazas quedarán libres). " +
-                            "No podrás recuperar tu cuenta ni tus datos."
-                    )
+                    Text(I18n.accountDeleteConfirmBody)
                     deleteError?.let { err ->
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -448,7 +445,7 @@ private fun AuthenticatedUserView(
                     enabled = !isDeleting
                 ) {
                     Text(
-                        if (isDeleting) "Eliminando..." else "Sí, eliminar mi cuenta",
+                        if (isDeleting) I18n.accountDeleting else I18n.accountDeleteConfirmButton,
                         color = MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.Bold
                     )
@@ -456,7 +453,7 @@ private fun AuthenticatedUserView(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }, enabled = !isDeleting) {
-                    Text("Cancelar")
+                    Text(I18n.cancel)
                 }
             }
         )
@@ -503,7 +500,7 @@ private fun LoginForm(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Iniciar sesión",
+                        text = I18n.accountTabLogin,
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = if (!isRegisterMode) FontWeight.Bold else FontWeight.Normal,
                             color = if (!isRegisterMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
@@ -524,7 +521,7 @@ private fun LoginForm(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Crear cuenta",
+                        text = I18n.accountCreateAccount,
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = if (isRegisterMode) FontWeight.Bold else FontWeight.Normal,
                             color = if (isRegisterMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
@@ -538,8 +535,8 @@ private fun LoginForm(
             OutlinedTextField(
                 value = name,
                 onValueChange = onNameChange,
-                label = { Text("Tu nombre") },
-                placeholder = { Text("Ej. Víctor Oliver") },
+                label = { Text(I18n.accountNameLabel) },
+                placeholder = { Text(I18n.accountNamePlaceholder) },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
@@ -550,8 +547,8 @@ private fun LoginForm(
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text("Tu Correo electrónico") },
-            placeholder = { Text("ejemplo@gmail.com") },
+            label = { Text(I18n.accountEmailLabel) },
+            placeholder = { Text(I18n.accountEmailPlaceholder) },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -562,13 +559,13 @@ private fun LoginForm(
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text(if (isRegisterMode) "Crear contraseña (mínimo 6 caracteres)" else "Tu Contraseña") },
+            label = { Text(if (isRegisterMode) I18n.accountPasswordLabelRegister else I18n.accountPasswordLabelLogin) },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
             trailingIcon = {
                 IconButton(onClick = onTogglePasswordVisibility) {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = "Ver contraseña"
+                        contentDescription = I18n.accountShowPasswordDescription
                     )
                 }
             },
@@ -586,7 +583,7 @@ private fun LoginForm(
             shape = RoundedCornerShape(14.dp)
         ) {
             Text(
-                text = if (isRegisterMode) "Registrarme con Correo" else "Iniciar sesión",
+                text = if (isRegisterMode) I18n.accountSubmitRegister else I18n.accountTabLogin,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -599,7 +596,7 @@ private fun LoginForm(
         ) {
             HorizontalDivider(modifier = Modifier.weight(1f))
             Text(
-                text = " o también ",
+                text = I18n.accountOrAlsoSeparator,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -620,7 +617,7 @@ private fun LoginForm(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = "Continuar con Google",
+                text = I18n.continueWithGoogle,
                 fontWeight = FontWeight.SemiBold
             )
         }
