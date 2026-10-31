@@ -20,6 +20,7 @@ import com.apleq.app.data.model.CurrencyItem
 import com.apleq.app.data.model.CurrencyManager
 import com.apleq.app.data.model.PlatformPriceItem
 import com.apleq.app.data.model.PlatformPricingHelper
+import com.apleq.app.ui.util.I18n
 import com.apleq.app.ui.util.ImageStorageHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -220,7 +221,7 @@ class FirebaseAuthService(
                 .build()
 
             val ctx = activityContext ?: context
-            val cm = credentialManager ?: throw IllegalStateException("El gestor de credenciales no está disponible en este dispositivo")
+            val cm = credentialManager ?: throw IllegalStateException(I18n.authCredentialManagerUnavailable)
             val response: GetCredentialResponse = cm.getCredential(
                 request = request,
                 context = ctx
@@ -231,22 +232,22 @@ class FirebaseAuthService(
                     if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         val authCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
-                        val authInst = auth ?: throw IllegalStateException("Servicio de autenticación no inicializado")
+                        val authInst = auth ?: throw IllegalStateException(I18n.authServiceNotInitialized)
                         val authResult = authInst.signInWithCredential(authCredential).await()
-                        val user = authResult.user ?: throw IllegalStateException("Usuario no disponible")
+                        val user = authResult.user ?: throw IllegalStateException(I18n.authUserUnavailable)
                         _authState.value = AuthState.Authenticated(user)
                         
                         // Sincronizar datos de la nube
                         syncFromCloud()
                         Result.success(user)
                     } else {
-                        val err = "Tipo de credencial no soportado: ${credential.type}"
+                        val err = I18n.authUnsupportedCredentialType(credential.type)
                         _authState.value = AuthState.Error(err)
                         Result.failure(Exception(err))
                     }
                 }
                 else -> {
-                    val err = "Tipo de credencial desconocido"
+                    val err = I18n.authUnknownCredentialType
                     _authState.value = AuthState.Error(err)
                     Result.failure(Exception(err))
                 }
@@ -262,11 +263,11 @@ class FirebaseAuthService(
                 _authState.value = AuthState.Error("FALLBACK_GOOGLE_SIGNIN")
                 Result.failure(e)
             } else {
-                _authState.value = AuthState.Error("Error de Google: $rawMsg")
+                _authState.value = AuthState.Error(I18n.authGoogleError(rawMsg))
                 Result.failure(e)
             }
         } catch (e: Exception) {
-            val msg = e.localizedMessage ?: "Error de autenticación"
+            val msg = e.localizedMessage ?: I18n.authDefaultError
             _authState.value = AuthState.Error(msg)
             Result.failure(e)
         }
@@ -287,16 +288,16 @@ class FirebaseAuthService(
         try {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
-            val idToken = account?.idToken ?: throw IllegalStateException("No se obtuvo el token de Google")
+            val idToken = account?.idToken ?: throw IllegalStateException(I18n.authGoogleTokenMissing)
             val authCredential = GoogleAuthProvider.getCredential(idToken, null)
-            val authInst = auth ?: throw IllegalStateException("Servicio de autenticación no inicializado")
+            val authInst = auth ?: throw IllegalStateException(I18n.authServiceNotInitialized)
             val authResult = authInst.signInWithCredential(authCredential).await()
-            val user = authResult.user ?: throw IllegalStateException("Usuario no disponible")
+            val user = authResult.user ?: throw IllegalStateException(I18n.authUserUnavailable)
             _authState.value = AuthState.Authenticated(user)
             syncFromCloud()
             Result.success(user)
         } catch (e: Exception) {
-            val msg = e.localizedMessage ?: "Error de autenticación con Google"
+            val msg = e.localizedMessage ?: I18n.authGoogleDefaultError
             _authState.value = AuthState.Error(msg)
             Result.failure(e)
         }
@@ -308,9 +309,9 @@ class FirebaseAuthService(
     suspend fun registerWithEmail(email: String, password: String, name: String = ""): Result<FirebaseUser> = withContext(Dispatchers.IO) {
         _authState.value = AuthState.Loading
         try {
-            val authInst = auth ?: throw IllegalStateException("Servicio de autenticación no inicializado")
+            val authInst = auth ?: throw IllegalStateException(I18n.authServiceNotInitialized)
             val authResult = authInst.createUserWithEmailAndPassword(email.trim(), password).await()
-            val user = authResult.user ?: throw IllegalStateException("Usuario no disponible")
+            val user = authResult.user ?: throw IllegalStateException(I18n.authUserUnavailable)
 
             val trimmedName = name.trim()
             if (trimmedName.isNotEmpty()) {
@@ -342,9 +343,9 @@ class FirebaseAuthService(
     suspend fun signInWithEmail(email: String, password: String): Result<FirebaseUser> = withContext(Dispatchers.IO) {
         _authState.value = AuthState.Loading
         try {
-            val authInst = auth ?: throw IllegalStateException("Servicio de autenticación no inicializado")
+            val authInst = auth ?: throw IllegalStateException(I18n.authServiceNotInitialized)
             val authResult = authInst.signInWithEmailAndPassword(email.trim(), password).await()
-            val user = authResult.user ?: throw IllegalStateException("Usuario no disponible")
+            val user = authResult.user ?: throw IllegalStateException(I18n.authUserUnavailable)
             _authState.value = AuthState.Authenticated(user)
             
             // Sincronizar datos al iniciar sesión
@@ -367,7 +368,7 @@ class FirebaseAuthService(
             signOut(clearLocalData = true)
             Result.success(Unit)
         } catch (e: Exception) {
-            val msg = e.message ?: "No se pudo eliminar la cuenta. Inténtalo de nuevo."
+            val msg = e.message ?: I18n.deleteAccountRetryError
             Result.failure(Exception(msg))
         }
     }
@@ -384,7 +385,7 @@ class FirebaseAuthService(
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
-            val msg = e.message ?: "No se pudo salir del grupo. Inténtalo de nuevo."
+            val msg = e.message ?: I18n.leaveGroupRetryError
             Result.failure(Exception(msg))
         }
     }
@@ -747,11 +748,11 @@ class FirebaseAuthService(
             true
         } catch (e: Exception) {
             Log.e("FirebaseAuthService", "Error syncing to cloud", e)
-            val msg = e.localizedMessage ?: "Error desconocido"
+            val msg = e.localizedMessage ?: I18n.syncUnknownError
             val userFriendly = if (msg.contains("PERMISSION_DENIED", ignoreCase = true) || msg.contains("insufficient permissions", ignoreCase = true)) {
-                "⚠️ Permiso denegado en Firestore: Configura las Reglas (Rules) en tu consola de Firebase."
+                I18n.syncPermissionDeniedUpload
             } else {
-                "⚠️ Error al sincronizar con la nube: $msg"
+                I18n.syncUploadError(msg)
             }
             _syncStatus.value = userFriendly
             _isSyncing.value = false
@@ -910,10 +911,10 @@ class FirebaseAuthService(
      * - Deja el esquema 100% limpio y optimizado para Web y Android
      */
     suspend fun cleanAndPruneFirebaseDatabase(): Result<String> = withContext(Dispatchers.IO) {
-        val user = auth?.currentUser ?: return@withContext Result.failure(Exception("Debes iniciar sesión para depurar la base de datos"))
-        val db = firestore ?: return@withContext Result.failure(Exception("Firestore no disponible"))
+        val user = auth?.currentUser ?: return@withContext Result.failure(Exception(I18n.cleanupLoginRequired))
+        val db = firestore ?: return@withContext Result.failure(Exception(I18n.cleanupFirestoreUnavailable))
         _isSyncing.value = true
-        _syncStatus.value = "🧹 Depurando y limpiando base de datos en la nube..."
+        _syncStatus.value = I18n.cleanupRunning
 
         try {
             val allDocs = mutableListOf<com.google.firebase.firestore.DocumentSnapshot>()
@@ -1288,14 +1289,14 @@ class FirebaseAuthService(
             // 7. Sincronizar el resultado consolidado en la base de datos local Room
             dao.replaceAllSubscriptionsAndMembers(finalItemsToSync)
 
-            val summary = "✨ Base de datos depurada: ${finalItemsToSync.size} suscripciones consolidadas, $deletedOldDocsCount documentos duplicados eliminados."
+            val summary = I18n.cleanupSummary(finalItemsToSync.size, deletedOldDocsCount)
             _syncStatus.value = "✅ $summary"
             _isSyncing.value = false
             Result.success(summary)
         } catch (e: Exception) {
             Log.e("FirebaseAuthService", "Error during cloud database cleanup", e)
-            val msg = e.localizedMessage ?: "Error desconocido al depurar"
-            _syncStatus.value = "⚠️ Error al depurar: $msg"
+            val msg = e.localizedMessage ?: I18n.cleanupUnknownError
+            _syncStatus.value = I18n.cleanupError(msg)
             _isSyncing.value = false
             Result.failure(e)
         }
@@ -1944,16 +1945,16 @@ class FirebaseAuthService(
     suspend fun syncFromCloud(): Boolean = withContext(Dispatchers.IO) {
         val user = auth?.currentUser
         if (user == null) {
-            _syncStatus.value = "⚠️ Debes iniciar sesión con tu cuenta de Google para descargar datos de la nube."
+            _syncStatus.value = I18n.syncLoginRequiredDownload
             return@withContext false
         }
         val db = firestore
         if (db == null) {
-            _syncStatus.value = "⚠️ Firestore no está disponible en este momento."
+            _syncStatus.value = I18n.syncFirestoreUnavailable
             return@withContext false
         }
         _isSyncing.value = true
-        _syncStatus.value = "☁️ Descargando datos desde la nube..."
+        _syncStatus.value = I18n.syncDownloading
         try {
             val allDocs = mutableListOf<com.google.firebase.firestore.DocumentSnapshot>()
 
@@ -2080,19 +2081,19 @@ class FirebaseAuthService(
 
             if (allDocs.isNotEmpty()) {
                 processSnapshotAndSyncToRoom(allDocs)
-                _syncStatus.value = "✅ Suscripciones sincronizadas desde la nube"
+                _syncStatus.value = I18n.syncDownloadedOk
             } else {
-                _syncStatus.value = "ℹ️ Sincronización completada. No hay cambios pendientes."
+                _syncStatus.value = I18n.syncNoChanges
             }
             _isSyncing.value = false
             true
         } catch (e: Exception) {
             Log.e("FirebaseAuthService", "Error syncing from cloud", e)
-            val msg = e.localizedMessage ?: "Error desconocido"
+            val msg = e.localizedMessage ?: I18n.syncUnknownError
             val userFriendly = if (msg.contains("PERMISSION_DENIED", ignoreCase = true) || msg.contains("insufficient permissions", ignoreCase = true)) {
-                "⚠️ Permiso denegado en Firestore: Revisa las Reglas en Firebase Console."
+                I18n.syncPermissionDeniedDownload
             } else {
-                "⚠️ Error al descargar de la nube: $msg"
+                I18n.syncDownloadError(msg)
             }
             _syncStatus.value = userFriendly
             _isSyncing.value = false
@@ -2176,8 +2177,8 @@ class FirebaseAuthService(
                     groupId = (data["groupId"] as? String) ?: "",
                     ownerUid = (data["ownerUid"] as? String) ?: "",
                     clientUid = (data["clientUid"] as? String) ?: "",
-                    subscriptionName = (data["subscriptionName"] as? String) ?: "Suscripción",
-                    otherPersonName = if (isOwnerSide) (data["clientName"] as? String ?: "Cliente") else "El gestor",
+                    subscriptionName = (data["subscriptionName"] as? String) ?: I18n.subscriptionFallbackName,
+                    otherPersonName = if (isOwnerSide) (data["clientName"] as? String ?: I18n.chatDefaultClientName) else I18n.chatManagerName,
                     lastMessageText = (data["lastMessageText"] as? String) ?: "",
                     isOwnerSide = isOwnerSide
                 )
@@ -2309,15 +2310,15 @@ class FirebaseAuthService(
     private fun parseAuthErrorMessage(e: Exception): String {
         val msg = e.localizedMessage ?: ""
         return when {
-            msg.contains("The email address is already in use", ignoreCase = true) -> "Este correo electrónico ya está registrado. Inicia sesión directamente."
-            msg.contains("The email address is badly formatted", ignoreCase = true) -> "El formato del correo electrónico no es válido."
+            msg.contains("The email address is already in use", ignoreCase = true) -> I18n.authEmailAlreadyInUse
+            msg.contains("The email address is badly formatted", ignoreCase = true) -> I18n.authEmailBadFormat
             msg.contains("The password is invalid or the user does not have a password", ignoreCase = true) ||
             msg.contains("INVALID_LOGIN_CREDENTIALS", ignoreCase = true) ||
             msg.contains("wrong-password", ignoreCase = true) ||
-            msg.contains("user-not-found", ignoreCase = true) -> "Correo o contraseña incorrectos."
-            msg.contains("Password should be at least 6 characters", ignoreCase = true) -> "La contraseña debe tener al menos 6 caracteres."
-            msg.contains("A network error", ignoreCase = true) -> "Error de red. Comprueba tu conexión a Internet."
-            else -> msg.ifBlank { "Ha ocurrido un error en la autenticación." }
+            msg.contains("user-not-found", ignoreCase = true) -> I18n.authWrongCredentials
+            msg.contains("Password should be at least 6 characters", ignoreCase = true) -> I18n.authPasswordMinLengthError
+            msg.contains("A network error", ignoreCase = true) -> I18n.authNetworkError
+            else -> msg.ifBlank { I18n.authGenericError }
         }
     }
 }

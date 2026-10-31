@@ -2802,6 +2802,210 @@ object I18n {
         isCatalan -> "No s'ha pogut eliminar el compte."
         else -> "Could not delete account."
     }
+
+    // ==========================================
+    // BATCH 8: FIREBASE AUTH SERVICE MESSAGES (auth errors, cloud sync status, DB cleanup)
+    // ==========================================
+    val authCredentialManagerUnavailable: String get() = when {
+        isSpanish -> "El gestor de credenciales no está disponible en este dispositivo"
+        isCatalan -> "El gestor de credencials no està disponible en aquest dispositiu"
+        else -> "The credential manager is not available on this device"
+    }
+
+    val authServiceNotInitialized: String get() = when {
+        isSpanish -> "Servicio de autenticación no inicializado"
+        isCatalan -> "Servei d'autenticació no inicialitzat"
+        else -> "Authentication service not initialized"
+    }
+
+    val authUserUnavailable: String get() = when {
+        isSpanish -> "Usuario no disponible"
+        isCatalan -> "Usuari no disponible"
+        else -> "User not available"
+    }
+
+    val authGoogleTokenMissing: String get() = when {
+        isSpanish -> "No se obtuvo el token de Google"
+        isCatalan -> "No s'ha obtingut el token de Google"
+        else -> "Couldn't get the Google token"
+    }
+
+    fun authUnsupportedCredentialType(type: String): String = when {
+        isSpanish -> "Tipo de credencial no soportado: $type"
+        isCatalan -> "Tipus de credencial no suportat: $type"
+        else -> "Unsupported credential type: $type"
+    }
+
+    val authUnknownCredentialType: String get() = when {
+        isSpanish -> "Tipo de credencial desconocido"
+        isCatalan -> "Tipus de credencial desconegut"
+        else -> "Unknown credential type"
+    }
+
+    fun authGoogleError(detail: String): String = when {
+        isSpanish -> "Error de Google: $detail"
+        isCatalan -> "Error de Google: $detail"
+        else -> "Google error: $detail"
+    }
+
+    val authDefaultError: String get() = when {
+        isSpanish -> "Error de autenticación"
+        isCatalan -> "Error d'autenticació"
+        else -> "Authentication error"
+    }
+
+    val authGoogleDefaultError: String get() = when {
+        isSpanish -> "Error de autenticación con Google"
+        isCatalan -> "Error d'autenticació amb Google"
+        else -> "Google authentication error"
+    }
+
+    val authEmailAlreadyInUse: String get() = when {
+        isSpanish -> "Este correo electrónico ya está registrado. Inicia sesión directamente."
+        isCatalan -> "Aquest correu electrònic ja està registrat. Inicia la sessió directament."
+        else -> "This email address is already registered. Please sign in instead."
+    }
+
+    val authEmailBadFormat: String get() = when {
+        isSpanish -> "El formato del correo electrónico no es válido."
+        isCatalan -> "El format del correu electrònic no és vàlid."
+        else -> "The email address format is not valid."
+    }
+
+    val authWrongCredentials: String get() = when {
+        isSpanish -> "Correo o contraseña incorrectos."
+        isCatalan -> "Correu o contrasenya incorrectes."
+        else -> "Incorrect email or password."
+    }
+
+    val authPasswordMinLengthError: String get() = when {
+        isSpanish -> "La contraseña debe tener al menos 6 caracteres."
+        isCatalan -> "La contrasenya ha de tenir almenys 6 caràcters."
+        else -> "The password must be at least 6 characters long."
+    }
+
+    val authNetworkError: String get() = when {
+        isSpanish -> "Error de red. Comprueba tu conexión a Internet."
+        isCatalan -> "Error de xarxa. Comprova la teva connexió a Internet."
+        else -> "Network error. Check your Internet connection."
+    }
+
+    val authGenericError: String get() = when {
+        isSpanish -> "Ha ocurrido un error en la autenticación."
+        isCatalan -> "S'ha produït un error en l'autenticació."
+        else -> "An authentication error occurred."
+    }
+
+    // ---- Eliminar cuenta / salir del grupo (mensajes por defecto si el servidor no envía uno) ----
+    val deleteAccountRetryError: String get() = when {
+        isSpanish -> "No se pudo eliminar la cuenta. Inténtalo de nuevo."
+        isCatalan -> "No s'ha pogut eliminar el compte. Torna-ho a provar."
+        else -> "Couldn't delete the account. Please try again."
+    }
+
+    val leaveGroupRetryError: String get() = when {
+        isSpanish -> "No se pudo salir del grupo. Inténtalo de nuevo."
+        isCatalan -> "No s'ha pogut sortir del grup. Torna-ho a provar."
+        else -> "Couldn't leave the group. Please try again."
+    }
+
+    // ---- Estado de sincronización ----
+    val syncUnknownError: String get() = when {
+        isSpanish -> "Error desconocido"
+        isCatalan -> "Error desconegut"
+        else -> "Unknown error"
+    }
+
+    val syncLoginRequiredDownload: String get() = when {
+        isSpanish -> "⚠️ Debes iniciar sesión con tu cuenta de Google para descargar datos de la nube."
+        isCatalan -> "⚠️ Has d'iniciar la sessió amb el teu compte de Google per descarregar dades del núvol."
+        else -> "⚠️ You must sign in with your Google account to download data from the cloud."
+    }
+
+    val syncFirestoreUnavailable: String get() = when {
+        isSpanish -> "⚠️ Firestore no está disponible en este momento."
+        isCatalan -> "⚠️ Firestore no està disponible en aquest moment."
+        else -> "⚠️ Firestore is not available right now."
+    }
+
+    val syncDownloading: String get() = when {
+        isSpanish -> "☁️ Descargando datos desde la nube..."
+        isCatalan -> "☁️ Descarregant dades del núvol..."
+        else -> "☁️ Downloading data from the cloud..."
+    }
+
+    val syncDownloadedOk: String get() = when {
+        isSpanish -> "✅ Suscripciones sincronizadas desde la nube"
+        isCatalan -> "✅ Subscripcions sincronitzades des del núvol"
+        else -> "✅ Subscriptions synced from the cloud"
+    }
+
+    val syncNoChanges: String get() = when {
+        isSpanish -> "ℹ️ Sincronización completada. No hay cambios pendientes."
+        isCatalan -> "ℹ️ Sincronització completada. No hi ha canvis pendents."
+        else -> "ℹ️ Sync complete. No pending changes."
+    }
+
+    val syncPermissionDeniedDownload: String get() = when {
+        isSpanish -> "⚠️ Permiso denegado en Firestore: Revisa las Reglas en Firebase Console."
+        isCatalan -> "⚠️ Permís denegat a Firestore: Revisa les regles a Firebase Console."
+        else -> "⚠️ Permission denied in Firestore: Check the Rules in Firebase Console."
+    }
+
+    fun syncDownloadError(detail: String): String = when {
+        isSpanish -> "⚠️ Error al descargar de la nube: $detail"
+        isCatalan -> "⚠️ Error en descarregar del núvol: $detail"
+        else -> "⚠️ Error downloading from the cloud: $detail"
+    }
+
+    val syncPermissionDeniedUpload: String get() = when {
+        isSpanish -> "⚠️ Permiso denegado en Firestore: Configura las Reglas (Rules) en tu consola de Firebase."
+        isCatalan -> "⚠️ Permís denegat a Firestore: Configura les regles (Rules) a la teva consola de Firebase."
+        else -> "⚠️ Permission denied in Firestore: Set up the Rules in your Firebase console."
+    }
+
+    fun syncUploadError(detail: String): String = when {
+        isSpanish -> "⚠️ Error al sincronizar con la nube: $detail"
+        isCatalan -> "⚠️ Error en sincronitzar amb el núvol: $detail"
+        else -> "⚠️ Error syncing with the cloud: $detail"
+    }
+
+    // ---- Depuración de la base de datos en la nube ----
+    val cleanupLoginRequired: String get() = when {
+        isSpanish -> "Debes iniciar sesión para depurar la base de datos"
+        isCatalan -> "Has d'iniciar la sessió per depurar la base de dades"
+        else -> "You must sign in to clean up the database"
+    }
+
+    val cleanupFirestoreUnavailable: String get() = when {
+        isSpanish -> "Firestore no disponible"
+        isCatalan -> "Firestore no disponible"
+        else -> "Firestore not available"
+    }
+
+    val cleanupRunning: String get() = when {
+        isSpanish -> "🧹 Depurando y limpiando base de datos en la nube..."
+        isCatalan -> "🧹 Depurant i netejant la base de dades al núvol..."
+        else -> "🧹 Cleaning up the cloud database..."
+    }
+
+    fun cleanupSummary(subscriptions: Int, deletedDocs: Int): String = when {
+        isSpanish -> "✨ Base de datos depurada: $subscriptions suscripciones consolidadas, $deletedDocs documentos duplicados eliminados."
+        isCatalan -> "✨ Base de dades depurada: $subscriptions subscripcions consolidades, $deletedDocs documents duplicats eliminats."
+        else -> "✨ Database cleaned up: $subscriptions subscriptions consolidated, $deletedDocs duplicate documents removed."
+    }
+
+    val cleanupUnknownError: String get() = when {
+        isSpanish -> "Error desconocido al depurar"
+        isCatalan -> "Error desconegut en depurar"
+        else -> "Unknown error while cleaning up"
+    }
+
+    fun cleanupError(detail: String): String = when {
+        isSpanish -> "⚠️ Error al depurar: $detail"
+        isCatalan -> "⚠️ Error en depurar: $detail"
+        else -> "⚠️ Error cleaning up: $detail"
+    }
 }
 
 
