@@ -1,13 +1,17 @@
 package com.apleq.app.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -16,16 +20,25 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -240,8 +253,8 @@ private fun PasswordRuleLine(text: String, ok: Boolean, show: Boolean) {
 }
 
 /**
- * Pantalla de verificación del correo: no se puede cerrar tocando fuera.
- * "Ya lo he verificado", "Reenviar correo" y "Usar otra cuenta".
+ * Pantalla de verificación del correo: no se puede cerrar tocando fuera ni con «atrás».
+ * «Ya lo he verificado», «Reenviar correo» y «Usar otra cuenta».
  */
 @Composable
 fun VerifyEmailDialog(
@@ -251,24 +264,116 @@ fun VerifyEmailDialog(
     onUseOtherAccount: () -> Unit
 ) {
     var busy by remember { mutableStateOf(false) }
+    var checking by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
     var messageIsError by remember { mutableStateOf(false) }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = { },
-        title = { Text(I18n.verifyEmailTitle) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(I18n.verifyEmailBody(email), style = MaterialTheme.typography.bodyMedium)
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 28.dp),
+                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Icono dentro de un círculo
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+
+                Text(
+                    text = I18n.verifyEmailTitle,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+
+                // Correo destacado, en su propia «píldora»
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        text = email,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
+
+                Text(
+                    text = I18n.verifyEmailInstructions,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+
                 message?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
                         color = if (messageIsError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                     )
                 }
-                TextButton(
+
+                Spacer(Modifier.height(4.dp))
+
+                // Acción principal
+                Button(
+                    onClick = {
+                        busy = true
+                        checking = true
+                        message = null
+                        onCheckVerified { ok ->
+                            busy = false
+                            checking = false
+                            if (!ok) {
+                                messageIsError = true
+                                message = I18n.verifyEmailNotYet
+                            }
+                        }
+                    },
                     enabled = !busy,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                ) {
+                    if (checking) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(Modifier.width(10.dp))
+                    } else {
+                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    Text(I18n.verifyEmailDone, fontWeight = FontWeight.SemiBold)
+                }
+
+                // Reenviar
+                OutlinedButton(
                     onClick = {
                         busy = true
                         message = null
@@ -277,37 +382,29 @@ fun VerifyEmailDialog(
                             messageIsError = !ok
                             message = if (ok) I18n.verifyEmailResent else I18n.verifyEmailResendFailed
                         }
-                    }
-                ) { Text(I18n.verifyEmailResend) }
-                TextButton(
+                    },
                     enabled = !busy,
-                    onClick = onUseOtherAccount
-                ) { Text(I18n.verifyEmailUseOther) }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = !busy,
-                onClick = {
-                    busy = true
-                    message = null
-                    onCheckVerified { ok ->
-                        busy = false
-                        if (!ok) {
-                            messageIsError = true
-                            message = I18n.verifyEmailNotYet
-                        }
-                    }
-                }
-            ) {
-                if (busy) {
-                    CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp)
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                ) {
+                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
+                    Text(I18n.verifyEmailResend)
                 }
-                Text(I18n.verifyEmailDone)
+
+                // Otra cuenta
+                TextButton(
+                    onClick = onUseOtherAccount,
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(I18n.verifyEmailUseOther)
+                }
             }
         }
-    )
+    }
 }
 
 /** Pide el correo y envía el enlace para cambiar la contraseña. */

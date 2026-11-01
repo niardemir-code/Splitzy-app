@@ -3433,6 +3433,12 @@ object I18n {
         else -> "Verify your email"
     }
 
+    val verifyEmailInstructions: String get() = when {
+        isSpanish -> "Te hemos enviado un enlace de confirmación. Ábrelo desde tu correo y vuelve aquí. Si no lo ves, mira también la carpeta de spam."
+        isCatalan -> "T'hem enviat un enllaç de confirmació. Obre'l des del teu correu i torna aquí. Si no el veus, mira també la carpeta de correu brossa."
+        else -> "We've sent you a confirmation link. Open it from your email and come back here. If you don't see it, check your spam folder too."
+    }
+
     fun verifyEmailBody(email: String): String = when {
         isSpanish -> "Te hemos enviado un enlace a $email. Ábrelo para confirmar tu cuenta y vuelve aquí. Si no lo ves, mira también la carpeta de spam."
         isCatalan -> "T'hem enviat un enllaç a $email. Obre'l per confirmar el teu compte i torna aquí. Si no el veus, mira també la carpeta de correu brossa."
