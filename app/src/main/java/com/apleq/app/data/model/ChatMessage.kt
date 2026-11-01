@@ -17,3 +17,11 @@ data class UnreadChatInfo(
     val lastMessageText: String,
     val isOwnerSide: Boolean // true si el "sin leer" es para el gestor; false si es para el cliente
 )
+
+data class MemberLeftEvent(
+    val id: String,
+    val groupId: String,
+    val subscriptionName: String,
+    val memberName: String,
+    val createdAtMs: Long
+)

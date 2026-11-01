@@ -135,6 +135,10 @@ class FirebaseAuthService(
     val unreadChats: StateFlow<List<com.apleq.app.data.model.UnreadChatInfo>> = _unreadChats
     private var unreadChatsListeners: List<ListenerRegistration> = emptyList()
 
+    private val _memberLeftEvents = MutableStateFlow<List<com.apleq.app.data.model.MemberLeftEvent>>(emptyList())
+    val memberLeftEvents: StateFlow<List<com.apleq.app.data.model.MemberLeftEvent>> = _memberLeftEvents
+    private var memberLeftEventsListener: ListenerRegistration? = null
+
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
 
@@ -268,7 +272,7 @@ class FirebaseAuthService(
                 Result.failure(e)
             }
         } catch (e: Exception) {
-            val msg = e.localizedMessage ?: I18n.authDefaultError
+            val msg = I18n.clockErrorMessageOrNull(e.localizedMessage) ?: e.localizedMessage ?: I18n.authDefaultError
             _authState.value = AuthState.Error(msg)
             Result.failure(e)
         }
@@ -300,7 +304,7 @@ class FirebaseAuthService(
             syncFromCloud()
             Result.success(user)
         } catch (e: Exception) {
-            val msg = e.localizedMessage ?: I18n.authGoogleDefaultError
+            val msg = I18n.clockErrorMessageOrNull(e.localizedMessage) ?: e.localizedMessage ?: I18n.authGoogleDefaultError
             _authState.value = AuthState.Error(msg)
             Result.failure(e)
         }
@@ -401,6 +405,7 @@ class FirebaseAuthService(
             removeActiveListeners()
             removeParticipatingGroupsListener()
             stopListeningUnreadChats()
+            stopListeningMemberLeftEvents()
             stopListeningChatMessages()
             if (clearLocalData) {
                 dao.deleteAllMembers()
@@ -2204,6 +2209,51 @@ class FirebaseAuthService(
                 publish()
             }
         unreadChatsListeners = listOf(l1, l2)
+    }
+
+    /**
+     * Escucha los avisos de "un miembro ha dejado el grupo" que crea la función
+     * del servidor en users/{uid}/events. Se llama una vez al iniciar sesión.
+     */
+    fun startListeningMemberLeftEvents() {
+        val uid = auth?.currentUser?.uid ?: return
+        val db = firestore ?: return
+        memberLeftEventsListener?.remove()
+        memberLeftEventsListener = db.collection("users").document(uid).collection("events")
+            .whereEqualTo("type", "member_left")
+            .addSnapshotListener { snap, error ->
+                if (error != null) {
+                    android.util.Log.e("Events", "Error escuchando avisos de baja", error)
+                    return@addSnapshotListener
+                }
+                _memberLeftEvents.value = (snap?.documents ?: emptyList()).mapNotNull { doc ->
+                    val data = doc.data ?: return@mapNotNull null
+                    com.apleq.app.data.model.MemberLeftEvent(
+                        id = doc.id,
+                        groupId = (data["groupId"] as? String) ?: "",
+                        subscriptionName = (data["subscriptionName"] as? String)?.takeIf { it.isNotBlank() }
+                            ?: I18n.subscriptionFallbackName,
+                        memberName = (data["memberName"] as? String) ?: "",
+                        createdAtMs = (data["createdAtMs"] as? Number)?.toLong() ?: 0L
+                    )
+                }.sortedByDescending { it.createdAtMs }
+            }
+    }
+
+    fun stopListeningMemberLeftEvents() {
+        memberLeftEventsListener?.remove()
+        memberLeftEventsListener = null
+        _memberLeftEvents.value = emptyList()
+    }
+
+    suspend fun deleteMemberLeftEvent(eventId: String): Unit = withContext(Dispatchers.IO) {
+        val uid = auth?.currentUser?.uid ?: return@withContext
+        val db = firestore ?: return@withContext
+        try {
+            db.collection("users").document(uid).collection("events").document(eventId).delete().await()
+        } catch (e: Exception) {
+            android.util.Log.w("Events", "No se pudo borrar el aviso de baja", e)
+        }
     }
 
     fun stopListeningUnreadChats() {

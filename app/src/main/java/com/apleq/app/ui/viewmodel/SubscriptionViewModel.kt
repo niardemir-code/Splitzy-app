@@ -128,6 +128,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 if (state is AuthState.Authenticated) {
                     authService.startListeningParticipatingGroups()
                     authService.startListeningUnreadChats()
+                    authService.startListeningMemberLeftEvents()
                     // Sincronizar el estado de leído con la nube, una vez por sesión.
                     if (!hasMergedReadIds) {
                         hasMergedReadIds = true
@@ -393,11 +394,16 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             initialValue = FinancialOverview()
         )
 
+    private val chatsAndLeftEventsFlow = combine(
+        authService.unreadChats,
+        authService.memberLeftEvents
+    ) { chats, leftEvents -> Pair(chats, leftEvents) }
+
     private val clientReminderSourceFlow = combine(
         authService.participatingGroups,
         _clientAlarmPrefs,
-        authService.unreadChats
-    ) { groups, prefs, unreadChatsList -> Triple(groups, prefs, unreadChatsList) }
+        chatsAndLeftEventsFlow
+    ) { groups, prefs, chatsAndEvents -> Triple(groups, prefs, chatsAndEvents) }
 
     private val _languageTick = MutableStateFlow(0)
     fun onLanguageChanged() {
@@ -410,7 +416,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         _dismissedNotificationIds,
         clientReminderSourceFlow,
         _languageTick
-    ) { subsWithMembers, readIds, dismissedIds, (participating, prefs, unreadChatsList), _ ->
+    ) { subsWithMembers, readIds, dismissedIds, (participating, prefs, chatsAndEvents), _ ->
+        val unreadChatsList = chatsAndEvents.first
+        val leftEvents = chatsAndEvents.second
         val subscriptions = subsWithMembers.map { it.subscription }
         val membersBySub = subsWithMembers.associate { it.subscription.id.toString() to it.members }
         val managerNotifs = NotificationGenerator.generate(
@@ -445,7 +453,27 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 alarmConfigText = null
             )
         }
-        (managerNotifs + clientNotifs + chatNotifs).filter { it.id !in dismissedIds }
+        val leftNotifs = leftEvents.map { ev ->
+            com.apleq.app.data.model.AppNotification(
+                id = "left_${ev.id}",
+                type = com.apleq.app.data.model.NotificationType.CLIENT_REMINDER,
+                subscriptionId = ev.groupId,
+                subscriptionName = ev.subscriptionName,
+                subscriptionColorHex = "#E11D48",
+                memberId = "",
+                memberName = ev.memberName,
+                sharingPlatform = "",
+                amount = 0.0,
+                currencySymbol = "€",
+                nextPaymentDate = "",
+                dueDateText = I18n.memberLeftNotification(ev.memberName),
+                daysRemaining = 0,
+                status = com.apleq.app.data.model.NotificationStatus.TODAY,
+                isRead = "left_${ev.id}" in readIds,
+                alarmConfigText = null
+            )
+        }
+        (managerNotifs + clientNotifs + chatNotifs + leftNotifs).filter { it.id !in dismissedIds }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -492,6 +520,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         val updated = _dismissedNotificationIds.value + id
         _dismissedNotificationIds.value = updated
         saveDismissedNotificationIds(updated)
+        if (id.startsWith("left_")) {
+            viewModelScope.launch { authService.deleteMemberLeftEvent(id.removePrefix("left_")) }
+        }
     }
 
     fun dismissAllNotifications() {
@@ -499,6 +530,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         val updated = _dismissedNotificationIds.value + allVisibleIds
         _dismissedNotificationIds.value = updated
         saveDismissedNotificationIds(updated)
+        allVisibleIds.filter { it.startsWith("left_") }.forEach { leftId ->
+            viewModelScope.launch { authService.deleteMemberLeftEvent(leftId.removePrefix("left_")) }
+        }
     }
 
     /**

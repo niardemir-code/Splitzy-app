@@ -210,14 +210,16 @@ private fun NotificationItemRow(
                         modifier = Modifier.weight(1f)
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    if (notif.amount > 0.0) {
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(
-                        text = "${String.format("%.2f", notif.amount)} ${notif.currencySymbol}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                        Text(
+                            text = "${String.format("%.2f", notif.amount)} ${notif.currencySymbol}",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(2.dp))

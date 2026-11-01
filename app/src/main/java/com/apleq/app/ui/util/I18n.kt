@@ -3362,6 +3362,31 @@ object I18n {
         isCatalan -> "Tria l'idioma de l'aplicació"
         else -> "Choose the app language"
     }
+
+    // ==========================================
+    // BATCH 14: CLOCK ERROR & MEMBER-LEFT NOTIFICATION
+    // ==========================================
+    val authClockError: String get() = when {
+        isSpanish -> "No se ha podido iniciar sesión. Revisa que la fecha y la hora de tu móvil estén en automático (Ajustes → Fecha y hora) e inténtalo de nuevo."
+        isCatalan -> "No s'ha pogut iniciar la sessió. Comprova que la data i l'hora del mòbil estiguin en automàtic (Ajustos → Data i hora) i torna-ho a provar."
+        else -> "Couldn't sign in. Check that your phone's date and time are set to automatic (Settings → Date & time) and try again."
+    }
+
+    /** Si el error es el típico de un reloj mal puesto, devuelve el mensaje claro; si no, null. */
+    fun clockErrorMessageOrNull(raw: String?): String? {
+        val r = raw ?: return null
+        return if (r.contains("is stale to sign-in", ignoreCase = true) ||
+            r.contains("ID Token issued at", ignoreCase = true)) authClockError else null
+    }
+
+    fun memberLeftNotification(name: String): String {
+        val who = name.ifBlank { chatDefaultClientName }
+        return when {
+            isSpanish -> "$who ha dejado la suscripción"
+            isCatalan -> "$who ha deixat la subscripció"
+            else -> "$who has left the subscription"
+        }
+    }
 }
 
 
