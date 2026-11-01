@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apleq.app.data.remote.AuthState
 import com.apleq.app.data.util.AppThemeMode
+import com.apleq.app.data.util.LanguagePreferences
 import com.apleq.app.ui.screens.AuthGateScreen
 import com.apleq.app.ui.screens.HomeScreen
 import com.apleq.app.ui.screens.SettingsScreen
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: SubscriptionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        LanguagePreferences.apply(this)
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

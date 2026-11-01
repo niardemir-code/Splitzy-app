@@ -399,12 +399,18 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         authService.unreadChats
     ) { groups, prefs, unreadChatsList -> Triple(groups, prefs, unreadChatsList) }
 
+    private val _languageTick = MutableStateFlow(0)
+    fun onLanguageChanged() {
+        _languageTick.value += 1
+    }
+
     val notifications: StateFlow<List<AppNotification>> = combine(
         repository.allSubscriptions,
         _readNotificationIds,
         _dismissedNotificationIds,
-        clientReminderSourceFlow
-    ) { subsWithMembers, readIds, dismissedIds, (participating, prefs, unreadChatsList) ->
+        clientReminderSourceFlow,
+        _languageTick
+    ) { subsWithMembers, readIds, dismissedIds, (participating, prefs, unreadChatsList), _ ->
         val subscriptions = subsWithMembers.map { it.subscription }
         val membersBySub = subsWithMembers.associate { it.subscription.id.toString() to it.members }
         val managerNotifs = NotificationGenerator.generate(

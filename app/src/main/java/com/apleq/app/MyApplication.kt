@@ -8,6 +8,7 @@ import com.google.firebase.FirebaseOptions
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        com.apleq.app.data.util.LanguagePreferences.apply(this)
         try {
             if (FirebaseApp.getApps(this).isEmpty()) {
                 val initialized = try { FirebaseApp.initializeApp(this) } catch (_: Throwable) { null }

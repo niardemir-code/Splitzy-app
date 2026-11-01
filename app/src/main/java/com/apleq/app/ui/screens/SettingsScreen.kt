@@ -50,6 +50,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.apleq.app.data.util.LanguagePreferences
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -211,6 +216,21 @@ fun SettingsScreen(
             // SECCIÓN: IDIOMA (AUTOMÁTICO DEL SISTEMA)
             // ==========================================
             item {
+                val languageContext = LocalContext.current
+                var languageChoice by remember { mutableStateOf(LanguagePreferences.getChoice(languageContext)) }
+                val changeLanguage: (String) -> Unit = { code ->
+                    if (code != languageChoice) {
+                        languageChoice = code
+                        LanguagePreferences.setChoice(languageContext, code)
+                        viewModel.onLanguageChanged()
+                        var ctx: android.content.Context = languageContext
+                        while (ctx is android.content.ContextWrapper && ctx !is android.app.Activity) {
+                            ctx = ctx.baseContext
+                        }
+                        (ctx as? android.app.Activity)?.recreate()
+                    }
+                }
+
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -238,7 +258,7 @@ fun SettingsScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = I18n.languageAutomaticTitle,
+                                text = I18n.languageSectionSubtitle,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -251,44 +271,43 @@ fun SettingsScreen(
                         border = CardDefaults.outlinedCardBorder(),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Language,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = I18n.languageAutomaticTitle,
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = I18n.languageAutomaticDesc,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
+                            ThemeOptionCard(
+                                title = I18n.languageAutomaticTitle,
+                                description = I18n.languageAutomaticDesc,
+                                icon = Icons.Default.Language,
+                                isSelected = languageChoice == LanguagePreferences.SYSTEM,
+                                onClick = { changeLanguage(LanguagePreferences.SYSTEM) },
+                                testTag = "language_option_system"
+                            )
+                            ThemeOptionCard(
+                                title = "Español",
+                                description = "ES",
+                                icon = Icons.Default.Language,
+                                isSelected = languageChoice == "es",
+                                onClick = { changeLanguage("es") },
+                                testTag = "language_option_es"
+                            )
+                            ThemeOptionCard(
+                                title = "Català",
+                                description = "CA",
+                                icon = Icons.Default.Language,
+                                isSelected = languageChoice == "ca",
+                                onClick = { changeLanguage("ca") },
+                                testTag = "language_option_ca"
+                            )
+                            ThemeOptionCard(
+                                title = "English",
+                                description = "EN",
+                                icon = Icons.Default.Language,
+                                isSelected = languageChoice == "en",
+                                onClick = { changeLanguage("en") },
+                                testTag = "language_option_en"
                             )
                         }
                     }

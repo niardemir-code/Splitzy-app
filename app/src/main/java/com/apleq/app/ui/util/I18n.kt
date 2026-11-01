@@ -3353,6 +3353,15 @@ object I18n {
         isCatalan -> "Tu"
         else -> "You"
     }
+
+    // ==========================================
+    // BATCH 13: LANGUAGE PICKER
+    // ==========================================
+    val languageSectionSubtitle: String get() = when {
+        isSpanish -> "Elige el idioma de la aplicación"
+        isCatalan -> "Tria l'idioma de l'aplicació"
+        else -> "Choose the app language"
+    }
 }
 
 
