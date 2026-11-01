@@ -30,10 +30,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.apleq.app.data.util.evaluatePassword
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
@@ -111,14 +113,28 @@ class FirebaseAuthService(
         }
     }
 
+    /** Una cuenta de correo y contraseña sin verificar no entra en la app. Las de Google ya vienen verificadas. */
+    private fun isVerified(user: FirebaseUser): Boolean =
+        user.isEmailVerified || user.providerData.none { it.providerId == EmailAuthProvider.PROVIDER_ID }
+
     private val _authState = MutableStateFlow<AuthState>(
         try {
-            auth?.currentUser?.let { AuthState.Authenticated(it) } ?: AuthState.Idle
+            auth?.currentUser?.takeIf { isVerified(it) }?.let { AuthState.Authenticated(it) } ?: AuthState.Idle
         } catch (_: Throwable) {
             AuthState.Idle
         }
     )
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    /** Correo de la cuenta que falta por verificar; si no es null, la pantalla de acceso muestra la verificación. */
+    private val _pendingVerificationEmail = MutableStateFlow<String?>(
+        try {
+            auth?.currentUser?.takeIf { !isVerified(it) }?.email
+        } catch (_: Throwable) {
+            null
+        }
+    )
+    val pendingVerificationEmail: StateFlow<String?> = _pendingVerificationEmail.asStateFlow()
 
     private val _syncStatus = MutableStateFlow<String?>(null)
     val syncStatus: StateFlow<String?> = _syncStatus.asStateFlow()
@@ -161,7 +177,13 @@ class FirebaseAuthService(
             auth?.addAuthStateListener { firebaseAuth ->
                 try {
                     val user = firebaseAuth.currentUser
-                    if (user != null) {
+                    if (user != null && !isVerified(user)) {
+                        // Cuenta de correo sin verificar: no entra en la app hasta verificar.
+                        _pendingVerificationEmail.value = user.email
+                        _authState.value = AuthState.Idle
+                        removeActiveListeners()
+                    } else if (user != null) {
+                        _pendingVerificationEmail.value = null
                         _authState.value = AuthState.Authenticated(user)
                         setupFirestoreRealtimeSync(user.uid)
                         // Descargar y sincronizar datos de la nube primero al autenticar
@@ -255,7 +277,7 @@ class FirebaseAuthService(
                 }
             }
         } catch (e: GetCredentialCancellationException) {
-            _authState.value = auth?.currentUser?.let { AuthState.Authenticated(it) } ?: AuthState.Idle
+            _authState.value = auth?.currentUser?.takeIf { isVerified(it) }?.let { AuthState.Authenticated(it) } ?: AuthState.Idle
             Result.failure(e)
         } catch (e: GetCredentialException) {
             val rawMsg = e.localizedMessage ?: ""
@@ -314,6 +336,12 @@ class FirebaseAuthService(
      * Registro con correo y contraseña
      */
     suspend fun registerWithEmail(email: String, password: String, name: String = ""): Result<FirebaseUser> = withContext(Dispatchers.IO) {
+        // Red de seguridad: la pantalla ya no deja pulsar el botón sin cumplir los requisitos.
+        if (!evaluatePassword(password).meets) {
+            val msg = I18n.authPasswordWeak
+            _authState.value = AuthState.Error(msg)
+            return@withContext Result.failure(Exception(msg))
+        }
         _authState.value = AuthState.Loading
         try {
             val authInst = auth ?: throw IllegalStateException(I18n.authServiceNotInitialized)
@@ -332,10 +360,15 @@ class FirebaseAuthService(
                 }
             }
 
-            _authState.value = AuthState.Authenticated(user)
-
-            // Subir datos locales a la nueva cuenta
-            syncToCloud()
+            // La cuenta no entra en la app hasta verificar el correo.
+            try {
+                authInst.setLanguageCode(I18n.currentLanguageCode) // el correo sale en el idioma de la app
+                user.sendEmailVerification().await()
+            } catch (e: Exception) {
+                Log.w("FirebaseAuthService", "No se pudo enviar el correo de verificación: ${e.message}")
+            }
+            _pendingVerificationEmail.value = email.trim()
+            _authState.value = AuthState.Idle
             Result.success(user)
         } catch (e: Exception) {
             val msg = parseAuthErrorMessage(e)
@@ -353,8 +386,14 @@ class FirebaseAuthService(
             val authInst = auth ?: throw IllegalStateException(I18n.authServiceNotInitialized)
             val authResult = authInst.signInWithEmailAndPassword(email.trim(), password).await()
             val user = authResult.user ?: throw IllegalStateException(I18n.authUserUnavailable)
+            if (!isVerified(user)) {
+                // Cuenta sin verificar: pantalla de verificación, sin entrar en la app.
+                _pendingVerificationEmail.value = user.email ?: email.trim()
+                _authState.value = AuthState.Idle
+                return@withContext Result.success(user)
+            }
             _authState.value = AuthState.Authenticated(user)
-            
+
             // Sincronizar datos al iniciar sesión
             syncFromCloud()
             Result.success(user)
@@ -362,6 +401,56 @@ class FirebaseAuthService(
             val msg = parseAuthErrorMessage(e)
             _authState.value = AuthState.Error(msg)
             Result.failure(Exception(msg))
+        }
+    }
+
+    /** Reenvía el correo de verificación a la cuenta pendiente. */
+    suspend fun resendVerificationEmail(): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val authInst = auth ?: return@withContext Result.failure(IllegalStateException(I18n.authServiceNotInitialized))
+            val user = authInst.currentUser ?: return@withContext Result.failure(IllegalStateException(I18n.authUserUnavailable))
+            authInst.setLanguageCode(I18n.currentLanguageCode)
+            user.sendEmailVerification().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** "Ya lo he verificado": recarga el usuario y, si consta verificado, entra en la app. */
+    suspend fun checkEmailVerified(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val user = auth?.currentUser ?: return@withContext false
+            user.reload().await()
+            if (!isVerified(user)) return@withContext false
+            user.getIdToken(true).await() // refresca el token para que lleve "email verificado"
+            _pendingVerificationEmail.value = null
+            _authState.value = AuthState.Authenticated(user)
+            setupFirestoreRealtimeSync(user.uid)
+            syncFromCloud()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /** "Usar otra cuenta": cierra la sesión pendiente y vuelve al formulario. */
+    suspend fun cancelEmailVerification() {
+        signOut()
+        _pendingVerificationEmail.value = null
+    }
+
+    /** Envía el enlace para cambiar la contraseña. Mismo resultado exista o no la cuenta (no revela qué correos están registrados). */
+    suspend fun sendPasswordReset(email: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val authInst = auth ?: return@withContext Result.failure(IllegalStateException(I18n.authServiceNotInitialized))
+            authInst.setLanguageCode(I18n.currentLanguageCode)
+            authInst.sendPasswordResetEmail(email.trim()).await()
+            Result.success(Unit)
+        } catch (e: com.google.firebase.auth.FirebaseAuthInvalidUserException) {
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
@@ -424,7 +513,7 @@ class FirebaseAuthService(
     }
 
     fun clearError() {
-        _authState.value = auth?.currentUser?.let { AuthState.Authenticated(it) } ?: AuthState.Idle
+        _authState.value = auth?.currentUser?.takeIf { isVerified(it) }?.let { AuthState.Authenticated(it) } ?: AuthState.Idle
     }
 
     fun clearSyncStatus() {

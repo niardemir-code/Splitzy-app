@@ -51,9 +51,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apleq.app.data.remote.AuthState
 import com.apleq.app.ui.components.EmailLoginDialog
 import com.apleq.app.ui.components.EmailRegisterDialog
+import com.apleq.app.ui.components.ForgotPasswordDialog
+import com.apleq.app.ui.components.VerifyEmailDialog
 import com.apleq.app.ui.components.SplitzyLogo
 import com.apleq.app.ui.theme.Quicksand
 import com.apleq.app.ui.util.I18n
@@ -81,6 +84,17 @@ fun AuthGateScreen(
 
     var showRegisterDialog by remember { mutableStateOf(false) }
     var showLoginDialog by remember { mutableStateOf(false) }
+    var showForgotPasswordDialog by remember { mutableStateOf(false) }
+    var forgotPasswordEmail by remember { mutableStateOf("") }
+    val pendingVerificationEmail by viewModel.pendingVerificationEmail.collectAsStateWithLifecycle()
+
+    // Al pasar a "pendiente de verificar", cerrar los formularios.
+    LaunchedEffect(pendingVerificationEmail) {
+        if (pendingVerificationEmail != null) {
+            showRegisterDialog = false
+            showLoginDialog = false
+        }
+    }
 
     val isLoading = authState is AuthState.Loading
 
@@ -294,7 +308,29 @@ fun AuthGateScreen(
             onDismiss = { showLoginDialog = false },
             onLogin = { email, password ->
                 viewModel.signInWithEmail(email, password)
+            },
+            onForgotPassword = { email ->
+                forgotPasswordEmail = email
+                showLoginDialog = false
+                showForgotPasswordDialog = true
             }
+        )
+    }
+
+    if (showForgotPasswordDialog) {
+        ForgotPasswordDialog(
+            initialEmail = forgotPasswordEmail,
+            onSend = { email, onResult -> viewModel.sendPasswordReset(email, onResult) },
+            onDismiss = { showForgotPasswordDialog = false }
+        )
+    }
+
+    pendingVerificationEmail?.let { pendingEmail ->
+        VerifyEmailDialog(
+            email = pendingEmail,
+            onCheckVerified = { onResult -> viewModel.checkEmailVerified(onResult) },
+            onResend = { onResult -> viewModel.resendVerificationEmail(onResult) },
+            onUseOtherAccount = { viewModel.cancelEmailVerification() }
         )
     }
 }

@@ -3393,6 +3393,117 @@ object I18n {
             else -> "$who has left the subscription"
         }
     }
+
+    // ==========================================
+    // BATCH 15: SECURE SIGN-UP (PASSWORD RULES, EMAIL VERIFICATION, PASSWORD RESET)
+    // ==========================================
+    val passwordRuleLength: String get() = when {
+        isSpanish -> "Mínimo 8 caracteres"
+        isCatalan -> "Mínim 8 caràcters"
+        else -> "At least 8 characters"
+    }
+
+    val passwordRuleLetter: String get() = when {
+        isSpanish -> "Al menos una letra"
+        isCatalan -> "Almenys una lletra"
+        else -> "At least one letter"
+    }
+
+    val passwordRuleNumber: String get() = when {
+        isSpanish -> "Al menos un número"
+        isCatalan -> "Almenys un número"
+        else -> "At least one number"
+    }
+
+    val passwordRuleNotCommon: String get() = when {
+        isSpanish -> "Esa contraseña es demasiado habitual"
+        isCatalan -> "Aquesta contrasenya és massa habitual"
+        else -> "That password is too common"
+    }
+
+    val authPasswordWeak: String get() = when {
+        isSpanish -> "La contraseña no cumple los requisitos."
+        isCatalan -> "La contrasenya no compleix els requisits."
+        else -> "The password doesn't meet the requirements."
+    }
+
+    val verifyEmailTitle: String get() = when {
+        isSpanish -> "Verifica tu correo"
+        isCatalan -> "Verifica el teu correu"
+        else -> "Verify your email"
+    }
+
+    fun verifyEmailBody(email: String): String = when {
+        isSpanish -> "Te hemos enviado un enlace a $email. Ábrelo para confirmar tu cuenta y vuelve aquí. Si no lo ves, mira también la carpeta de spam."
+        isCatalan -> "T'hem enviat un enllaç a $email. Obre'l per confirmar el teu compte i torna aquí. Si no el veus, mira també la carpeta de correu brossa."
+        else -> "We've sent a link to $email. Open it to confirm your account and come back here. If you don't see it, check your spam folder too."
+    }
+
+    val verifyEmailDone: String get() = when {
+        isSpanish -> "Ya lo he verificado"
+        isCatalan -> "Ja l'he verificat"
+        else -> "I've verified it"
+    }
+
+    val verifyEmailResend: String get() = when {
+        isSpanish -> "Reenviar correo"
+        isCatalan -> "Torna a enviar el correu"
+        else -> "Resend email"
+    }
+
+    val verifyEmailUseOther: String get() = when {
+        isSpanish -> "Usar otra cuenta"
+        isCatalan -> "Fer servir un altre compte"
+        else -> "Use another account"
+    }
+
+    val verifyEmailNotYet: String get() = when {
+        isSpanish -> "Todavía no consta como verificado. Abre el enlace del correo e inténtalo de nuevo."
+        isCatalan -> "Encara no consta com a verificat. Obre l'enllaç del correu i torna-ho a provar."
+        else -> "It's not verified yet. Open the link in the email and try again."
+    }
+
+    val verifyEmailResent: String get() = when {
+        isSpanish -> "Correo reenviado. Revisa también la carpeta de spam."
+        isCatalan -> "Correu reenviat. Mira també la carpeta de correu brossa."
+        else -> "Email sent again. Check your spam folder too."
+    }
+
+    val verifyEmailResendFailed: String get() = when {
+        isSpanish -> "No se pudo reenviar el correo. Inténtalo en unos minutos."
+        isCatalan -> "No s'ha pogut reenviar el correu. Torna-ho a provar d'aquí a uns minuts."
+        else -> "Couldn't resend the email. Try again in a few minutes."
+    }
+
+    val forgotPasswordLink: String get() = when {
+        isSpanish -> "¿Has olvidado tu contraseña?"
+        isCatalan -> "Has oblidat la contrasenya?"
+        else -> "Forgot your password?"
+    }
+
+    val forgotPasswordTitle: String get() = when {
+        isSpanish -> "Recuperar contraseña"
+        isCatalan -> "Recuperar la contrasenya"
+        else -> "Reset password"
+    }
+
+    val forgotPasswordBody: String get() = when {
+        isSpanish -> "Escribe el correo de tu cuenta y te enviaremos un enlace para elegir una contraseña nueva."
+        isCatalan -> "Escriu el correu del teu compte i t'enviarem un enllaç per triar una contrasenya nova."
+        else -> "Enter your account email and we'll send you a link to choose a new password."
+    }
+
+    val forgotPasswordSend: String get() = when {
+        isSpanish -> "Enviar enlace"
+        isCatalan -> "Envia l'enllaç"
+        else -> "Send link"
+    }
+
+    val forgotPasswordSent: String get() = when {
+        isSpanish -> "Si existe una cuenta con ese correo, recibirás un enlace para cambiar la contraseña."
+        isCatalan -> "Si existeix un compte amb aquest correu, rebràs un enllaç per canviar la contrasenya."
+        else -> "If an account exists with that email, you'll receive a link to change the password."
+    }
 }
 
 

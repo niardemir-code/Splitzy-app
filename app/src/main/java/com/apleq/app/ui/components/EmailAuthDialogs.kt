@@ -2,13 +2,17 @@ package com.apleq.app.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -32,6 +36,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.apleq.app.data.util.evaluatePassword
 import com.apleq.app.ui.util.I18n
 
 /**
@@ -50,10 +55,10 @@ fun EmailRegisterDialog(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val passwordsMatch = confirmPassword.isEmpty() || password == confirmPassword
-    val passwordTooShort = password.isNotEmpty() && password.length < 6
+    val rules = evaluatePassword(password)
     val canSubmit = name.trim().isNotEmpty() &&
         email.isNotBlank() &&
-        password.length >= 6 &&
+        rules.meets &&
         password == confirmPassword &&
         !isLoading
 
@@ -86,18 +91,15 @@ fun EmailRegisterDialog(
                     onValueChange = { password = it },
                     label = { Text(I18n.passwordLabel) },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                    isError = passwordTooShort,
                     supportingText = {
-                        Text(
-                            text = if (passwordTooShort)
-                                I18n.passwordTooShortWarning
-                            else
-                                I18n.passwordMinChars,
-                            color = if (passwordTooShort)
-                                MaterialTheme.colorScheme.error
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column {
+                            PasswordRuleLine(I18n.passwordRuleLength, rules.length, password.isNotEmpty())
+                            PasswordRuleLine(I18n.passwordRuleLetter, rules.hasLetter, password.isNotEmpty())
+                            PasswordRuleLine(I18n.passwordRuleNumber, rules.hasNumber, password.isNotEmpty())
+                            if (rules.basicsMet && !rules.notCommon) {
+                                PasswordRuleLine(I18n.passwordRuleNotCommon, false, true)
+                            }
+                        }
                     },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -155,7 +157,8 @@ fun EmailRegisterDialog(
 fun EmailLoginDialog(
     isLoading: Boolean,
     onDismiss: () -> Unit,
-    onLogin: (email: String, password: String) -> Unit
+    onLogin: (email: String, password: String) -> Unit,
+    onForgotPassword: (email: String) -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -195,6 +198,12 @@ fun EmailLoginDialog(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
+                TextButton(
+                    onClick = { onForgotPassword(email.trim()) },
+                    enabled = !isLoading
+                ) {
+                    Text(I18n.forgotPasswordLink)
+                }
             }
         },
         confirmButton = {
@@ -210,3 +219,150 @@ fun EmailLoginDialog(
         }
     )
 }
+
+@Composable
+private fun PasswordRuleLine(text: String, ok: Boolean, show: Boolean) {
+    val color = when {
+        !show -> MaterialTheme.colorScheme.onSurfaceVariant
+        ok -> androidx.compose.ui.graphics.Color(0xFF16A34A)
+        else -> MaterialTheme.colorScheme.error
+    }
+    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+        Icon(
+            imageVector = if (show && !ok) Icons.Default.Close else Icons.Default.Check,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.height(14.dp).width(14.dp)
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(text = text, color = color, style = MaterialTheme.typography.labelSmall)
+    }
+}
+
+/**
+ * Pantalla de verificación del correo: no se puede cerrar tocando fuera.
+ * "Ya lo he verificado", "Reenviar correo" y "Usar otra cuenta".
+ */
+@Composable
+fun VerifyEmailDialog(
+    email: String,
+    onCheckVerified: (onResult: (Boolean) -> Unit) -> Unit,
+    onResend: (onResult: (Boolean) -> Unit) -> Unit,
+    onUseOtherAccount: () -> Unit
+) {
+    var busy by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf<String?>(null) }
+    var messageIsError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = { },
+        title = { Text(I18n.verifyEmailTitle) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(I18n.verifyEmailBody(email), style = MaterialTheme.typography.bodyMedium)
+                message?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (messageIsError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    )
+                }
+                TextButton(
+                    enabled = !busy,
+                    onClick = {
+                        busy = true
+                        message = null
+                        onResend { ok ->
+                            busy = false
+                            messageIsError = !ok
+                            message = if (ok) I18n.verifyEmailResent else I18n.verifyEmailResendFailed
+                        }
+                    }
+                ) { Text(I18n.verifyEmailResend) }
+                TextButton(
+                    enabled = !busy,
+                    onClick = onUseOtherAccount
+                ) { Text(I18n.verifyEmailUseOther) }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = !busy,
+                onClick = {
+                    busy = true
+                    message = null
+                    onCheckVerified { ok ->
+                        busy = false
+                        if (!ok) {
+                            messageIsError = true
+                            message = I18n.verifyEmailNotYet
+                        }
+                    }
+                }
+            ) {
+                if (busy) {
+                    CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(I18n.verifyEmailDone)
+            }
+        }
+    )
+}
+
+/** Pide el correo y envía el enlace para cambiar la contraseña. */
+@Composable
+fun ForgotPasswordDialog(
+    initialEmail: String,
+    onSend: (email: String, onResult: (Boolean) -> Unit) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var email by remember { mutableStateOf(initialEmail) }
+    var busy by remember { mutableStateOf(false) }
+    var sent by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = { if (!busy) onDismiss() },
+        title = { Text(I18n.forgotPasswordTitle) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (sent) {
+                    Text(I18n.forgotPasswordSent, style = MaterialTheme.typography.bodyMedium)
+                } else {
+                    Text(I18n.forgotPasswordBody, style = MaterialTheme.typography.bodyMedium)
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text(I18n.emailLabel) },
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            if (sent) {
+                TextButton(onClick = onDismiss) { Text(I18n.close) }
+            } else {
+                TextButton(
+                    enabled = email.isNotBlank() && !busy,
+                    onClick = {
+                        busy = true
+                        onSend(email.trim()) { ok ->
+                            busy = false
+                            // Mismo mensaje exista o no la cuenta; solo falla si no hay conexión.
+                            if (ok) sent = true
+                        }
+                    }
+                ) { Text(I18n.forgotPasswordSend) }
+            }
+        },
+        dismissButton = {
+            if (!sent) TextButton(onClick = onDismiss, enabled = !busy) { Text(I18n.cancel) }
+        }
+    )
+}
+

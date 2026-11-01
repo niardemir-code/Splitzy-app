@@ -261,6 +261,24 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    val pendingVerificationEmail: StateFlow<String?> = authService.pendingVerificationEmail
+
+    fun checkEmailVerified(onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(authService.checkEmailVerified()) }
+    }
+
+    fun resendVerificationEmail(onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(authService.resendVerificationEmail().isSuccess) }
+    }
+
+    fun cancelEmailVerification() {
+        viewModelScope.launch { authService.cancelEmailVerification() }
+    }
+
+    fun sendPasswordReset(email: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(authService.sendPasswordReset(email).isSuccess) }
+    }
+
     fun signOut() {
         viewModelScope.launch {
             authService.signOut()
