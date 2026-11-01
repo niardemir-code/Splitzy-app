@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.apleq.app.data.remote
 
 import android.app.Activity
