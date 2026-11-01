@@ -28,7 +28,7 @@ data class GuidePage(
 /** Textos de la guía de inicio en español, catalán e inglés. */
 object GuideContent {
 
-    private fun tr(es: String, ca: String, en: String): String = when {
+    internal fun tr(es: String, ca: String, en: String): String = when {
         I18n.isSpanish -> es
         I18n.isCatalan -> ca
         else -> en

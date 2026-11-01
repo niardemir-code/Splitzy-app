@@ -106,28 +106,8 @@ fun GuideScreen(onFinish: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(Modifier.height(8.dp))
-                // Ilustración: círculo degradado con icono grande
-                Box(
-                    modifier = Modifier
-                        .size(150.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.primaryContainer,
-                                    MaterialTheme.colorScheme.secondaryContainer
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = page.icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(72.dp)
-                    )
-                }
+                // Ilustración: maqueta gráfica de la app para esta pantalla
+                GuideIllustration(index)
                 Spacer(Modifier.height(20.dp))
                 Text(
                     text = page.title,
