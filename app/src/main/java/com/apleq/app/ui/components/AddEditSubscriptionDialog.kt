@@ -61,6 +61,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -398,7 +399,7 @@ fun AddEditSubscriptionDialog(
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryDropdownExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                             .testTag("input_sub_category_dropdown"),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -484,7 +485,7 @@ fun AddEditSubscriptionDialog(
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyDropdownExpanded)
                             },
                             modifier = Modifier
-                                .menuAnchor()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                 .fillMaxWidth()
                                 .testTag("dropdown_currency_selector"),
                             singleLine = true,
@@ -592,7 +593,7 @@ fun AddEditSubscriptionDialog(
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = billingPeriodDropdownExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                             .testTag("dropdown_billing_period"),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -691,7 +692,7 @@ fun AddEditSubscriptionDialog(
                                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = monthDropdownExpanded)
                                 },
                                 modifier = Modifier
-                                    .menuAnchor()
+                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                     .fillMaxWidth()
                                     .testTag("dropdown_billing_month"),
                                 singleLine = true,
@@ -856,7 +857,7 @@ fun AddEditSubscriptionDialog(
                                             },
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .menuAnchor()
+                                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                                 .testTag("dropdown_subscription_alarm_unit"),
                                             singleLine = true,
                                             shape = RoundedCornerShape(10.dp)
@@ -1364,7 +1365,7 @@ fun AddEditSubscriptionDialog(
                                     readOnly = true,
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editModalPlatformDropdownExpanded) },
                                     modifier = Modifier
-                                        .menuAnchor()
+                                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                         .fillMaxWidth()
                                         .testTag("dropdown_modal_platform_select"),
                                     shape = RoundedCornerShape(10.dp)
@@ -1472,7 +1473,7 @@ fun AddEditSubscriptionDialog(
                                     readOnly = true,
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editModalCurrencyDropdownExpanded) },
                                     modifier = Modifier
-                                        .menuAnchor()
+                                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                         .fillMaxWidth()
                                         .testTag("dropdown_modal_platform_currency"),
                                     shape = RoundedCornerShape(10.dp),
@@ -1524,7 +1525,7 @@ fun AddEditSubscriptionDialog(
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editModalPeriodDropdownExpanded) },
                                 modifier = Modifier
-                                    .menuAnchor()
+                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                     .fillMaxWidth()
                                     .testTag("dropdown_modal_platform_period"),
                                 shape = RoundedCornerShape(10.dp)

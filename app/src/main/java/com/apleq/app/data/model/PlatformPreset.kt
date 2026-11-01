@@ -1,7 +1,7 @@
 package com.apleq.app.data.model
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Games
 import androidx.compose.material.icons.filled.Headphones
@@ -105,7 +105,7 @@ object PlatformPresets {
             primaryColor = Color(0xFF10A37F),
             accentColor = Color(0xFF1FAF88),
             category = "Productividad",
-            icon = Icons.Default.Chat
+            icon = Icons.AutoMirrored.Filled.Chat
         ),
         PlatformPreset(
             name = "Prime Video / Amazon",

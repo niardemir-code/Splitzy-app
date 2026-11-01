@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Subscriptions
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -129,7 +129,7 @@ fun FinancialSummaryCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = if (isProfit) Icons.Default.TrendingUp else Icons.Default.Savings,
+                            imageVector = if (isProfit) Icons.AutoMirrored.Filled.TrendingUp else Icons.Default.Savings,
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(26.dp)

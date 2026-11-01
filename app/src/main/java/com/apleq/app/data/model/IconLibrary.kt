@@ -7,7 +7,7 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -83,7 +83,7 @@ object IconLibrary {
         CustomIconOption("headphones", "Música", Icons.Default.Headphones, "Música"),
         CustomIconOption("mic", "Podcast / Audio", Icons.Default.Mic, "Música"),
         CustomIconOption("radio", "Radio", Icons.Default.Radio, "Música"),
-        CustomIconOption("chat", "Chat / IA", Icons.Default.Chat, "Productividad"),
+        CustomIconOption("chat", "Chat / IA", Icons.AutoMirrored.Filled.Chat, "Productividad"),
         CustomIconOption("auto_awesome", "IA / Gemini", Icons.Default.AutoAwesome, "Productividad"),
         CustomIconOption("code", "Desarrollo", Icons.Default.Code, "Productividad"),
         CustomIconOption("cloud", "Nube / Almacenamiento", Icons.Default.Cloud, "Productividad"),

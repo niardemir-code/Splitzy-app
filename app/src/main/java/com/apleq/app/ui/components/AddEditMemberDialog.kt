@@ -52,6 +52,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -394,7 +395,7 @@ fun AddEditMemberDialog(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                 .testTag("input_member_platform_dropdown"),
                             singleLine = true,
                             maxLines = 1,
@@ -533,7 +534,7 @@ fun AddEditMemberDialog(
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .menuAnchor()
+                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                     .testTag("input_member_currency"),
                                 singleLine = true,
                                 maxLines = 1,
@@ -868,7 +869,7 @@ fun AddEditMemberDialog(
                                                     },
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .menuAnchor(),
+                                                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
                                                     singleLine = true,
                                                     shape = RoundedCornerShape(10.dp)
                                                 )
@@ -1001,7 +1002,7 @@ fun AddEditMemberDialog(
                                                         },
                                                         modifier = Modifier
                                                             .fillMaxWidth()
-                                                            .menuAnchor(),
+                                                            .menuAnchor(MenuAnchorType.PrimaryNotEditable),
                                                         singleLine = true,
                                                         shape = RoundedCornerShape(10.dp)
                                                     )

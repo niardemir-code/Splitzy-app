@@ -94,8 +94,10 @@ class FirebaseAuthService(
     }
 
     // Fallback: GoogleSignInClient clásico para dispositivos donde Credential Manager falla
+    @Suppress("DEPRECATION")
     private var googleSignInClient: GoogleSignInClient? = null
 
+    @Suppress("DEPRECATION")
     private fun getOrCreateGoogleSignInClient(ctx: Context): GoogleSignInClient {
         return googleSignInClient ?: run {
             val serverClientId = getWebClientId() ?: "498651324948-18qocdi9iqatn6kc4isaof5d0bhate0q.apps.googleusercontent.com"
@@ -277,6 +279,7 @@ class FirebaseAuthService(
      * Fallback: inicia Google Sign-In con el método clásico (Intent).
      * Devuelve el Intent que hay que lanzar con un ActivityResultLauncher.
      */
+    @Suppress("DEPRECATION")
     fun getGoogleSignInIntent(ctx: Context): Intent {
         return getOrCreateGoogleSignInClient(ctx).signInIntent
     }
@@ -284,6 +287,7 @@ class FirebaseAuthService(
     /**
      * Procesa el resultado del Intent de Google Sign-In clásico.
      */
+    @Suppress("DEPRECATION")
     suspend fun handleGoogleSignInResult(data: Intent?): Result<FirebaseUser> = withContext(Dispatchers.IO) {
         try {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
