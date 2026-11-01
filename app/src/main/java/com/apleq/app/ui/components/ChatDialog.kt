@@ -1,6 +1,7 @@
 package com.apleq.app.ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -34,14 +35,19 @@ fun ChatDialog(
     var text by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
+    val imeBottom = androidx.compose.foundation.layout.WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current)
+    LaunchedEffect(messages.size, imeBottom) {
+        if (messages.isNotEmpty()) listState.scrollToItem(messages.size - 1)
     }
 
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth(0.95f)
+                .imePadding()
                 .fillMaxHeight(0.85f),
             shape = RoundedCornerShape(20.dp)
         ) {

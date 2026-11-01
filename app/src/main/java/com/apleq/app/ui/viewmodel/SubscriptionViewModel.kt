@@ -432,10 +432,10 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 amount = 0.0,
                 currencySymbol = "€",
                 nextPaymentDate = "",
-                dueDateText = "Nuevo mensaje: ${chat.lastMessageText.take(40)}",
+                dueDateText = "${I18n.newMessagePrefix} ${chat.lastMessageText.take(40)}",
                 daysRemaining = 0,
                 status = com.apleq.app.data.model.NotificationStatus.TODAY,
-                isRead = false,
+                isRead = "chat_${chat.chatId}" in readIds,
                 alarmConfigText = null
             )
         }

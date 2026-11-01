@@ -3238,9 +3238,9 @@ object I18n {
     }
 
     val memberFormPendingRemovalDesc: String get() = when {
-        isSpanish -> "Indica que este usuario va a dejar la suscripción"
-        isCatalan -> "Indica que aquest usuari deixarà la subscripció"
-        else -> "Indicates that this user is going to leave the subscription"
+        isSpanish -> "Indica que este usuario deja la suscripción o ya la ha dejado"
+        isCatalan -> "Indica que aquest usuari deixa la subscripció o ja l'ha deixada"
+        else -> "Indicates that this user is leaving the subscription or has already left it"
     }
 
     val memberFormPendingActivation: String get() = when {
@@ -3334,6 +3334,15 @@ object I18n {
         isSpanish -> "Error al procesar la copia de seguridad"
         isCatalan -> "Error en processar la còpia de seguretat"
         else -> "Error processing the backup"
+    }
+
+    // ==========================================
+    // BATCH 11: CHAT NOTIFICATION & MEMBER LEAVE WORDING
+    // ==========================================
+    val newMessagePrefix: String get() = when {
+        isSpanish -> "Nuevo mensaje:"
+        isCatalan -> "Nou missatge:"
+        else -> "New message:"
     }
 }
 
