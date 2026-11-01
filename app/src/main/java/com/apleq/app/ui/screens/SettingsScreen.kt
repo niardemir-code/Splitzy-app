@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RestartAlt
@@ -80,6 +81,7 @@ import com.apleq.app.ui.util.I18n
 fun SettingsScreen(
     viewModel: SubscriptionViewModel,
     onBack: () -> Unit,
+    onOpenGuide: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val currentThemeMode by viewModel.themeMode.collectAsStateWithLifecycle()
@@ -308,6 +310,51 @@ fun SettingsScreen(
                                 isSelected = languageChoice == "en",
                                 onClick = { changeLanguage("en") },
                                 testTag = "language_option_en"
+                            )
+                        }
+                    }
+                }
+            }
+
+            // ==========================================
+            // GUÍA DE INICIO
+            // ==========================================
+            item {
+                Card(
+                    onClick = onOpenGuide,
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = com.apleq.app.ui.screens.GuideContent.settingsTitle,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = com.apleq.app.ui.screens.GuideContent.settingsSubtitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
