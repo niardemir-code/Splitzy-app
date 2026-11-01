@@ -3344,6 +3344,15 @@ object I18n {
         isCatalan -> "Nou missatge:"
         else -> "New message:"
     }
+
+    // ==========================================
+    // BATCH 12: CHAT MESSAGE HEADER
+    // ==========================================
+    val chatYouLabel: String get() = when {
+        isSpanish -> "Tú"
+        isCatalan -> "Tu"
+        else -> "You"
+    }
 }
 
 

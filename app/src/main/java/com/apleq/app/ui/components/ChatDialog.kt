@@ -101,21 +101,33 @@ fun ChatDialog(
                     }
                     items(messages, key = { it.id }) { msg ->
                         val isMine = msg.senderId == currentUid
+                        val senderLabel = if (isMine) I18n.chatYouLabel else otherPersonName
+                        val timeLabel = java.text.DateFormat
+                            .getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT)
+                            .format(java.util.Date(msg.createdAtMs))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = if (isMine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.widthIn(max = 260.dp)
-                            ) {
+                            Column(horizontalAlignment = if (isMine) Alignment.End else Alignment.Start) {
                                 Text(
-                                    msg.text,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                    color = if (isMine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyMedium
+                                    "$senderLabel · $timeLabel",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                 )
+                                Surface(
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = if (isMine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                    modifier = Modifier.widthIn(max = 260.dp)
+                                ) {
+                                    Text(
+                                        msg.text,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                        color = if (isMine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                             }
                         }
                     }
