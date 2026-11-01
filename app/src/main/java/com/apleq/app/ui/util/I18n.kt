@@ -3375,8 +3375,14 @@ object I18n {
     /** Si el error es el típico de un reloj mal puesto, devuelve el mensaje claro; si no, null. */
     fun clockErrorMessageOrNull(raw: String?): String? {
         val r = raw ?: return null
-        return if (r.contains("is stale to sign-in", ignoreCase = true) ||
-            r.contains("ID Token issued at", ignoreCase = true)) authClockError else null
+        val looksLikeClockProblem =
+            r.contains("is stale to sign-in", ignoreCase = true) ||
+            r.contains("ID Token issued at", ignoreCase = true) ||
+            r.contains("Chain validation failed", ignoreCase = true) ||
+            r.contains("CertPathValidatorException", ignoreCase = true) ||
+            r.contains("not yet valid", ignoreCase = true) ||
+            r.contains("certificate expired", ignoreCase = true)
+        return if (looksLikeClockProblem) authClockError else null
     }
 
     fun memberLeftNotification(name: String): String {
