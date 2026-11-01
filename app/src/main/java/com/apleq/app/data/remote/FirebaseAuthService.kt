@@ -213,15 +213,9 @@ class FirebaseAuthService(
             val signInWithGoogleOption = GetSignInWithGoogleOption.Builder(serverClientId)
                 .build()
 
-            val googleIdOption = GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false)
-                .setAutoSelectEnabled(false)
-                .setServerClientId(serverClientId)
-                .build()
-
+            // GetSignInWithGoogleOption no se puede combinar con otras opciones.
             val request = GetCredentialRequest.Builder()
                 .addCredentialOption(signInWithGoogleOption)
-                .addCredentialOption(googleIdOption)
                 .build()
 
             val ctx = activityContext ?: context
@@ -262,7 +256,10 @@ class FirebaseAuthService(
         } catch (e: GetCredentialException) {
             val rawMsg = e.localizedMessage ?: ""
             if (rawMsg.contains("No credentials available", ignoreCase = true) ||
-                rawMsg.contains("No credential", ignoreCase = true)) {
+                rawMsg.contains("No credential", ignoreCase = true) ||
+                rawMsg.contains("cannot be combined", ignoreCase = true) ||
+                e is androidx.credentials.exceptions.GetCredentialProviderConfigurationException ||
+                e is androidx.credentials.exceptions.GetCredentialUnsupportedException) {
                 // Señal para que la UI lance el fallback con GoogleSignInClient
                 _authState.value = AuthState.Error("FALLBACK_GOOGLE_SIGNIN")
                 Result.failure(e)
