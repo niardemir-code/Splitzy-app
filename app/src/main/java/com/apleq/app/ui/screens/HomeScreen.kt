@@ -108,6 +108,10 @@ import com.apleq.app.ui.components.SplitzyLogo
 import com.apleq.app.ui.components.SubscriptionCard
 import com.apleq.app.ui.viewmodel.SubscriptionViewModel
 
+import com.apleq.app.data.reminders.ReminderPreferences
+import com.apleq.app.ui.components.BatteryHelper
+import com.apleq.app.ui.components.BatteryInfoDialog
+import com.apleq.app.ui.components.BatteryPromptDialog
 import com.apleq.app.data.util.GuideEvent
 import com.apleq.app.data.util.GuidePath
 import com.apleq.app.ui.guide.FirstStepsCard
@@ -958,6 +962,34 @@ fun HomeScreen(
             onClearError = { viewModel.clearAuthError() }
         )
     }
+
+    // Aviso de primera vez para quitar las restricciones de batería (solo si hay avisos programados)
+    val scheduledReminderCount by viewModel.scheduledReminderCount.collectAsStateWithLifecycle()
+    var showBatteryPrompt by remember { mutableStateOf(false) }
+    var showBatteryInfo by remember { mutableStateOf(false) }
+    LaunchedEffect(scheduledReminderCount) {
+        if (scheduledReminderCount > 0 &&
+            !ReminderPreferences.batteryAsked(context) &&
+            !BatteryHelper.isExempt(context)
+        ) {
+            showBatteryPrompt = true
+        }
+    }
+    if (showBatteryPrompt) {
+        BatteryPromptDialog(
+            onRemove = {
+                ReminderPreferences.markBatteryAsked(context)
+                showBatteryPrompt = false
+                BatteryHelper.openAppDetails(context)
+            },
+            onLater = {
+                ReminderPreferences.markBatteryAsked(context)
+                showBatteryPrompt = false
+            },
+            onInfo = { showBatteryInfo = true }
+        )
+    }
+    if (showBatteryInfo) BatteryInfoDialog(onClose = { showBatteryInfo = false })
 
     if (showJoinDialog) {
         JoinGroupDialog(

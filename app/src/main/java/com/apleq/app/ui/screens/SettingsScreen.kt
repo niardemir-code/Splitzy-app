@@ -1,5 +1,7 @@
 package com.apleq.app.ui.screens
 
+import com.apleq.app.ui.components.ReminderSettingsCard
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -314,6 +316,13 @@ fun SettingsScreen(
                         }
                     }
                 }
+            }
+
+            // ==========================================
+            // AVISOS EN EL MÓVIL
+            // ==========================================
+            item {
+                ReminderSettingsCard(viewModel = viewModel)
             }
 
             // ==========================================

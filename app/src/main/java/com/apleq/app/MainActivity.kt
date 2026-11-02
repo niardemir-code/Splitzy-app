@@ -18,7 +18,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.core.content.ContextCompat
 import com.apleq.app.data.remote.AuthState
+import com.apleq.app.data.reminders.ReminderPreferences
 import com.apleq.app.data.util.AppThemeMode
 import com.apleq.app.data.util.LanguagePreferences
 import com.apleq.app.ui.screens.AuthGateScreen
@@ -47,6 +55,24 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val authState by viewModel.authState.collectAsStateWithLifecycle()
                     val showSettings by viewModel.showSettingsScreen.collectAsStateWithLifecycle()
+                    val permissionContext = LocalContext.current
+                    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.RequestPermission()
+                    ) { }
+                    val isAuthenticatedNow = authState is AuthState.Authenticated
+                    LaunchedEffect(isAuthenticatedNow) {
+                        if (isAuthenticatedNow &&
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                            ContextCompat.checkSelfPermission(
+                                permissionContext, Manifest.permission.POST_NOTIFICATIONS
+                            ) != PackageManager.PERMISSION_GRANTED &&
+                            !ReminderPreferences.permissionAsked(permissionContext)
+                        ) {
+                            ReminderPreferences.markPermissionAsked(permissionContext)
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+
                     Crossfade(
                         targetState = authState is AuthState.Authenticated,
                         label = "auth_crossfade"

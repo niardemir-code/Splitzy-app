@@ -27,12 +27,18 @@ import com.apleq.app.data.util.GuideState
 import com.apleq.app.ui.guide.GuideStepId
 import com.apleq.app.ui.guide.GuideStepStatus
 import com.apleq.app.ui.util.I18n
+import com.apleq.app.data.reminders.ReminderPlanner
+import com.apleq.app.data.reminders.ReminderPreferences
+import com.apleq.app.data.reminders.ReminderScheduler
+import com.apleq.app.data.reminders.ReminderStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -1110,5 +1116,64 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    // ==========================================
+    // AVISOS DE COBRO EN EL MÓVIL
+    // ==========================================
+    data class ReminderSettings(val enabled: Boolean, val hour: Int, val minute: Int)
+
+    private val _reminderSettings = MutableStateFlow(
+        ReminderSettings(
+            enabled = ReminderPreferences.enabled(application),
+            hour = ReminderPreferences.hour(application),
+            minute = ReminderPreferences.minute(application)
+        )
+    )
+    val reminderSettings: StateFlow<ReminderSettings> = _reminderSettings.asStateFlow()
+
+    private val _scheduledReminderCount = MutableStateFlow(ReminderStore.load(application).size)
+    val scheduledReminderCount: StateFlow<Int> = _scheduledReminderCount.asStateFlow()
+
+    fun setRemindersEnabled(enabled: Boolean) {
+        ReminderPreferences.setEnabled(getApplication<Application>(), enabled)
+        _reminderSettings.value = _reminderSettings.value.copy(enabled = enabled)
+    }
+
+    fun setReminderTime(hour: Int, minute: Int) {
+        ReminderPreferences.setTime(getApplication<Application>(), hour, minute)
+        _reminderSettings.value = _reminderSettings.value.copy(hour = hour, minute = minute)
+    }
+
+    init {
+        // Reprograma los avisos cada vez que cambian los datos, la sesión o los ajustes.
+        viewModelScope.launch {
+            combine(
+                allSubscriptions,
+                participatingGroups,
+                _clientAlarmPrefs,
+                _reminderSettings,
+                authService.authState
+            ) { subs, groups, prefs, settings, auth -> arrayOf<Any?>(subs, groups, prefs, settings, auth) }
+                .collectLatest { input ->
+                    delay(1500) // espera a que acaben las ráfagas de cambios
+                    @Suppress("UNCHECKED_CAST")
+                    val subs = input[0] as List<SubscriptionWithMembers>
+                    @Suppress("UNCHECKED_CAST")
+                    val groups = input[1] as List<Map<String, Any>>
+                    @Suppress("UNCHECKED_CAST")
+                    val prefs = input[2] as Map<String, Pair<Boolean, Int>>
+                    val settings = input[3] as ReminderSettings
+                    val uid = (input[4] as? AuthState.Authenticated)?.user?.uid
+
+                    val items = if (!settings.enabled || uid == null) {
+                        emptyList()
+                    } else {
+                        ReminderPlanner.build(subs, groups, prefs, uid, settings.hour, settings.minute)
+                    }
+                    ReminderScheduler.replaceAll(getApplication<Application>(), items)
+                    _scheduledReminderCount.value = items.size
+                }
+        }
+    }
 }
 
