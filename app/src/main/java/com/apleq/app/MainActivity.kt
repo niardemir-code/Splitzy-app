@@ -20,10 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apleq.app.data.remote.AuthState
 import com.apleq.app.data.util.AppThemeMode
-import com.apleq.app.data.util.GuidePreferences
 import com.apleq.app.data.util.LanguagePreferences
 import com.apleq.app.ui.screens.AuthGateScreen
-import com.apleq.app.ui.screens.GuideScreen
 import com.apleq.app.ui.screens.HomeScreen
 import com.apleq.app.ui.screens.SettingsScreen
 import com.apleq.app.ui.theme.MyApplicationTheme
@@ -49,28 +47,19 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val authState by viewModel.authState.collectAsStateWithLifecycle()
                     val showSettings by viewModel.showSettingsScreen.collectAsStateWithLifecycle()
-                    val guideContext = LocalContext.current
-                    var guideSeen by rememberSaveable { mutableStateOf(GuidePreferences.isSeen(guideContext)) }
-                    var showGuide by rememberSaveable { mutableStateOf(false) }
-
                     Crossfade(
                         targetState = authState is AuthState.Authenticated,
                         label = "auth_crossfade"
                     ) { isAuthenticated ->
                         if (isAuthenticated) {
-                            if (!guideSeen || showGuide) {
-                                GuideScreen(
-                                    onFinish = {
-                                        GuidePreferences.markSeen(guideContext)
-                                        guideSeen = true
-                                        showGuide = false
-                                    }
-                                )
-                            } else if (showSettings) {
+                            if (showSettings) {
                                 SettingsScreen(
                                     viewModel = viewModel,
                                     onBack = { viewModel.closeSettingsScreen() },
-                                    onOpenGuide = { showGuide = true }
+                                    onOpenGuide = {
+                                        viewModel.guideReopen()
+                                        viewModel.closeSettingsScreen()
+                                    }
                                 )
                             } else {
                                 HomeScreen(viewModel = viewModel)

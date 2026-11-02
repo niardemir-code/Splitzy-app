@@ -91,6 +91,7 @@ fun SubscriptionCard(
     subscriptionWithMembers: SubscriptionWithMembers,
     onAddMemberClick: () -> Unit,
     onGenerateInvite: () -> Unit = {},
+    onInviteShared: () -> Unit = {},
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onMemberClick: (com.apleq.app.data.local.MemberEntity) -> Unit = {},
@@ -646,6 +647,7 @@ fun SubscriptionCard(
                                                     context.startActivity(
                                                         android.content.Intent.createChooser(sendIntent, I18n.shareInviteDescription)
                                                     )
+                                                    onInviteShared()
                                                 },
                                                 modifier = Modifier.size(30.dp)
                                             ) {

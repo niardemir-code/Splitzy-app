@@ -347,12 +347,12 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(14.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = com.apleq.app.ui.screens.GuideContent.settingsTitle,
+                                text = com.apleq.app.ui.guide.FirstStepsTexts.settingsTitle,
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = com.apleq.app.ui.screens.GuideContent.settingsSubtitle,
+                                text = com.apleq.app.ui.guide.FirstStepsTexts.settingsSubtitle,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

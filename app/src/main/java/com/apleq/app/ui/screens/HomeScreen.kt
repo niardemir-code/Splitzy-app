@@ -108,6 +108,10 @@ import com.apleq.app.ui.components.SplitzyLogo
 import com.apleq.app.ui.components.SubscriptionCard
 import com.apleq.app.ui.viewmodel.SubscriptionViewModel
 
+import com.apleq.app.data.util.GuideEvent
+import com.apleq.app.data.util.GuidePath
+import com.apleq.app.ui.guide.FirstStepsCard
+import com.apleq.app.ui.guide.FirstStepsChoiceDialog
 import com.apleq.app.ui.util.I18n
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -142,6 +146,8 @@ fun HomeScreen(
 
     val notifications by viewModel.notifications.collectAsStateWithLifecycle()
     val unreadNotificationsCount by viewModel.unreadNotificationsCount.collectAsStateWithLifecycle()
+    val guideState by viewModel.guideState.collectAsStateWithLifecycle()
+    val guideSteps by viewModel.guideSteps.collectAsStateWithLifecycle()
 
     var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
     var showJoinDialog by remember { mutableStateOf(false) }
@@ -246,7 +252,10 @@ fun HomeScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { showNotificationsDialog = true },
+                        onClick = {
+                            viewModel.guideMarkEvent(GuideEvent.BELL_OPENED)
+                            showNotificationsDialog = true
+                        },
                         modifier = Modifier.testTag("btn_top_notifications")
                     ) {
                         BadgedBox(
@@ -394,6 +403,30 @@ fun HomeScreen(
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // 0. Tarjeta Primeros pasos
+            if (!guideState.dismissed && guideState.path != null) {
+                item {
+                    val inviteNeedsSlots = guideState.path == GuidePath.MANAGER &&
+                            allSubscriptions.isNotEmpty() &&
+                            allSubscriptions.all { it.subscription.freeSlots <= 0 || it.members.size >= it.subscription.freeSlots }
+                    FirstStepsCard(
+                        path = guideState.path!!,
+                        steps = guideSteps,
+                        collapsed = guideState.collapsed,
+                        inviteNeedsSlots = inviteNeedsSlots,
+                        onToggleCollapse = { viewModel.guideSetCollapsed(!guideState.collapsed) },
+                        onDismiss = { viewModel.guideDismiss() },
+                        onReopenRole = { viewModel.guideReopen() },
+                        onCreateSubscription = { viewModel.openAddSubscription() },
+                        onJoinGroup = { showJoinDialog = true },
+                        onOpenNotifications = {
+                            viewModel.guideMarkEvent(GuideEvent.BELL_OPENED)
+                            showNotificationsDialog = true
+                        }
+                    )
+                }
+            }
+
             // 1. Financial Overview Summary Card
             item {
                 FinancialSummaryCard(overview = financialOverview)
@@ -620,6 +653,7 @@ fun HomeScreen(
                         unreadChatIdsForOwner = unreadChatIdsForOwner,
                         onAddMemberClick = { viewModel.openAddMember(item) },
                         onGenerateInvite = { viewModel.generateInvite(item) },
+                        onInviteShared = { viewModel.guideMarkEvent(GuideEvent.SHARED) },
                         onEditClick = { viewModel.openEditSubscription(item.subscription) },
                         onDeleteClick = { subscriptionToDelete = item.subscription },
                         onMemberClick = { member -> viewModel.openEditMember(member, item) },
@@ -700,7 +734,10 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
-                            .clickable { selectedClientGroup = group },
+                            .clickable {
+                                viewModel.guideMarkEvent(GuideEvent.GROUP_OPENED)
+                                selectedClientGroup = group
+                            },
                         shape = RoundedCornerShape(20.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -1351,5 +1388,13 @@ fun HomeScreen(
             android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
             viewModel.clearBackupStatusMessage()
         }
+    }
+
+    // Diálogo «¿Qué vienes a hacer?» si es la primera vez que se accede
+    if (guideState.path == null && !guideState.dismissed && !guideState.choiceShown) {
+        FirstStepsChoiceDialog(
+            onChoosePath = { path -> viewModel.guideChoosePath(path) },
+            onDecideLater = { viewModel.guideChoiceShown() }
+        )
     }
 }

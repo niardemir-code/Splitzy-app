@@ -20,6 +20,12 @@ import com.apleq.app.data.repository.SubscriptionRepository
 import com.apleq.app.data.util.AppThemeMode
 import com.apleq.app.data.util.calculateNextCycleDate
 import com.apleq.app.data.util.ThemePreferences
+import com.apleq.app.data.util.GuideEvent
+import com.apleq.app.data.util.GuidePath
+import com.apleq.app.data.util.GuidePreferences
+import com.apleq.app.data.util.GuideState
+import com.apleq.app.ui.guide.GuideStepId
+import com.apleq.app.ui.guide.GuideStepStatus
 import com.apleq.app.ui.util.I18n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -198,6 +204,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     val chatMessages: StateFlow<List<com.apleq.app.data.model.ChatMessage>> = authService.chatMessages
 
     fun openChat(chatId: String, currentUid: String, isOwnerSide: Boolean) {
+        guideMarkEvent(GuideEvent.CHAT_OPENED)
         authService.startListeningChatMessages(chatId, currentUid, isOwnerSide)
     }
 
@@ -733,6 +740,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun openEditMember(member: MemberEntity, subscriptionWithMembers: SubscriptionWithMembers) {
+        guideMarkEvent(GuideEvent.MEMBER_OPENED)
         _targetSubscriptionForNewMember.value = subscriptionWithMembers
         _memberToEdit.value = member
         _showAddEditMemberDialog.value = true
@@ -1023,5 +1031,81 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             repository.rawDao.insertSharingPlatforms(initialList)
         }
     }
+
+    // ==========================================
+    // PRIMEROS PASOS (INTERACTIVE GUIDE)
+    // ==========================================
+    private val _guideState = MutableStateFlow(GuidePreferences.load(application))
+    val guideState: StateFlow<GuideState> = _guideState.asStateFlow()
+
+    fun guideChoosePath(path: GuidePath) {
+        val updated = _guideState.value.copy(path = path, choiceShown = true, dismissed = false)
+        _guideState.value = updated
+        GuidePreferences.save(getApplication(), updated)
+    }
+
+    fun guideChoiceShown() {
+        val updated = _guideState.value.copy(choiceShown = true)
+        _guideState.value = updated
+        GuidePreferences.save(getApplication(), updated)
+    }
+
+    fun guideSetCollapsed(collapsed: Boolean) {
+        val updated = _guideState.value.copy(collapsed = collapsed)
+        _guideState.value = updated
+        GuidePreferences.save(getApplication(), updated)
+    }
+
+    fun guideDismiss() {
+        val updated = _guideState.value.copy(dismissed = true)
+        _guideState.value = updated
+        GuidePreferences.save(getApplication(), updated)
+    }
+
+    fun guideReopen() {
+        val updated = _guideState.value.copy(path = null, dismissed = false, choiceShown = false)
+        _guideState.value = updated
+        GuidePreferences.save(getApplication(), updated)
+    }
+
+    fun guideMarkEvent(event: GuideEvent) {
+        if (event in _guideState.value.events) return
+        val updated = _guideState.value.copy(events = _guideState.value.events + event)
+        _guideState.value = updated
+        GuidePreferences.save(getApplication(), updated)
+    }
+
+    val guideSteps: StateFlow<List<GuideStepStatus>> = combine(
+        _guideState,
+        allSubscriptions,
+        participatingGroups
+    ) { state, subs, groups ->
+        val events = state.events
+        when (state.path) {
+            GuidePath.MANAGER -> {
+                listOf(
+                    GuideStepStatus(GuideStepId.M_CREATE, subs.isNotEmpty()),
+                    GuideStepStatus(GuideStepId.M_INVITE, subs.any { sub -> sub.members.any { !it.inviteCode.isNullOrBlank() } }),
+                    GuideStepStatus(GuideStepId.M_SHARE, GuideEvent.SHARED in events),
+                    GuideStepStatus(GuideStepId.M_JOIN, subs.any { sub -> sub.members.any { !it.linkedUid.isNullOrBlank() } }),
+                    GuideStepStatus(GuideStepId.M_MEMBER, GuideEvent.MEMBER_OPENED in events),
+                    GuideStepStatus(GuideStepId.M_BELL, GuideEvent.BELL_OPENED in events)
+                )
+            }
+            GuidePath.CLIENT -> {
+                listOf(
+                    GuideStepStatus(GuideStepId.C_JOIN, groups.isNotEmpty()),
+                    GuideStepStatus(GuideStepId.C_GROUP, GuideEvent.GROUP_OPENED in events),
+                    GuideStepStatus(GuideStepId.C_CHAT, GuideEvent.CHAT_OPENED in events),
+                    GuideStepStatus(GuideStepId.C_BELL, GuideEvent.BELL_OPENED in events)
+                )
+            }
+            null -> emptyList()
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 }
 
