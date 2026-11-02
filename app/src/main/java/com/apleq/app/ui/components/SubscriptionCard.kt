@@ -616,7 +616,10 @@ fun SubscriptionCard(
                                         Spacer(modifier = Modifier.height(4.dp))
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Surface(
-                                                onClick = { clipboard.setText(androidx.compose.ui.text.AnnotatedString(prettyCode)) },
+                                                onClick = {
+                                                    clipboard.setText(androidx.compose.ui.text.AnnotatedString(prettyCode))
+                                                    onInviteShared()
+                                                },
                                                 shape = RoundedCornerShape(6.dp),
                                                 color = MaterialTheme.colorScheme.primaryContainer
                                             ) {

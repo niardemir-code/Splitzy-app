@@ -1085,8 +1085,11 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             GuidePath.MANAGER -> {
                 listOf(
                     GuideStepStatus(GuideStepId.M_CREATE, subs.isNotEmpty()),
-                    GuideStepStatus(GuideStepId.M_INVITE, subs.any { sub -> sub.members.any { !it.inviteCode.isNullOrBlank() } }),
-                    GuideStepStatus(GuideStepId.M_SHARE, GuideEvent.SHARED in events),
+                    GuideStepStatus(GuideStepId.M_INVITE, subs.any { sub -> sub.members.isNotEmpty() }),
+                    GuideStepStatus(
+                        GuideStepId.M_SHARE,
+                        GuideEvent.SHARED in events || subs.any { sub -> sub.members.any { !it.linkedUid.isNullOrBlank() } }
+                    ),
                     GuideStepStatus(GuideStepId.M_JOIN, subs.any { sub -> sub.members.any { !it.linkedUid.isNullOrBlank() } }),
                     GuideStepStatus(GuideStepId.M_MEMBER, GuideEvent.MEMBER_OPENED in events),
                     GuideStepStatus(GuideStepId.M_BELL, GuideEvent.BELL_OPENED in events)

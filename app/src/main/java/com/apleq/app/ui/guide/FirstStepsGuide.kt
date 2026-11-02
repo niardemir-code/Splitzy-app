@@ -133,8 +133,8 @@ object FirstStepsTexts {
 
     val clientSubtitle: String
         get() = tr(
-            "Tengo un código de invitación de 6 letras para unirme a un grupo ya creado.",
-            "Tinc un codi d'invitació de 6 lletres per unir-me a un grup ja creat.",
+            "Tengo un código de invitación de 6 letras para unirse a un grupo ya creado.",
+            "Tinc un codi d'invitació de 6 lletres per unir-se a un grup ja creat.",
             "I have a 6-letter invite code to join an existing group."
         )
 
@@ -259,13 +259,13 @@ object FirstStepsTexts {
             "Inside the subscription card, tap \"Invite to slot\" to get a 6-letter invite code to share."
         )
         GuideStepId.M_SHARE -> tr(
-            "Pulsa el botón de compartir al lado del código para enviarlo por WhatsApp, Telegram o copiarlo.",
-            "Toca el botó de compartir al costat del codi per enviar-lo per WhatsApp, Telegram o copiar-lo.",
-            "Tap the share button next to the code to send it via WhatsApp, Telegram, or copy it."
+            "Toca el código para copiarlo, o pulsa el botón de compartir junto a él para enviarlo por WhatsApp, Telegram u otra app.",
+            "Toca el codi per copiar-lo, o prem el botó de compartir al costat per enviar-lo per WhatsApp, Telegram o una altra app.",
+            "Tap the code to copy it, or tap the share button next to it to send it via WhatsApp, Telegram or another app."
         )
         GuideStepId.M_JOIN -> tr(
-            "Cuando alguien introduzca tu código con «Unirme», verás su nombre en la tarjeta y recibirás un aviso.",
-            "Quan algú introdueixi el teu codi amb «Unir-me», veuràs el seu nom a la targeta i rebràs un avís.",
+            "Cuando alguien introduzca tu código en «Unirse», verás su nombre en la tarjeta y recibirás un aviso.",
+            "Quan algú introdueixi el teu codi a «Unir-se», veuràs el seu nom a la targeta i rebràs un avís.",
             "When someone enters your code with \"Join\", you will see their name on the card and receive an alert."
         )
         GuideStepId.M_MEMBER -> tr(
@@ -279,8 +279,8 @@ object FirstStepsTexts {
             "The bell at the top notifies you of new members, departures, and upcoming billings."
         )
         GuideStepId.C_JOIN -> tr(
-            "Pulsa «Unirme» arriba e introduce el código de 6 letras que te ha dado el titular.",
-            "Toca «Unir-me» a dalt i introdueix el codi de 6 lletres que t'ha donat el titular.",
+            "Pulsa «Unirse» abajo e introduce el código de 6 letras que te ha dado el titular.",
+            "Toca «Unir-se» a baix i introdueix el codi de 6 lletres que t'ha donat el titular.",
             "Tap \"Join\" at top and enter the 6-letter code given to you by the owner."
         )
         GuideStepId.C_GROUP -> tr(
@@ -303,7 +303,7 @@ object FirstStepsTexts {
     fun stepActionLabel(id: GuideStepId): String? = when (id) {
         GuideStepId.M_CREATE -> tr("Crear suscripción", "Crear subscripció", "Create subscription")
         GuideStepId.M_BELL, GuideStepId.C_BELL -> tr("Ver avisos", "Veure avisos", "View notifications")
-        GuideStepId.C_JOIN -> tr("Unirme a grupo", "Unir-me a grup", "Join group")
+        GuideStepId.C_JOIN -> tr("Unirse a un grupo", "Unir-se a un grup", "Join a group")
         else -> null
     }
 }
@@ -756,7 +756,7 @@ private fun StepItemView(
                     ),
                     textDecoration = if (step.done) TextDecoration.LineThrough else TextDecoration.None,
                     color = when {
-                        step.done -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        step.done -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
                         isCurrent -> MaterialTheme.colorScheme.onSurface
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },
