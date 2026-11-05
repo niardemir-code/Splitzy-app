@@ -108,3 +108,33 @@ object ReminderPreferences {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean("battery_asked", true).apply()
     }
 }
+
+/** Avisos ya mostrados (uno por aviso y ciclo de cobro), para no repetirlos al recuperar los perdidos. */
+object ReminderFired {
+    private const val PREFS = "reminder_fired"
+    private const val INIT = "__init"
+    private const val KEEP_MILLIS = 60L * 24 * 60 * 60 * 1000
+
+    private fun key(item: ReminderItem) = "${item.id}|${item.paymentMillis}"
+
+    fun wasFired(context: Context, item: ReminderItem): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).contains(key(item))
+
+    fun mark(context: Context, item: ReminderItem) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val now = System.currentTimeMillis()
+        val edit = prefs.edit()
+        prefs.all.forEach { (k, v) ->
+            if (k != INIT && v is Long && now - v > KEEP_MILLIS) edit.remove(k)
+        }
+        edit.putLong(key(item), now).apply()
+    }
+
+    /** True solo la primera vez: sirve para no avisar de golpe de lo que ya se mostró antes de esta versión. */
+    fun firstRun(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (prefs.contains(INIT)) return false
+        prefs.edit().putBoolean(INIT, true).apply()
+        return true
+    }
+}

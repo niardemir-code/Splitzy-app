@@ -75,6 +75,12 @@ object ReminderTexts {
         "The system may stop Apleq in the background and some reminders may not arrive."
     )
     val batteryRemove get() = tr("Quitar restricciones", "Treu les restriccions", "Remove restrictions")
+    val autostartHint get() = tr(
+        "En Xiaomi, Redmi y POCO hay que activar también el «Autoarranque» de Apleq; si no, los avisos se pierden al reiniciar el móvil.",
+        "A Xiaomi, Redmi i POCO cal activar també l'«Inici automàtic» d'Apleq; si no, els avisos es perden en reiniciar el mòbil.",
+        "On Xiaomi, Redmi and POCO you also need to turn on Apleq's \"Autostart\"; otherwise reminders are lost when the phone restarts."
+    )
+    val autostartButton get() = tr("Abrir Autoarranque", "Obre l'Inici automàtic", "Open Autostart")
     val moreInfo get() = tr("Más información", "Més informació", "More info")
     val later get() = tr("Ahora no", "Ara no", "Not now")
     val close get() = tr("Cerrar", "Tanca", "Close")

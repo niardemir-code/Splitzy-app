@@ -66,7 +66,7 @@ object ReminderPlanner {
     private fun money(value: Double, symbol: String): String =
         String.format(Locale.getDefault(), "%.2f %s", value, symbol)
 
-    fun build(
+    fun buildRaw(
         subs: List<SubscriptionWithMembers>,
         groups: List<Map<String, Any?>>,
         clientPrefs: Map<String, Pair<Boolean, Int>>,
@@ -155,8 +155,12 @@ object ReminderPlanner {
             )
         }
 
-        return raw.mapNotNull { upcoming(it, hour, minute) }
+        return raw
     }
+
+    /** Avisos listos para programar (el del ciclo actual, o el siguiente si su hora ya pasó). */
+    fun upcomingAll(raw: List<ReminderItem>, hour: Int, minute: Int): List<ReminderItem> =
+        raw.mapNotNull { upcoming(it, hour, minute) }
 }
 
 /** Programa y cancela las alarmas del sistema. */
@@ -203,6 +207,29 @@ object ReminderScheduler {
         val items = ReminderStore.load(context).mapNotNull { ReminderPlanner.upcoming(it, hour, minute) }
         ReminderStore.save(context, items)
         items.forEach { arm(context, it) }
+    }
+
+    /**
+     * Muestra ahora los avisos cuya hora pasó hace poco sin que llegaran (móvil apagado, ahorro de batería
+     * del fabricante...). Solo si pasó hace menos de 2 días, el día de cobro no ha terminado y no se mostró ya.
+     */
+    fun catchUp(context: Context, raw: List<ReminderItem>, hour: Int, minute: Int) {
+        if (!ReminderPreferences.enabled(context)) return
+        val now = System.currentTimeMillis()
+        val day = 24L * 60 * 60 * 1000
+        val missed = raw.filter { item ->
+            val at = ReminderPlanner.triggerMillis(item, hour, minute)
+            at <= now && now - at <= 2 * day && now < item.paymentMillis + day && !ReminderFired.wasFired(context, item)
+        }
+        if (ReminderFired.firstRun(context)) {
+            // Primera vez con esta versión: se da por mostrado lo anterior, sin avisar de golpe.
+            missed.forEach { ReminderFired.mark(context, it) }
+            return
+        }
+        missed.forEach {
+            ReminderFired.mark(context, it)
+            ReminderNotifier.show(context, it)
+        }
     }
 
     /** Sustituye un aviso concreto por el de su ciclo siguiente (o lo quita si no se repite). */

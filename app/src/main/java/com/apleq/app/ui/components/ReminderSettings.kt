@@ -2,7 +2,9 @@ package com.apleq.app.ui.components
 
 import android.content.Context
 import android.content.Intent
+import android.content.ComponentName
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
@@ -70,6 +72,29 @@ object BatteryHelper {
                 context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             } catch (_: Exception) {
             }
+        }
+    }
+
+    /** True en móviles Xiaomi, Redmi y POCO, que bloquean los avisos tras reiniciar si falta el «Autoarranque». */
+    fun needsAutostartHelp(): Boolean {
+        val maker = Build.MANUFACTURER.lowercase()
+        return maker.contains("xiaomi") || maker.contains("redmi") || maker.contains("poco")
+    }
+
+    /** Abre la pantalla de «Autoarranque» de Xiaomi; si no existe, la ficha de la app. */
+    fun openAutostart(context: Context) {
+        try {
+            context.startActivity(
+                Intent().apply {
+                    component = ComponentName(
+                        "com.miui.securitycenter",
+                        "com.miui.permcenter.autostart.AutoStartManagementActivity"
+                    )
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            )
+        } catch (_: Exception) {
+            openAppDetails(context)
         }
     }
 
@@ -249,6 +274,16 @@ fun ReminderSettingsCard(viewModel: SubscriptionViewModel) {
                         }
                     }
                     TextButton(onClick = { showBatteryInfo = true }) { Text(ReminderTexts.moreInfo) }
+                }
+                if (BatteryHelper.needsAutostartHelp()) {
+                    Text(
+                        ReminderTexts.autostartHint,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                    OutlinedButton(onClick = { BatteryHelper.openAutostart(context) }) {
+                        Text(ReminderTexts.autostartButton)
+                    }
                 }
             }
         }

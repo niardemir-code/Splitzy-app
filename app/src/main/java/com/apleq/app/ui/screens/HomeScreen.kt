@@ -156,6 +156,17 @@ fun HomeScreen(
     var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
     var showJoinDialog by remember { mutableStateOf(false) }
     var showNotificationsDialog by remember { mutableStateOf(false) }
+    val bellRequested by com.apleq.app.ui.util.BellRequest.pending.collectAsStateWithLifecycle()
+    LaunchedEffect(bellRequested) {
+        if (bellRequested) {
+            viewModel.refreshNotifications()
+            showNotificationsDialog = true
+            com.apleq.app.ui.util.BellRequest.pending.value = false
+        }
+    }
+    LaunchedEffect(showNotificationsDialog) {
+        if (showNotificationsDialog) viewModel.refreshNotifications()
+    }
     var selectedClientGroup by remember { mutableStateOf<Map<String, Any>?>(null) }
     var groupPendingLeave by remember { mutableStateOf<Map<String, Any>?>(null) }
     var isLeavingGroup by remember { mutableStateOf(false) }

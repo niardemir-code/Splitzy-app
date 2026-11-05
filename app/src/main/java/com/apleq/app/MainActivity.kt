@@ -1,5 +1,6 @@
 package com.apleq.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
         LanguagePreferences.apply(this)
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        handleBellIntent(intent)
         enableEdgeToEdge()
         setContent {
             val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
@@ -99,6 +101,19 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleBellIntent(intent)
+    }
+
+    private fun handleBellIntent(intent: Intent?) {
+        if (intent?.getBooleanExtra(com.apleq.app.ui.util.BellRequest.EXTRA, false) == true) {
+            com.apleq.app.ui.util.BellRequest.pending.value = true
+            intent.removeExtra(com.apleq.app.ui.util.BellRequest.EXTRA)
         }
     }
 }

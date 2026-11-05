@@ -24,7 +24,10 @@ class ReminderReceiver : BroadcastReceiver() {
         val id = intent.getStringExtra(ReminderScheduler.EXTRA_ID) ?: return
         val item = ReminderStore.load(context).find { it.id == id } ?: return
 
-        if (ReminderPreferences.enabled(context)) show(context, item)
+        if (ReminderPreferences.enabled(context)) {
+            ReminderFired.mark(context, item)
+            ReminderNotifier.show(context, item)
+        }
 
         val next = ReminderPlanner.nextAfterFiring(
             item,
@@ -33,8 +36,14 @@ class ReminderReceiver : BroadcastReceiver() {
         )
         ReminderScheduler.replaceOne(context, id, next)
     }
+}
 
-    private fun show(context: Context, item: ReminderItem) {
+/** Muestra la notificación de un aviso (la usa el receptor y la recuperación de avisos perdidos). */
+object ReminderNotifier {
+    const val CHANNEL_ID = "payment_reminders"
+
+    fun show(context: Context, item: ReminderItem) {
+        FiredReminders.add(context, item)
         val manager = NotificationManagerCompat.from(context)
         if (!manager.areNotificationsEnabled()) return
         createChannel(context)
@@ -48,6 +57,7 @@ class ReminderReceiver : BroadcastReceiver() {
             item.id.hashCode(),
             Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra(com.apleq.app.ui.util.BellRequest.EXTRA, true)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -76,10 +86,6 @@ class ReminderReceiver : BroadcastReceiver() {
             NotificationManager.IMPORTANCE_HIGH
         ).apply { description = ReminderTexts.channelDescription }
         context.getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
-    }
-
-    companion object {
-        const val CHANNEL_ID = "payment_reminders"
     }
 }
 

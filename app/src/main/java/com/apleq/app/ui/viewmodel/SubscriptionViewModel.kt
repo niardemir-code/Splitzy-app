@@ -441,6 +441,10 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         _languageTick.value += 1
     }
 
+    fun refreshNotifications() {
+        _languageTick.value += 1
+    }
+
     val notifications: StateFlow<List<AppNotification>> = combine(
         repository.allSubscriptions,
         _readNotificationIds,
@@ -504,7 +508,45 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 alarmConfigText = null
             )
         }
-        (managerNotifs + clientNotifs + chatNotifs + leftNotifs).filter { it.id !in dismissedIds }
+        val nowDate = java.time.LocalDate.now()
+        val firedNotifs = com.apleq.app.data.reminders.FiredReminders.load(getApplication()).mapNotNull { f ->
+            val it = f.item
+            // Si la lógica normal ya genera un aviso para lo mismo, no se duplica.
+            val duplicated = when (it.kind) {
+                "MEMBER" -> managerNotifs.any { n -> n.subscriptionName == it.subName && n.memberName == it.who }
+                "CLIENT" -> clientNotifs.any { n -> n.subscriptionName == it.subName }
+                else -> managerNotifs.any { n -> n.subscriptionName == it.subName && n.memberName.isBlank() }
+            }
+            if (duplicated) return@mapNotNull null
+            val payDate = java.time.Instant.ofEpochMilli(it.paymentMillis)
+                .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+            val days = java.time.temporal.ChronoUnit.DAYS.between(nowDate, payDate).toInt()
+            val id = "fired_${it.id}_${it.paymentMillis}"
+            com.apleq.app.data.model.AppNotification(
+                id = id,
+                type = if (it.kind == "CLIENT") com.apleq.app.data.model.NotificationType.CLIENT_REMINDER
+                       else com.apleq.app.data.model.NotificationType.ALARM,
+                subscriptionId = "",
+                subscriptionName = it.subName,
+                subscriptionColorHex = "#1285FA",
+                memberId = "",
+                memberName = it.who,
+                sharingPlatform = "",
+                amount = 0.0,
+                currencySymbol = "€",
+                nextPaymentDate = payDate.toString(),
+                dueDateText = com.apleq.app.data.reminders.ReminderTexts.body(it, days),
+                daysRemaining = days,
+                status = when {
+                    days < 0 -> com.apleq.app.data.model.NotificationStatus.OVERDUE
+                    days == 0 -> com.apleq.app.data.model.NotificationStatus.TODAY
+                    else -> com.apleq.app.data.model.NotificationStatus.UPCOMING
+                },
+                isRead = id in readIds,
+                alarmConfigText = null
+            )
+        }
+        (managerNotifs + clientNotifs + firedNotifs + chatNotifs + leftNotifs).filter { it.id !in dismissedIds }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -1168,7 +1210,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                     val items = if (!settings.enabled || uid == null) {
                         emptyList()
                     } else {
-                        ReminderPlanner.build(subs, groups, prefs, uid, settings.hour, settings.minute)
+                        val raw = ReminderPlanner.buildRaw(subs, groups, prefs, uid, settings.hour, settings.minute)
+                        ReminderScheduler.catchUp(getApplication<Application>(), raw, settings.hour, settings.minute)
+                        ReminderPlanner.upcomingAll(raw, settings.hour, settings.minute)
                     }
                     ReminderScheduler.replaceAll(getApplication<Application>(), items)
                     _scheduledReminderCount.value = items.size
