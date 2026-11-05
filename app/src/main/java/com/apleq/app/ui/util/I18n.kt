@@ -1609,7 +1609,7 @@ object I18n {
 
     val changeIconDescription: String get() = when {
         isSpanish -> "Cambiar icono"
-        isCatalan -> "Canviar icona"
+        isCatalan -> "Canviar la icona"
         else -> "Change icon"
     }
 
@@ -1622,7 +1622,7 @@ object I18n {
     val tapToCustomizeIcon: String get() = when {
         isSpanish -> "Toca aquí para personalizar icono o imagen"
         isCatalan -> "Toca aquí per personalitzar la icona o la imatge"
-        else -> "Tap here to customize icon or image"
+        else -> "Tap here to customize the icon or image"
     }
 
     val subscriptionNameFieldLabel: String get() = when {
@@ -1649,7 +1649,8 @@ object I18n {
         else -> "Subscription category *"
     }
 
-    fun getSubscriptionCategoryLabel(category: String): String = when (category) {
+    /** Solo para mostrar: el valor guardado sigue siendo el texto en castellano. */
+    fun getSubscriptionCategoryLabel(category: String): String = when (category.trim()) {
         "Streaming" -> "Streaming"
         "Música" -> when {
             isSpanish -> "Música"
@@ -1697,14 +1698,14 @@ object I18n {
 
     val mainUserFieldLabel: String get() = when {
         isSpanish -> "Titular / Usuario Principal *"
-        isCatalan -> "Titular / Usuari Principal *"
-        else -> "Account Holder / Main User *"
+        isCatalan -> "Titular / Usuari principal *"
+        else -> "Account holder / Main user *"
     }
 
     val mainUserFieldPlaceholder: String get() = when {
         isSpanish -> "Ej: Carlos (Yo)"
         isCatalan -> "Ex: Carles (Jo)"
-        else -> "E.g. Charlie (Me)"
+        else -> "E.g. Charles (Me)"
     }
 
     val mainUserRequired: String get() = when {
@@ -1721,26 +1722,26 @@ object I18n {
 
     fun conversionToEuros(amount: String): String = when {
         isSpanish -> "Conversión a Euros: ≈ $amount"
-        isCatalan -> "Conversió a Euros: ≈ $amount"
+        isCatalan -> "Conversió a euros: ≈ $amount"
         else -> "Conversion to Euros: ≈ $amount"
     }
 
-    fun exchangeRateLine(currencyCode: String, rate: String): String = when {
-        isSpanish -> "Tipo de cambio: 1 $currencyCode ≈ $rate €"
-        isCatalan -> "Tipus de canvi: 1 $currencyCode ≈ $rate €"
-        else -> "Exchange rate: 1 $currencyCode ≈ $rate €"
+    fun exchangeRateLine(code: String, rate: String): String = when {
+        isSpanish -> "Tipo de cambio: 1 $code ≈ $rate €"
+        isCatalan -> "Tipus de canvi: 1 $code ≈ $rate €"
+        else -> "Exchange rate: 1 $code ≈ $rate €"
     }
 
-    fun monthlyEquivalentLine(monthlyAmount: String): String = when {
-        isSpanish -> "Equivalente mensual: ≈ $monthlyAmount / mes"
-        isCatalan -> "Equivalent mensual: ≈ $monthlyAmount / mes"
-        else -> "Monthly equivalent: ≈ $monthlyAmount / month"
+    fun monthlyEquivalentLine(amount: String): String = when {
+        isSpanish -> "Equivalente mensual: ≈ $amount / mes"
+        isCatalan -> "Equivalent mensual: ≈ $amount / mes"
+        else -> "Monthly equivalent: ≈ $amount / month"
     }
 
     val billingFrequencyFieldLabel: String get() = when {
         isSpanish -> "Frecuencia / Periodo de cobro *"
         isCatalan -> "Freqüència / Període de cobrament *"
-        else -> "Billing frequency / period *"
+        else -> "Frequency / Billing period *"
     }
 
     val billingDayFieldLabelMonthly: String get() = when {
@@ -1767,21 +1768,33 @@ object I18n {
         else -> "Day"
     }
 
-    fun billingMonthFieldLabel(period: BillingPeriod): String = when {
-        isSpanish -> "Mes de cobro (${period.label.lowercase()})"
-        isCatalan -> "Mes de cobrament (${getBillingPeriodLabel(period).lowercase()})"
-        else -> "Billing month (${getBillingPeriodLabel(period).lowercase()})"
+    fun billingMonthFieldLabel(period: BillingPeriod): String = when (period) {
+        BillingPeriod.YEARLY -> when {
+            isSpanish -> "Mes renovación"
+            isCatalan -> "Mes de renovació"
+            else -> "Renewal month"
+        }
+        BillingPeriod.SEMI_ANNUAL, BillingPeriod.QUARTERLY -> when {
+            isSpanish -> "Mes inicio"
+            isCatalan -> "Mes d'inici"
+            else -> "Start month"
+        }
+        else -> when {
+            isSpanish -> "Mes cobro"
+            isCatalan -> "Mes de cobrament"
+            else -> "Billing month"
+        }
     }
 
     val selectMonthPlaceholder: String get() = when {
         isSpanish -> "Seleccionar mes"
-        isCatalan -> "Seleccionar mes"
+        isCatalan -> "Selecciona un mes"
         else -> "Select month"
     }
 
     val freeSlotsFieldLabel: String get() = when {
         isSpanish -> "Huecos libres (plazas para otros)"
-        isCatalan -> "Llocs lliures (places per a altres)"
+        isCatalan -> "Places lliures (per a altres)"
         else -> "Free slots (seats for others)"
     }
 
@@ -1799,7 +1812,7 @@ object I18n {
 
     val saveChangesButton: String get() = when {
         isSpanish -> "Guardar Cambios"
-        isCatalan -> "Desar Canvis"
+        isCatalan -> "Desar els canvis"
         else -> "Save Changes"
     }
 
@@ -3511,6 +3524,7 @@ object I18n {
         else -> "If an account exists with that email, you'll receive a link to change the password."
     }
 }
+
 
 
 
