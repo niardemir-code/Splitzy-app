@@ -65,14 +65,21 @@ object FiredReminders {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY, arr.toString()).apply()
     }
 
-    /** Un aviso nuevo del móvil vuelve a mostrar los avisos de ese miembro que se hubieran descartado antes. */
+    /** Un aviso nuevo del móvil vuelve a mostrar lo que se hubiera descartado antes para ese mismo aviso. */
     private fun clearDismissedFor(context: Context, item: ReminderItem) {
-        if (item.kind != "MEMBER") return
-        // item.id = "m_<subId>_<memberId>"  ->  los ids de la campanita son "notif_<subId>_<memberId>_..."
-        val prefix = "notif_" + item.id.removePrefix("m_") + "_"
+        // Ids de la campanita que corresponden a este aviso:
+        //  MEMBER: item.id = "m_<subId>_<memberId>"  -> "notif_<subId>_<memberId>_..."
+        //  CLIENT: item.id = "c_<groupId>"           -> "client_notif_<groupId>_..."
+        //  Todos: el aviso guardado "fired_<item.id>_<paymentMillis>"
+        val prefixes = mutableListOf<String>()
+        when (item.kind) {
+            "MEMBER" -> prefixes += "notif_" + item.id.removePrefix("m_") + "_"
+            "CLIENT" -> prefixes += "client_notif_" + item.id.removePrefix("c_") + "_"
+        }
+        val firedId = "fired_${item.id}_${item.paymentMillis}"
         val prefs = context.getSharedPreferences("apleq_notifications_prefs", Context.MODE_PRIVATE)
         val current = prefs.getStringSet("dismissed_notification_ids", emptySet()) ?: emptySet()
-        val cleaned = current.filterNot { it.startsWith(prefix) }.toSet()
+        val cleaned = current.filterNot { id -> id == firedId || prefixes.any { id.startsWith(it) } }.toSet()
         if (cleaned.size != current.size) {
             prefs.edit().putStringSet("dismissed_notification_ids", cleaned).apply()
         }
