@@ -548,10 +548,6 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 alarmConfigText = null
             )
         }
-        android.util.Log.d(
-            "ApleqBell",
-            "subs=${subscriptions.size} generated=${managerNotifs.size} client=${clientNotifs.size} fired=${firedNotifs.size} dismissed=${dismissedIds.size}"
-        )
         (managerNotifs + clientNotifs + firedNotifs + chatNotifs + leftNotifs).filter { it.id !in dismissedIds }
     }.stateIn(
         scope = viewModelScope,
