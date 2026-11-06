@@ -14,6 +14,7 @@ object FiredReminders {
 
     @Synchronized
     fun add(context: Context, item: ReminderItem) {
+        clearDismissedFor(context, item)
         val now = System.currentTimeMillis()
         val list = load(context)
             .filterNot { it.item.id == item.id && it.item.paymentMillis == item.paymentMillis }
@@ -62,5 +63,18 @@ object FiredReminders {
             })
         }
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY, arr.toString()).apply()
+    }
+
+    /** Un aviso nuevo del móvil vuelve a mostrar los avisos de ese miembro que se hubieran descartado antes. */
+    private fun clearDismissedFor(context: Context, item: ReminderItem) {
+        if (item.kind != "MEMBER") return
+        // item.id = "m_<subId>_<memberId>"  ->  los ids de la campanita son "notif_<subId>_<memberId>_..."
+        val prefix = "notif_" + item.id.removePrefix("m_") + "_"
+        val prefs = context.getSharedPreferences("apleq_notifications_prefs", Context.MODE_PRIVATE)
+        val current = prefs.getStringSet("dismissed_notification_ids", emptySet()) ?: emptySet()
+        val cleaned = current.filterNot { it.startsWith(prefix) }.toSet()
+        if (cleaned.size != current.size) {
+            prefs.edit().putStringSet("dismissed_notification_ids", cleaned).apply()
+        }
     }
 }

@@ -442,6 +442,8 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun refreshNotifications() {
+        // Relee los descartados por si un aviso nuevo del móvil limpió alguno desde el receptor.
+        _dismissedNotificationIds.value = getDismissedNotificationIds()
         _languageTick.value += 1
     }
 
@@ -513,9 +515,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             val it = f.item
             // Si la lógica normal ya genera un aviso para lo mismo, no se duplica.
             val duplicated = when (it.kind) {
-                "MEMBER" -> managerNotifs.any { n -> n.subscriptionName == it.subName && n.memberName == it.who }
-                "CLIENT" -> clientNotifs.any { n -> n.subscriptionName == it.subName }
-                else -> managerNotifs.any { n -> n.subscriptionName == it.subName && n.memberName.isBlank() }
+                "MEMBER" -> managerNotifs.any { n -> n.id !in dismissedIds && n.subscriptionName == it.subName && n.memberName == it.who }
+                "CLIENT" -> clientNotifs.any { n -> n.id !in dismissedIds && n.subscriptionName == it.subName }
+                else -> managerNotifs.any { n -> n.id !in dismissedIds && n.subscriptionName == it.subName && n.memberName.isBlank() }
             }
             if (duplicated) return@mapNotNull null
             val payDate = java.time.Instant.ofEpochMilli(it.paymentMillis)
@@ -546,6 +548,10 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 alarmConfigText = null
             )
         }
+        android.util.Log.d(
+            "ApleqBell",
+            "subs=${subscriptions.size} generated=${managerNotifs.size} client=${clientNotifs.size} fired=${firedNotifs.size} dismissed=${dismissedIds.size}"
+        )
         (managerNotifs + clientNotifs + firedNotifs + chatNotifs + leftNotifs).filter { it.id !in dismissedIds }
     }.stateIn(
         scope = viewModelScope,
