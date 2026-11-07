@@ -46,7 +46,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
+import com.apleq.app.data.util.LegalLinks
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -285,6 +287,33 @@ fun AuthGateScreen(
                             subtitle = I18n.privacyBenefitSubtitle
                         )
                     }
+                }
+
+                val uriHandler = LocalUriHandler.current
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    I18n.legalAgree,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TextButton(onClick = { uriHandler.openUri(LegalLinks.TERMS_URL) }) {
+                        Text(I18n.legalTerms, style = MaterialTheme.typography.labelSmall)
+                    }
+                    TextButton(onClick = { uriHandler.openUri(LegalLinks.PRIVACY_URL) }) {
+                        Text(I18n.legalPrivacy, style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+                TextButton(
+                    onClick = { uriHandler.openUri(LegalLinks.DELETE_ACCOUNT_URL) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(I18n.legalDeleteInfo, style = MaterialTheme.typography.labelSmall)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

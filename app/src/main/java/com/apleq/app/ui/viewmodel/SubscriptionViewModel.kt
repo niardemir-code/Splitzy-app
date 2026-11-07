@@ -141,6 +141,7 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                     authService.startListeningParticipatingGroups()
                     authService.startListeningUnreadChats()
                     authService.startListeningMemberLeftEvents()
+                    authService.startListeningBlocks()
                     // Sincronizar el estado de leído con la nube, una vez por sesión.
                     if (!hasMergedReadIds) {
                         hasMergedReadIds = true
@@ -208,6 +209,32 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
     val participatingGroups: StateFlow<List<Map<String, Any>>> = authService.participatingGroups
     val unreadChats: StateFlow<List<com.apleq.app.data.model.UnreadChatInfo>> = authService.unreadChats
     val chatMessages: StateFlow<List<com.apleq.app.data.model.ChatMessage>> = authService.chatMessages
+    val blockedUids: StateFlow<Set<String>> = authService.blockedUids
+
+    fun blockUser(otherUid: String) {
+        viewModelScope.launch { authService.blockUser(otherUid) }
+    }
+
+    fun unblockUser(otherUid: String) {
+        viewModelScope.launch { authService.unblockUser(otherUid) }
+    }
+
+    fun reportUser(
+        reportedUid: String,
+        chatId: String,
+        groupId: String,
+        subscriptionName: String,
+        reason: String,
+        comment: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            val ok = authService.reportUser(
+                reportedUid, chatId, groupId, subscriptionName, reason, comment, chatMessages.value
+            )
+            onResult(ok)
+        }
+    }
 
     fun openChat(chatId: String, currentUid: String, isOwnerSide: Boolean) {
         guideMarkEvent(GuideEvent.CHAT_OPENED)

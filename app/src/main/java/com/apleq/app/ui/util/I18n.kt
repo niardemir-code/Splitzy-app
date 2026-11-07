@@ -1247,6 +1247,144 @@ object I18n {
         else -> "Send"
     }
 
+    val chatMenu: String get() = when {
+        isSpanish -> "Más opciones"
+        isCatalan -> "Més opcions"
+        else -> "More options"
+    }
+
+    val chatReport: String get() = when {
+        isSpanish -> "Denunciar"
+        isCatalan -> "Denunciar"
+        else -> "Report"
+    }
+
+    val chatBlock: String get() = when {
+        isSpanish -> "Bloquear"
+        isCatalan -> "Bloquejar"
+        else -> "Block"
+    }
+
+    val chatUnblock: String get() = when {
+        isSpanish -> "Desbloquear"
+        isCatalan -> "Desbloquejar"
+        else -> "Unblock"
+    }
+
+    val chatBlockConfirm: String get() = when {
+        isSpanish -> "¿Bloquear a esta persona? No verás sus mensajes y no podrá escribirte. Puedes desbloquearla cuando quieras."
+        isCatalan -> "Vols bloquejar aquesta persona? No veuràs els seus missatges i no et podrà escriure. Pots desbloquejar-la quan vulguis."
+        else -> "Block this person? You will not see their messages and they will not be able to write to you. You can unblock them at any time."
+    }
+
+    val chatBlockedNotice: String get() = when {
+        isSpanish -> "Has bloqueado a esta persona. No ves sus mensajes y no puede escribirte."
+        isCatalan -> "Has bloquejat aquesta persona. No veus els seus missatges i no et pot escriure."
+        else -> "You blocked this person. You do not see their messages and they cannot write to you."
+    }
+
+    val chatReportTitle: String get() = when {
+        isSpanish -> "Denunciar a esta persona"
+        isCatalan -> "Denunciar aquesta persona"
+        else -> "Report this person"
+    }
+
+    val chatReportIntro: String get() = when {
+        isSpanish -> "¿Cuál es el motivo? Revisaremos la denuncia junto con los últimos mensajes de la conversación."
+        isCatalan -> "Quin és el motiu? Revisarem la denúncia juntament amb els últims missatges de la conversa."
+        else -> "What is the reason? We will review the report together with the latest messages in the conversation."
+    }
+
+    val chatReportCommentHint: String get() = when {
+        isSpanish -> "Añade un comentario (opcional)"
+        isCatalan -> "Afegeix un comentari (opcional)"
+        else -> "Add a comment (optional)"
+    }
+
+    val chatReportSend: String get() = when {
+        isSpanish -> "Enviar denuncia"
+        isCatalan -> "Enviar denúncia"
+        else -> "Send report"
+    }
+
+    val chatReportCancel: String get() = when {
+        isSpanish -> "Cancelar"
+        isCatalan -> "Cancel·lar"
+        else -> "Cancel"
+    }
+
+    val chatReportClose: String get() = when {
+        isSpanish -> "Cerrar"
+        isCatalan -> "Tancar"
+        else -> "Close"
+    }
+
+    val chatReportThanks: String get() = when {
+        isSpanish -> "Gracias. Hemos recibido tu denuncia y la revisaremos. Si quieres, también puedes bloquear a esta persona."
+        isCatalan -> "Gràcies. Hem rebut la teva denúncia i la revisarem. Si vols, també pots bloquejar aquesta persona."
+        else -> "Thank you. We have received your report and will review it. You can also block this person if you wish."
+    }
+
+    val chatReportError: String get() = when {
+        isSpanish -> "No se pudo enviar la denuncia. Inténtalo de nuevo."
+        isCatalan -> "No s'ha pogut enviar la denúncia. Torna-ho a provar."
+        else -> "The report could not be sent. Please try again."
+    }
+
+    val reportReasonSpam: String get() = when {
+        isSpanish -> "Spam o publicidad"
+        isCatalan -> "Correu brossa o publicitat"
+        else -> "Spam or advertising"
+    }
+
+    val reportReasonHarassment: String get() = when {
+        isSpanish -> "Acoso, insultos o amenazas"
+        isCatalan -> "Assetjament, insults o amenaces"
+        else -> "Harassment, insults or threats"
+    }
+
+    val reportReasonIllegal: String get() = when {
+        isSpanish -> "Contenido ilegal"
+        isCatalan -> "Contingut il·legal"
+        else -> "Illegal content"
+    }
+
+    val reportReasonImpersonation: String get() = when {
+        isSpanish -> "Suplantación o engaño"
+        isCatalan -> "Suplantació o engany"
+        else -> "Impersonation or deception"
+    }
+
+    val reportReasonOther: String get() = when {
+        isSpanish -> "Otro motivo"
+        isCatalan -> "Un altre motiu"
+        else -> "Other reason"
+    }
+
+    val legalAgree: String get() = when {
+        isSpanish -> "Al continuar aceptas las condiciones de uso y la política de privacidad."
+        isCatalan -> "En continuar acceptes les condicions d'ús i la política de privacitat."
+        else -> "By continuing you accept the terms of use and the privacy policy."
+    }
+
+    val legalTerms: String get() = when {
+        isSpanish -> "Condiciones de uso"
+        isCatalan -> "Condicions d'ús"
+        else -> "Terms of use"
+    }
+
+    val legalPrivacy: String get() = when {
+        isSpanish -> "Política de privacidad"
+        isCatalan -> "Política de privacitat"
+        else -> "Privacy policy"
+    }
+
+    val legalDeleteInfo: String get() = when {
+        isSpanish -> "Cómo borrar tu cuenta y tus datos"
+        isCatalan -> "Com esborrar el teu compte i les teves dades"
+        else -> "How to delete your account and data"
+    }
+
     fun chatListTitle(subscriptionName: String): String = when {
         isSpanish -> "Chats · $subscriptionName"
         isCatalan -> "Xats · $subscriptionName"

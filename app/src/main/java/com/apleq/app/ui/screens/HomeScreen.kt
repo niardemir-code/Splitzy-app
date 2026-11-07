@@ -187,6 +187,7 @@ fun HomeScreen(
     var openChatIsOwnerSide by remember { mutableStateOf(true) }
     val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
     val unreadChats by viewModel.unreadChats.collectAsStateWithLifecycle()
+    val blockedUids by viewModel.blockedUids.collectAsStateWithLifecycle()
     val unreadChatIdsForOwner = remember(unreadChats) {
         unreadChats.filter { it.isOwnerSide }.map { it.chatId }.toSet()
     }
@@ -1380,11 +1381,34 @@ fun HomeScreen(
     }
 
     openChatInfo?.let { (chatId, subName, otherName) ->
+        // La otra persona del chat: el cliente si soy el gestor, el gestor si soy cliente.
+        val chatParts = chatId.split("_")
+        val otherUid = if (chatParts.size >= 3) {
+            if (openChatIsOwnerSide) chatParts.drop(2).joinToString("_") else chatParts[0]
+        } else ""
         ChatDialog(
             subscriptionName = subName,
             otherPersonName = otherName,
             currentUid = currentUid,
             messages = chatMessages,
+            isBlocked = otherUid.isNotEmpty() && blockedUids.contains(otherUid),
+            onBlock = { if (otherUid.isNotEmpty()) viewModel.blockUser(otherUid) },
+            onUnblock = { if (otherUid.isNotEmpty()) viewModel.unblockUser(otherUid) },
+            onReport = { reason, comment, onResult ->
+                if (otherUid.isEmpty()) {
+                    onResult(false)
+                } else {
+                    viewModel.reportUser(
+                        reportedUid = otherUid,
+                        chatId = chatId,
+                        groupId = chatParts.getOrElse(1) { "" },
+                        subscriptionName = subName,
+                        reason = reason,
+                        comment = comment,
+                        onResult = onResult
+                    )
+                }
+            },
             onSend = { text ->
                 val parts = chatId.split("_")
                 if (parts.size >= 3) {

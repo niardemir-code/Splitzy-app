@@ -151,6 +151,20 @@ class FirebaseAuthService(
     val unreadChats: StateFlow<List<com.apleq.app.data.model.UnreadChatInfo>> = _unreadChats
     private var unreadChatsListeners: List<ListenerRegistration> = emptyList()
 
+    // ===== MODERACIÓN (bloqueos y denuncias) =====
+    private val _blockedUids = MutableStateFlow<Set<String>>(emptySet())
+    val blockedUids: StateFlow<Set<String>> = _blockedUids
+    private var blocksListener: ListenerRegistration? = null
+    private var unreadChatsRaw: List<com.apleq.app.data.model.UnreadChatInfo> = emptyList()
+
+    /** Publica los chats sin leer, sin los de personas que tengo bloqueadas. */
+    private fun publishUnread() {
+        val blocked = _blockedUids.value
+        _unreadChats.value = unreadChatsRaw.filter { chat ->
+            !blocked.contains(if (chat.isOwnerSide) chat.clientUid else chat.ownerUid)
+        }
+    }
+
     private val _memberLeftEvents = MutableStateFlow<List<com.apleq.app.data.model.MemberLeftEvent>>(emptyList())
     val memberLeftEvents: StateFlow<List<com.apleq.app.data.model.MemberLeftEvent>> = _memberLeftEvents
     private var memberLeftEventsListener: ListenerRegistration? = null
@@ -494,6 +508,7 @@ class FirebaseAuthService(
             removeActiveListeners()
             removeParticipatingGroupsListener()
             stopListeningUnreadChats()
+            stopListeningBlocks()
             stopListeningMemberLeftEvents()
             stopListeningChatMessages()
             if (clearLocalData) {
@@ -2264,7 +2279,7 @@ class FirebaseAuthService(
 
         var ownerSide = emptyList<com.apleq.app.data.model.UnreadChatInfo>()
         var clientSide = emptyList<com.apleq.app.data.model.UnreadChatInfo>()
-        fun publish() { _unreadChats.value = ownerSide + clientSide }
+        fun publish() { unreadChatsRaw = ownerSide + clientSide; publishUnread() }
 
         fun mapDocs(docs: List<com.google.firebase.firestore.DocumentSnapshot>, isOwnerSide: Boolean) =
             docs.mapNotNull { doc ->
@@ -2348,6 +2363,7 @@ class FirebaseAuthService(
     fun stopListeningUnreadChats() {
         unreadChatsListeners.forEach { it.remove() }
         unreadChatsListeners = emptyList()
+        unreadChatsRaw = emptyList()
         _unreadChats.value = emptyList()
     }
 
@@ -2437,6 +2453,94 @@ class FirebaseAuthService(
                 .await()
         } catch (e: Exception) {
             android.util.Log.w("Chat", "No se pudo marcar el chat como leído", e)
+        }
+    }
+
+    /** Escucha en tiempo real a quién tengo bloqueado. Se llama al iniciar sesión. */
+    fun startListeningBlocks() {
+        val uid = auth?.currentUser?.uid ?: return
+        val db = firestore ?: return
+        blocksListener?.remove()
+        blocksListener = db.collection("users").document(uid).collection("blocks")
+            .addSnapshotListener { snap, error ->
+                if (error != null) {
+                    android.util.Log.e("Moderation", "Error escuchando bloqueos", error)
+                    return@addSnapshotListener
+                }
+                _blockedUids.value = (snap?.documents ?: emptyList()).map { it.id }.toSet()
+                publishUnread()
+            }
+    }
+
+    fun stopListeningBlocks() {
+        blocksListener?.remove()
+        blocksListener = null
+        _blockedUids.value = emptySet()
+        publishUnread()
+    }
+
+    suspend fun blockUser(otherUid: String): Unit = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext
+        val myUid = auth?.currentUser?.uid ?: return@withContext
+        try {
+            db.collection("users").document(myUid).collection("blocks").document(otherUid)
+                .set(mapOf("blockedUid" to otherUid, "createdAtMs" to System.currentTimeMillis()))
+                .await()
+        } catch (e: Exception) {
+            android.util.Log.e("Moderation", "No se pudo bloquear", e)
+        }
+    }
+
+    suspend fun unblockUser(otherUid: String): Unit = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext
+        val myUid = auth?.currentUser?.uid ?: return@withContext
+        try {
+            db.collection("users").document(myUid).collection("blocks").document(otherUid)
+                .delete()
+                .await()
+        } catch (e: Exception) {
+            android.util.Log.e("Moderation", "No se pudo desbloquear", e)
+        }
+    }
+
+    /** Guarda una denuncia con el contexto (los últimos 10 mensajes). Devuelve true si se guardó. */
+    suspend fun reportUser(
+        reportedUid: String,
+        chatId: String,
+        groupId: String,
+        subscriptionName: String,
+        reason: String,
+        comment: String,
+        messages: List<com.apleq.app.data.model.ChatMessage>
+    ): Boolean = withContext(Dispatchers.IO) {
+        val db = firestore ?: return@withContext false
+        val myUid = auth?.currentUser?.uid ?: return@withContext false
+        try {
+            db.collection("reports").add(
+                mapOf(
+                    "reporterUid" to myUid,
+                    "reportedUid" to reportedUid,
+                    "chatId" to chatId,
+                    "groupId" to groupId,
+                    "subscriptionName" to subscriptionName,
+                    "reason" to reason,
+                    "comment" to comment.take(500),
+                    "lastMessages" to messages.takeLast(10).map { m ->
+                        mapOf(
+                            "senderId" to m.senderId,
+                            "text" to m.text.take(500),
+                            "createdAtMs" to m.createdAtMs
+                        )
+                    },
+                    "createdAtMs" to System.currentTimeMillis(),
+                    "status" to "open",
+                    "platform" to "android"
+                )
+            ).await()
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("Moderation", "No se pudo enviar la denuncia", e)
+            false
         }
     }
 
