@@ -673,7 +673,9 @@ fun HomeScreen(
                         onEditClick = { viewModel.openEditSubscription(item.subscription) },
                         onDeleteClick = { subscriptionToDelete = item.subscription },
                         onMemberClick = { member -> viewModel.openEditMember(member, item) },
-                        onOpenChatList = { chatListForSubscription = item }
+                        onOpenChatList = { chatListForSubscription = item },
+                        loadAccessNote = { subId -> viewModel.loadAccessNote(subId) },
+                        saveAccessNote = { subId, text -> viewModel.saveAccessNote(subId, text) }
                     )
                 }
             }

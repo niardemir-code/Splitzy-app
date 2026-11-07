@@ -989,6 +989,15 @@ class FirebaseAuthService(
             rootSubDoc.delete().await()
         } catch (_: Exception) {}
 
+        // Borrar los datos de acceso privados de la suscripción (si existen)
+        try {
+            db.collection("users").document(user.uid)
+                .collection("accessNotes").document(subscriptionId.toString())
+                .delete().await()
+        } catch (_: Exception) {
+            // No existe o ya estaba borrado: ignorar
+        }
+
         // Borrar el logo personalizado de Storage si existe (ignorar si no hay)
         try {
             FirebaseStorage.getInstance().reference
@@ -2540,6 +2549,41 @@ class FirebaseAuthService(
             true
         } catch (e: Exception) {
             android.util.Log.e("Moderation", "No se pudo enviar la denuncia", e)
+            false
+        }
+    }
+
+    /** Datos de acceso privados del gestor para una suscripción (solo los lee su dueño). */
+    suspend fun loadAccessNote(subscriptionId: Long): String = withContext(Dispatchers.IO) {
+        val uid = auth?.currentUser?.uid ?: return@withContext ""
+        val db = firestore ?: return@withContext ""
+        try {
+            val snap = db.collection("users").document(uid)
+                .collection("accessNotes").document(subscriptionId.toString())
+                .get().await()
+            if (snap.exists()) (snap.getString("text") ?: "") else ""
+        } catch (e: Exception) {
+            android.util.Log.w("AccessNote", "No se pudieron leer los datos de acceso", e)
+            ""
+        }
+    }
+
+    /** Guarda los datos de acceso; si el texto queda vacío, borra el documento. Devuelve true si salió bien. */
+    suspend fun saveAccessNote(subscriptionId: Long, text: String): Boolean = withContext(Dispatchers.IO) {
+        val uid = auth?.currentUser?.uid ?: return@withContext false
+        val db = firestore ?: return@withContext false
+        try {
+            val ref = db.collection("users").document(uid)
+                .collection("accessNotes").document(subscriptionId.toString())
+            val clean = text.trim().take(500)
+            if (clean.isEmpty()) {
+                ref.delete().await()
+            } else {
+                ref.set(mapOf("text" to clean, "updatedAtMs" to System.currentTimeMillis())).await()
+            }
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("AccessNote", "No se pudieron guardar los datos de acceso", e)
             false
         }
     }

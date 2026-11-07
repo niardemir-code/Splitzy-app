@@ -100,6 +100,8 @@ fun SubscriptionCard(
     availablePlatforms: List<SharingPlatformEntity> = emptyList(),
     currentUid: String = "",
     unreadChatIdsForOwner: Set<String> = emptySet(),
+    loadAccessNote: (suspend (Long) -> String)? = null,
+    saveAccessNote: (suspend (Long, String) -> Boolean)? = null,
     modifier: Modifier = Modifier
 ) {
     val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
@@ -820,6 +822,16 @@ fun SubscriptionCard(
                     text = I18n.slotsFullHint(capacity),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Datos de acceso privados: solo los ve el gestor (y solo con la sesión iniciada)
+            if (currentUid.isNotBlank() && loadAccessNote != null && saveAccessNote != null) {
+                Spacer(modifier = Modifier.height(10.dp))
+                AccessNoteSection(
+                    subscriptionId = sub.id,
+                    load = loadAccessNote,
+                    save = saveAccessNote
                 )
             }
 

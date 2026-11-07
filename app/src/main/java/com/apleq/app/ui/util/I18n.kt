@@ -664,6 +664,78 @@ object I18n {
         else -> "Notes"
     }
 
+    val accessNoteTitle: String get() = when {
+        isSpanish -> "Datos de acceso (solo tú)"
+        isCatalan -> "Dades d'accés (només tu)"
+        else -> "Access details (only you)"
+    }
+
+    val accessNoteHelp: String get() = when {
+        isSpanish -> "Opcional. Solo tú lo ves: no se muestra a los miembros del grupo. Guárdalo solo si las condiciones del servicio permiten compartir la cuenta."
+        isCatalan -> "Opcional. Només tu ho veus: no es mostra als membres del grup. Desa-ho només si les condicions del servei permeten compartir el compte."
+        else -> "Optional. Only you can see it: it is not shown to the group's members. Store it only if the service's terms allow sharing the account."
+    }
+
+    val accessNoteAdd: String get() = when {
+        isSpanish -> "Añadir datos de acceso"
+        isCatalan -> "Afegir dades d'accés"
+        else -> "Add access details"
+    }
+
+    val accessNotePlaceholder: String get() = when {
+        isSpanish -> "Usuario, contraseña, enlace de invitación…"
+        isCatalan -> "Usuari, contrasenya, enllaç d'invitació…"
+        else -> "Username, password, invitation link…"
+    }
+
+    val accessNoteShow: String get() = when {
+        isSpanish -> "Mostrar"
+        isCatalan -> "Mostrar"
+        else -> "Show"
+    }
+
+    val accessNoteHide: String get() = when {
+        isSpanish -> "Ocultar"
+        isCatalan -> "Amagar"
+        else -> "Hide"
+    }
+
+    val accessNoteEdit: String get() = when {
+        isSpanish -> "Editar"
+        isCatalan -> "Editar"
+        else -> "Edit"
+    }
+
+    val accessNoteDelete: String get() = when {
+        isSpanish -> "Borrar"
+        isCatalan -> "Esborrar"
+        else -> "Delete"
+    }
+
+    val accessNoteSave: String get() = when {
+        isSpanish -> "Guardar"
+        isCatalan -> "Desar"
+        else -> "Save"
+    }
+
+    val accessNoteCancel: String get() = when {
+        isSpanish -> "Cancelar"
+        isCatalan -> "Cancel·lar"
+        else -> "Cancel"
+    }
+
+    val accessNoteError: String get() = when {
+        isSpanish -> "No se pudo guardar. Inténtalo de nuevo."
+        isCatalan -> "No s'ha pogut desar. Torna-ho a provar."
+        else -> "Could not save. Please try again."
+    }
+
+    val accessNoteDeleteConfirm: String get() = when {
+        isSpanish -> "¿Borrar los datos de acceso de esta suscripción?"
+        isCatalan -> "Vols esborrar les dades d'accés d'aquesta subscripció?"
+        else -> "Delete the access details of this subscription?"
+    }
+
     val membersSectionTitle: String get() = when {
         isSpanish -> "Miembros del Grupo"
         isCatalan -> "Membres del Grup"

@@ -262,6 +262,11 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch { authService.markChatRead(chatId, asOwner) }
     }
 
+    suspend fun loadAccessNote(subscriptionId: Long): String = authService.loadAccessNote(subscriptionId)
+
+    suspend fun saveAccessNote(subscriptionId: Long, text: String): Boolean =
+        authService.saveAccessNote(subscriptionId, text)
+
     private val _showAuthDialog = MutableStateFlow(false)
     val showAuthDialog: StateFlow<Boolean> = _showAuthDialog
 
