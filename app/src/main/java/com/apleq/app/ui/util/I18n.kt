@@ -1457,6 +1457,72 @@ object I18n {
         else -> "How to delete your account and data"
     }
 
+    val introSkip: String get() = when {
+        isSpanish -> "Saltar"
+        isCatalan -> "Saltar"
+        else -> "Skip"
+    }
+
+    val introNext: String get() = when {
+        isSpanish -> "Siguiente"
+        isCatalan -> "Següent"
+        else -> "Next"
+    }
+
+    val introStart: String get() = when {
+        isSpanish -> "Empezar"
+        isCatalan -> "Començar"
+        else -> "Get started"
+    }
+
+    val introTitle1: String get() = when {
+        isSpanish -> "Tus suscripciones compartidas, claras"
+        isCatalan -> "Les teves subscripcions compartides, clares"
+        else -> "Your shared subscriptions, made clear"
+    }
+
+    val introText1: String get() = when {
+        isSpanish -> "Apleq te ayuda a llevar las cuentas de lo que compartes con familiares y amigos, en un solo sitio."
+        isCatalan -> "Apleq t'ajuda a portar els comptes del que comparteixes amb familiars i amics, en un sol lloc."
+        else -> "Apleq helps you keep track of what you share with family and friends, all in one place."
+    }
+
+    val introTitle2: String get() = when {
+        isSpanish -> "Cobros bajo control"
+        isCatalan -> "Cobraments sota control"
+        else -> "Payments under control"
+    }
+
+    val introText2: String get() = when {
+        isSpanish -> "Registra el precio, la periodicidad y las plazas, y marca quién ha pagado cada ciclo. Si alguien se retrasa, verás cuántas cuotas debe."
+        isCatalan -> "Registra el preu, la periodicitat i les places, i marca qui ha pagat cada cicle. Si algú es retarda, veuràs quantes quotes deu."
+        else -> "Record the price, billing period and seats, and mark who has paid each cycle. If someone falls behind, you'll see how many payments they owe."
+    }
+
+    val introTitle3: String get() = when {
+        isSpanish -> "Avisos el día de cobro"
+        isCatalan -> "Avisos el dia de cobrament"
+        else -> "Reminders on payment day"
+    }
+
+    val introText3: String get() = when {
+        isSpanish -> "Recibe un recordatorio en el móvil cuando toca cobrar, aunque la app esté cerrada."
+        isCatalan -> "Rep un recordatori al mòbil quan toca cobrar, encara que l'app estigui tancada."
+        else -> "Get a reminder on your phone when payment is due, even when the app is closed."
+    }
+
+    val introTitle4: String get() = when {
+        isSpanish -> "Invita y habla con tu grupo"
+        isCatalan -> "Convida i parla amb el teu grup"
+        else -> "Invite and talk to your group"
+    }
+
+    val introText4: String get() = when {
+        isSpanish -> "Invita con un código y chatea con cada persona. Si participas en una suscripción, verás tu parte y tu próxima fecha de pago."
+        isCatalan -> "Convida amb un codi i xateja amb cada persona. Si participes en una subscripció, veuràs la teva part i la teva propera data de pagament."
+        else -> "Invite with a code and chat with each person. If you take part in a subscription, you'll see your share and your next payment date."
+    }
+
     fun chatListTitle(subscriptionName: String): String = when {
         isSpanish -> "Chats · $subscriptionName"
         isCatalan -> "Xats · $subscriptionName"

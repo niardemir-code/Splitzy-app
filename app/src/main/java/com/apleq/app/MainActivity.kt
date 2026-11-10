@@ -29,9 +29,11 @@ import androidx.core.content.ContextCompat
 import com.apleq.app.data.remote.AuthState
 import com.apleq.app.data.reminders.ReminderPreferences
 import com.apleq.app.data.util.AppThemeMode
+import com.apleq.app.data.util.IntroPreferences
 import com.apleq.app.data.util.LanguagePreferences
 import com.apleq.app.ui.screens.AuthGateScreen
 import com.apleq.app.ui.screens.HomeScreen
+import com.apleq.app.ui.screens.IntroScreen
 import com.apleq.app.ui.screens.SettingsScreen
 import com.apleq.app.ui.theme.MyApplicationTheme
 import com.apleq.app.ui.viewmodel.SubscriptionViewModel
@@ -58,6 +60,7 @@ class MainActivity : ComponentActivity() {
                     val authState by viewModel.authState.collectAsStateWithLifecycle()
                     val showSettings by viewModel.showSettingsScreen.collectAsStateWithLifecycle()
                     val permissionContext = LocalContext.current
+                    var introSeen by rememberSaveable { mutableStateOf(IntroPreferences.isSeen(permissionContext)) }
                     val notificationPermissionLauncher = rememberLauncherForActivityResult(
                         ActivityResultContracts.RequestPermission()
                     ) { }
@@ -72,6 +75,14 @@ class MainActivity : ComponentActivity() {
                         ) {
                             ReminderPreferences.markPermissionAsked(permissionContext)
                             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+
+                    // Quien ya tiene sesión iniciada no necesita ver la introducción nunca.
+                    LaunchedEffect(isAuthenticatedNow) {
+                        if (isAuthenticatedNow && !introSeen) {
+                            IntroPreferences.markSeen(permissionContext)
+                            introSeen = true
                         }
                     }
 
@@ -92,6 +103,13 @@ class MainActivity : ComponentActivity() {
                             } else {
                                 HomeScreen(viewModel = viewModel)
                             }
+                        } else if (!introSeen) {
+                            IntroScreen(
+                                onFinish = {
+                                    IntroPreferences.markSeen(permissionContext)
+                                    introSeen = true
+                                }
+                            )
                         } else {
                             AuthGateScreen(
                                 viewModel = viewModel,
