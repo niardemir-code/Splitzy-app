@@ -1,5 +1,6 @@
 package com.apleq.app.data.local
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -39,6 +40,10 @@ data class MemberEntity(
     val alarmUnit: String = "days", // Unidad de antelación ("days", "same_day", "hours", "weeks", "months")
     val alarmDaysBefore: Int = 3, // Antelación convertida a días enteros (retrocompatibilidad)
     val contributionAmount: Double = 0.0, // Dinero que aporta este usuario
+    // true si el gestor fijó el importe a mano (aunque sea 0,00): en ese caso NO se aplica
+    // el reparto por defecto de la suscripción ni el precio de la plataforma.
+    @ColumnInfo(defaultValue = "0")
+    val contributionFixed: Boolean = false,
     val currency: String = "EUR", // Moneda del aporte individual
     val isPaidThisMonth: Boolean = true, // Al día / Pagado (Verde)
     val isPendingPayment: Boolean = false, // Alerta: Pendiente de pago (Amarillo)

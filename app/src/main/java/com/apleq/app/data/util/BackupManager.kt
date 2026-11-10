@@ -117,6 +117,7 @@ object BackupManager {
                 put("alarmUnit", member.alarmUnit)
                 put("alarmDaysBefore", member.alarmDaysBefore)
                 put("contributionAmount", member.contributionAmount)
+                put("contributionFixed", member.contributionFixed)
                 put("currency", member.currency)
                 put("isPaidThisMonth", member.isPaidThisMonth)
                 put("isPendingPayment", member.isPendingPayment)
@@ -268,6 +269,7 @@ object BackupManager {
                         alarmUnit = obj.optString("alarmUnit", "days"),
                         alarmDaysBefore = obj.optInt("alarmDaysBefore", 3),
                         contributionAmount = obj.optDouble("contributionAmount", 0.0),
+                        contributionFixed = obj.optBoolean("contributionFixed", false),
                         currency = obj.optString("currency", "EUR"),
                         isPaidThisMonth = isPaid,
                         isPendingPayment = isPendingPayment,

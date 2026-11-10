@@ -32,7 +32,7 @@ data class SubscriptionWithMembers(
     val totalContributed: Double
         get() = members.sumOf { member ->
             val pPricing = platformPrices.find { it.platformName.equals(member.sharingPlatform, ignoreCase = true) }
-            val amount = if (member.contributionAmount > 0.0) {
+            val amount = if (member.contributionFixed || member.contributionAmount > 0.0) {
                 member.contributionAmount
             } else if (pPricing != null && pPricing.pricePerUser > 0) {
                 pPricing.pricePerUser

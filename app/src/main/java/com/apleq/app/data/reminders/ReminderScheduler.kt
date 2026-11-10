@@ -104,7 +104,7 @@ object ReminderPlanner {
             item.members.forEach { m ->
                 if (!m.enableAlarm || m.isPendingRemoval || m.isPendingRegistration) return@forEach
                 val pay = dayMillis(m.nextPaymentDate) ?: return@forEach
-                val amount = if (m.contributionAmount > 0.0) m.contributionAmount else sub.defaultContributionPerUser
+                val amount = if (m.contributionFixed || m.contributionAmount > 0.0) m.contributionAmount else sub.defaultContributionPerUser
                 raw += ReminderItem(
                     id = "m_${sub.id}_${m.id}",
                     kind = "MEMBER",

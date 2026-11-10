@@ -162,7 +162,7 @@ object NotificationGenerator {
 
                 val matchedPricing = platformPrices.find { it.platformName.equals(m.sharingPlatform, ignoreCase = true) }
                 val effectiveAmount = when {
-                    m.contributionAmount > 0.0 -> m.contributionAmount
+                    m.contributionFixed || m.contributionAmount > 0.0 -> m.contributionAmount
                     matchedPricing != null && matchedPricing.pricePerUser > 0.0 -> matchedPricing.pricePerUser
                     platformPrices.isNotEmpty() && platformPrices.first().pricePerUser > 0.0 -> platformPrices.first().pricePerUser
                     sub.defaultContributionPerUser > 0.0 -> sub.defaultContributionPerUser

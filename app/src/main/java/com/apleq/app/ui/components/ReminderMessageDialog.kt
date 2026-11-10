@@ -57,7 +57,7 @@ fun ReminderMessageDialog(
     val defaultMessage = remember {
         val parsedPricing = com.apleq.app.data.model.PlatformPricingHelper.parse(subscription.platformPricing)
         val memberPlatformPricing = parsedPricing.find { it.platformName.equals(member.sharingPlatform, ignoreCase = true) }
-        val memberAmount = if (member.contributionAmount > 0.0) {
+        val memberAmount = if (member.contributionFixed || member.contributionAmount > 0.0) {
             member.contributionAmount
         } else if (memberPlatformPricing != null && memberPlatformPricing.pricePerUser > 0.0) {
             memberPlatformPricing.pricePerUser

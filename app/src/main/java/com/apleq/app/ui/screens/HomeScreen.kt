@@ -700,6 +700,7 @@ fun HomeScreen(
                         ?: myMember?.get("contribution_amount")
                         ?: myMember?.get("amount")
                         ?: 0).toString().toDoubleOrNull() ?: 0.0
+                    val amountFixed = myMember?.get("contributionFixed") == true
 
                     // Respaldo: si el miembro no tiene importe propio, usar el precio por
                     // usuario de su plataforma de compartición (igual que hace la vista del gestor).
@@ -722,7 +723,7 @@ fun HomeScreen(
                     }
 
                     val myAmount = when {
-                        rawAmount > 0.0 -> rawAmount
+                        amountFixed || rawAmount > 0.0 -> rawAmount
                         matchedPricing != null && matchedPricing.pricePerUser > 0.0 -> matchedPricing.pricePerUser
                         groupPricingList.isNotEmpty() && groupPricingList.first().pricePerUser > 0.0 ->
                             groupPricingList.first().pricePerUser
@@ -1021,6 +1022,7 @@ fun HomeScreen(
             ?: myMember?.get("contribution_amount")
             ?: myMember?.get("amount")
             ?: 0).toString().toDoubleOrNull() ?: 0.0
+        val amountFixed = myMember?.get("contributionFixed") == true
 
         val myPlatformName = (myMember?.get("sharingPlatform")
             ?: myMember?.get("sharing_platform")
@@ -1041,7 +1043,7 @@ fun HomeScreen(
         }
 
         val myAmount = when {
-            rawAmount > 0.0 -> rawAmount
+            amountFixed || rawAmount > 0.0 -> rawAmount
             matchedPricing != null && matchedPricing.pricePerUser > 0.0 -> matchedPricing.pricePerUser
             groupPricingList.isNotEmpty() && groupPricingList.first().pricePerUser > 0.0 ->
                 groupPricingList.first().pricePerUser

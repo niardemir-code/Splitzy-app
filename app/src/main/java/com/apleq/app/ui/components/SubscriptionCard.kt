@@ -726,7 +726,7 @@ fun SubscriptionCard(
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
                                 val memberPlatformPricing = platformPricesList.find { it.platformName.equals(member.sharingPlatform, ignoreCase = true) }
-                                val memberDisplayAmount = if (member.contributionAmount > 0.0) {
+                                val memberDisplayAmount = if (member.contributionFixed || member.contributionAmount > 0.0) {
                                     member.contributionAmount
                                 } else if (memberPlatformPricing != null && memberPlatformPricing.pricePerUser > 0.0) {
                                     memberPlatformPricing.pricePerUser

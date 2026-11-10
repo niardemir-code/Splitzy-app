@@ -732,6 +732,7 @@ class FirebaseAuthService(
                         "alarm_days_before" to m.alarmDaysBefore,
                         "contributionAmount" to m.contributionAmount,
                         "amount" to m.contributionAmount,
+                        "contributionFixed" to m.contributionFixed,
                         "currency" to memCurrency,
                         "currencyCode" to memCurrency,
                         "currency_code" to memCurrency,
@@ -1282,6 +1283,7 @@ class FirebaseAuthService(
                         "alarm_days_before" to m.alarmDaysBefore,
                         "contributionAmount" to m.contributionAmount,
                         "amount" to m.contributionAmount,
+                        "contributionFixed" to m.contributionFixed,
                         "currency" to memCurrency,
                         "currencyCode" to memCurrency,
                         "currency_code" to memCurrency,
@@ -1787,7 +1789,8 @@ class FirebaseAuthService(
             val rawContribution = parseSafeDouble(
                 rawItem["contributionAmount"] ?: rawItem["amount"] ?: rawItem["contribution"] ?: rawItem["price"] ?: rawItem["cost"]
             )
-            val mContribution = if (rawContribution > 0.0) {
+            val mContributionFixed = parseSafeBoolean(rawItem["contributionFixed"])
+            val mContribution = if (mContributionFixed || rawContribution > 0.0) {
                 rawContribution
             } else if (matchedPlatformPrice != null && matchedPlatformPrice.pricePerUser > 0.0) {
                 matchedPlatformPrice.pricePerUser
@@ -1904,6 +1907,7 @@ class FirebaseAuthService(
                 alarmUnit = mAlarmUnit,
                 alarmDaysBefore = mAlarmDaysBefore,
                 contributionAmount = mContribution,
+                contributionFixed = mContributionFixed,
                 currency = mCurrency,
                 isPaidThisMonth = finalPaid,
                 isPendingPayment = finalPendingPayment,
@@ -2039,7 +2043,7 @@ class FirebaseAuthService(
                         CurrencyManager.findCurrency(sub.currency).code
                     }
                 }
-                val resolvedContribution = if (m.contributionAmount > 0.0) {
+                val resolvedContribution = if (m.contributionFixed || m.contributionAmount > 0.0) {
                     m.contributionAmount
                 } else if (matchedPlatformPrice != null && matchedPlatformPrice.pricePerUser > 0.0) {
                     matchedPlatformPrice.pricePerUser
@@ -2162,6 +2166,7 @@ class FirebaseAuthService(
                                                         memberContact = (rm["memberContact"] as? String)?.trim().orEmpty(),
                                                         joinedDate = mJoinedDate,
                                                         contributionAmount = (rm["contributionAmount"] as? Number)?.toDouble() ?: (rm["amount"] as? Number)?.toDouble() ?: 0.0,
+                                                        contributionFixed = parseSafeBoolean(rm["contributionFixed"]),
                                                         isPaidThisMonth = isPaid,
                                                         isPendingPayment = isPending,
                                                         isPendingRemoval = parseSafeBoolean(rm["isPendingRemoval"]),

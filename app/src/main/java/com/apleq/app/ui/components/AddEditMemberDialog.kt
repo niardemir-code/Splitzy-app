@@ -146,7 +146,7 @@ fun AddEditMemberDialog(
         mutableStateOf(
             // Solo se rellena solo si el miembro ya tenía importe, o si su plataforma de
             // compartición tiene precio propio. Si no, se deja vacío: lo decide el gestor.
-            if (memberToEdit != null && memberToEdit.contributionAmount > 0.0) {
+            if (memberToEdit != null && (memberToEdit.contributionAmount > 0.0 || memberToEdit.contributionFixed)) {
                 String.format(Locale.US, "%.2f", memberToEdit.contributionAmount)
             } else if (initialMatchedPlatformPrice != null && initialMatchedPlatformPrice.pricePerUser > 0.0) {
                 String.format(Locale.US, "%.2f", initialMatchedPlatformPrice.pricePerUser)
@@ -1312,7 +1312,11 @@ fun AddEditMemberDialog(
                                 nameError = true
                                 return@Button
                             }
-                            val amount = contributionText.replace(',', '.').toDoubleOrNull() ?: 0.0
+                            val parsedAmount = contributionText.trim().replace(',', '.').toDoubleOrNull()
+                            val amount = parsedAmount ?: 0.0
+                            // Campo vacío = sin importe (se usa el reparto por defecto).
+                            // Cualquier número escrito, incluido 0, queda fijado.
+                            val amountFixed = parsedAmount != null
                             val isoJoined = isoDateFormat.format(Date(joinedDateTimestamp))
                             val isoNextPayment = isoDateFormat.format(Date(nextPaymentDateTimestamp))
 
@@ -1335,6 +1339,7 @@ fun AddEditMemberDialog(
                                 alarmUnit = alarmUnit,
                                 alarmDaysBefore = if (alarmUnit == "days") alarmValue else 0,
                                 contributionAmount = amount,
+                                contributionFixed = amountFixed,
                                 currency = selectedCurrencyCode,
                                 isPaidThisMonth = !isPendingPayment,
                                 isPendingPayment = isPendingPayment,
