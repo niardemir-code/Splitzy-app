@@ -36,6 +36,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.apleq.app.data.util.evaluatePassword
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
@@ -2542,6 +2543,7 @@ class FirebaseAuthService(
                         )
                     },
                     "createdAtMs" to System.currentTimeMillis(),
+                    "createdAt" to FieldValue.serverTimestamp(),
                     "status" to "open",
                     "platform" to "android"
                 )
