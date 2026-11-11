@@ -663,12 +663,11 @@ fun AddEditSubscriptionDialog(
                             onValueChange = {
                                 billingDayText = it.filter { ch -> ch.isDigit() }.take(2)
                             },
-                            label = { Text(I18n.billingDayFieldLabelShort) },
-                            placeholder = { Text(I18n.billingDayPlaceholderShort) },
-                            leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
+                            label = { Text(I18n.billingDayPlaceholderShort, maxLines = 1) },
+                            placeholder = { Text("1-31", maxLines = 1) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
-                                .weight(0.40f)
+                                .weight(0.35f)
                                 .testTag("input_billing_day"),
                             singleLine = true,
                             maxLines = 1,
@@ -678,16 +677,16 @@ fun AddEditSubscriptionDialog(
                         ExposedDropdownMenuBox(
                             expanded = monthDropdownExpanded,
                             onExpandedChange = { monthDropdownExpanded = !monthDropdownExpanded },
-                            modifier = Modifier.weight(0.60f)
+                            modifier = Modifier.weight(0.65f)
                         ) {
                             OutlinedTextField(
                                 value = if (billingMonth != null) I18n.getMonthName(billingMonth!!) else "",
                                 onValueChange = {},
                                 readOnly = true,
                                 label = {
-                                    Text(I18n.billingMonthFieldLabel(billingPeriod))
+                                    Text(I18n.billingMonthFieldLabel(billingPeriod), maxLines = 1)
                                 },
-                                placeholder = { Text(I18n.selectMonthPlaceholder) },
+                                placeholder = { Text(I18n.selectMonthPlaceholder, maxLines = 1) },
                                 trailingIcon = {
                                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = monthDropdownExpanded)
                                 },

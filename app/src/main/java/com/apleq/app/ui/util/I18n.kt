@@ -2046,9 +2046,9 @@ object I18n {
 
     fun billingMonthFieldLabel(period: BillingPeriod): String = when (period) {
         BillingPeriod.YEARLY -> when {
-            isSpanish -> "Mes renovación"
-            isCatalan -> "Mes de renovació"
-            else -> "Renewal month"
+            isSpanish -> "Mes"
+            isCatalan -> "Mes"
+            else -> "Month"
         }
         BillingPeriod.SEMI_ANNUAL, BillingPeriod.QUARTERLY -> when {
             isSpanish -> "Mes inicio"
