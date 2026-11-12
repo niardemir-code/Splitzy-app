@@ -261,6 +261,48 @@ object I18n {
         else -> "Sort by"
     }
 
+    fun pendingRemovalBanner(count: Int): String = when {
+        isSpanish -> if (count == 1) "1 usuario pendiente de eliminar" else "$count usuarios pendientes de eliminar"
+        isCatalan -> if (count == 1) "1 usuari pendent d'eliminar" else "$count usuaris pendents d'eliminar"
+        else -> if (count == 1) "1 user pending removal" else "$count users pending removal"
+    }
+
+    val pendingRemovalSee: String get() = when {
+        isSpanish -> "Ver"
+        isCatalan -> "Veure"
+        else -> "View"
+    }
+
+    val pendingRemovalDialogTitle: String get() = when {
+        isSpanish -> "Pendientes de eliminar"
+        isCatalan -> "Pendents d'eliminar"
+        else -> "Pending removal"
+    }
+
+    val pendingRemovalDialogDesc: String get() = when {
+        isSpanish -> "Usuarios que has marcado para quitar de sus suscripciones. Al eliminarlos desaparecen de la suscripción."
+        isCatalan -> "Usuaris que has marcat per treure de les seves subscripcions. En eliminar-los desapareixen de la subscripció."
+        else -> "Users you marked to remove from their subscriptions. Removing them takes them out of the subscription."
+    }
+
+    val pendingRemovalDeleteAll: String get() = when {
+        isSpanish -> "Eliminar todos"
+        isCatalan -> "Eliminar tots"
+        else -> "Remove all"
+    }
+
+    fun pendingRemovalConfirm(name: String, subscription: String): String = when {
+        isSpanish -> "¿Eliminar a $name de $subscription?"
+        isCatalan -> "Eliminar $name de $subscription?"
+        else -> "Remove $name from $subscription?"
+    }
+
+    fun pendingRemovalConfirmAll(count: Int): String = when {
+        isSpanish -> "¿Eliminar a los $count usuarios pendientes?"
+        isCatalan -> "Eliminar els $count usuaris pendents?"
+        else -> "Remove all $count pending users?"
+    }
+
     val sortName: String get() = when {
         isSpanish -> "Nombre"
         isCatalan -> "Nom"

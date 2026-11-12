@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
@@ -56,8 +55,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -102,6 +99,10 @@ import com.apleq.app.ui.components.ChatListDialog
 import com.apleq.app.ui.components.FinancialSummaryCard
 import com.apleq.app.ui.components.JoinGroupDialog
 import com.apleq.app.ui.components.NotificationsDialog
+import androidx.compose.material.icons.filled.PersonRemove
+import com.apleq.app.ui.components.ListFilterBar
+import com.apleq.app.ui.components.PendingRemovalDialog
+import com.apleq.app.ui.components.PendingRemovalItem
 import com.apleq.app.ui.components.PlatformIconBadge
 import com.apleq.app.ui.components.ReminderMessageDialog
 import com.apleq.app.ui.components.SplitzyLogo
@@ -156,6 +157,14 @@ fun HomeScreen(
     var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
     var showJoinDialog by remember { mutableStateOf(false) }
     var showNotificationsDialog by remember { mutableStateOf(false) }
+    var showPendingRemovalDialog by remember { mutableStateOf(false) }
+    // Miembros marcados «pendiente de eliminar» en TODAS mis suscripciones (no depende de los filtros).
+    val pendingRemovalItems = allSubscriptions.flatMap { sw ->
+        val subName = sw.subscription.platformName +
+            (if (sw.subscription.customPlanName.isNotBlank() && !sw.subscription.customPlanName.equals(sw.subscription.platformName, ignoreCase = true))
+                " · ${sw.subscription.customPlanName}" else "")
+        sw.members.filter { it.isPendingRemoval }.map { PendingRemovalItem(subName, it) }
+    }
     val bellRequested by com.apleq.app.ui.util.BellRequest.pending.collectAsStateWithLifecycle()
     LaunchedEffect(bellRequested) {
         if (bellRequested) {
@@ -448,6 +457,42 @@ fun HomeScreen(
                 FinancialSummaryCard(overview = financialOverview)
             }
 
+            // 1b. Aviso de miembros pendientes de eliminar
+            if (pendingRemovalItems.isNotEmpty()) {
+                item {
+                    androidx.compose.material3.Surface(
+                        onClick = { showPendingRemovalDialog = true },
+                        shape = RoundedCornerShape(14.dp),
+                        color = Color(0xFFFFE4E6),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PersonRemove,
+                                contentDescription = null,
+                                tint = Color(0xFFE11D48),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = I18n.pendingRemovalBanner(pendingRemovalItems.size),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = Color(0xFF991B1B),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = I18n.pendingRemovalSee,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = Color(0xFFE11D48)
+                            )
+                        }
+                    }
+                }
+            }
+
             // 2. Search & Category Filters
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -491,92 +536,13 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Category Chips
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        rawCategories.forEach { category ->
-                            val isSelected = selectedCategory == category
-                            val displayLabel = if (category == "Todas") I18n.filterAll else I18n.getCategoryName(category)
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { viewModel.setSelectedCategory(category) },
-                                label = { Text(displayLabel) },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Sorting Options Chips
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.FilterList,
-                                    contentDescription = I18n.sortBy,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "${I18n.sortBy}:",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-                        com.apleq.app.ui.viewmodel.SubscriptionSortOrder.values().forEach { order ->
-                            val isSelected = sortOrder == order
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { viewModel.setSortOrder(order) },
-                                label = {
-                                    Text(
-                                        text = order.localizedChipText,
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                        )
-                                    )
-                                },
-                                leadingIcon = if (isSelected) {
-                                    {
-                                        Icon(
-                                            imageVector = Icons.Default.Check,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                    }
-                                } else null,
-                                shape = RoundedCornerShape(12.dp),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            )
-                        }
-                    }
+                    ListFilterBar(
+                        categories = rawCategories,
+                        selectedCategory = selectedCategory,
+                        onCategorySelected = { viewModel.setSelectedCategory(it) },
+                        sortOrder = sortOrder,
+                        onSortSelected = { viewModel.setSortOrder(it) }
+                    )
                 }
             }
 
@@ -1344,6 +1310,15 @@ fun HomeScreen(
                     Text(I18n.cancel)
                 }
             }
+        )
+    }
+
+    if (showPendingRemovalDialog) {
+        PendingRemovalDialog(
+            items = pendingRemovalItems,
+            onDelete = { viewModel.deleteMember(it) },
+            onDeleteAll = { list -> list.forEach { viewModel.deleteMember(it) } },
+            onDismiss = { showPendingRemovalDialog = false }
         )
     }
 
