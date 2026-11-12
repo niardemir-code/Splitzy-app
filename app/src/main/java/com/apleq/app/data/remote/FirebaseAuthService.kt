@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.withLock
 
 
 sealed class AuthState {
@@ -598,11 +599,34 @@ class FirebaseAuthService(
         }
     }
 
+    private val syncToCloudMutex = kotlinx.coroutines.sync.Mutex()
+    @Volatile private var syncToCloudDirty = false
+    @Volatile private var lastSyncToCloudResult = true
+
+    /** Sube todo a la nube. Si ya hay una subida en curso, no lanza otra en paralelo: la
+     *  de curso repetirá una sola vez al acabar, y esta llamada espera a que termine. */
+    suspend fun syncToCloud(): Boolean {
+        if (syncToCloudMutex.isLocked) {
+            syncToCloudDirty = true
+            syncToCloudMutex.withLock { }
+            return lastSyncToCloudResult
+        }
+        return syncToCloudMutex.withLock {
+            var ok: Boolean
+            do {
+                syncToCloudDirty = false
+                ok = syncToCloudInternal()
+            } while (syncToCloudDirty)
+            lastSyncToCloudResult = ok
+            ok
+        }
+    }
+
     /**
      * Sube todos los datos locales a Firestore de manera limpia y unificada en users/{uid}/subscriptions/{sub.id}
      * y en la subcolección granular users/{uid}/subscriptions/{sub.id}/members/{member.id}
      */
-    suspend fun syncToCloud(): Boolean = withContext(Dispatchers.IO) {
+    private suspend fun syncToCloudInternal(): Boolean = withContext(Dispatchers.IO) {
         val user = auth?.currentUser ?: return@withContext false
         val db = firestore ?: return@withContext false
         _isSyncing.value = true

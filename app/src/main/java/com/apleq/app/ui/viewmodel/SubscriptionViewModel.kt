@@ -412,8 +412,9 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             val totalMembers = subs.sumOf { it.members.size }
             val pendingMembersCount = subs.sumOf { it.pendingMembersCount }
             val pendingAmount = subs.sumOf { subWithMembers ->
+                val prices = subWithMembers.platformPrices
                 subWithMembers.members.filter { !it.isPaidThisMonth || it.isPendingPayment }.sumOf { member ->
-                    val pPricing = subWithMembers.platformPrices.find { it.platformName.equals(member.sharingPlatform, ignoreCase = true) }
+                    val pPricing = prices.find { it.platformName.equals(member.sharingPlatform, ignoreCase = true) }
                     val amount = if (member.contributionFixed || member.contributionAmount > 0.0) {
                         member.contributionAmount
                     } else if (pPricing != null && pPricing.pricePerUser > 0) {

@@ -159,12 +159,12 @@ fun HomeScreen(
     var showNotificationsDialog by remember { mutableStateOf(false) }
     var showPendingRemovalDialog by remember { mutableStateOf(false) }
     // Miembros marcados «pendiente de eliminar» en TODAS mis suscripciones (no depende de los filtros).
-    val pendingRemovalItems = allSubscriptions.flatMap { sw ->
+    val pendingRemovalItems = remember(allSubscriptions) { allSubscriptions.flatMap { sw ->
         val subName = sw.subscription.platformName +
             (if (sw.subscription.customPlanName.isNotBlank() && !sw.subscription.customPlanName.equals(sw.subscription.platformName, ignoreCase = true))
                 " · ${sw.subscription.customPlanName}" else "")
         sw.members.filter { it.isPendingRemoval }.map { PendingRemovalItem(subName, it) }
-    }
+    } }
     val bellRequested by com.apleq.app.ui.util.BellRequest.pending.collectAsStateWithLifecycle()
     LaunchedEffect(bellRequested) {
         if (bellRequested) {

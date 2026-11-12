@@ -114,6 +114,9 @@ fun SubscriptionCard(
     val netBalance = subscriptionWithMembers.netBalance
     val isProfit = subscriptionWithMembers.isNetProfit
     val period = subscriptionWithMembers.billingPeriodObj
+    val sortedMembers = remember(members) {
+        members.sortedWith(compareBy(nullsLast<String>()) { m -> m.nextPaymentDate.takeIf { it.isNotBlank() } })
+    }
 
     val hasAnyUnreadChat = remember(members, unreadChatIdsForOwner, currentUid, sub.id) {
         members.any { m ->
@@ -476,7 +479,7 @@ fun SubscriptionCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    members.sortedWith(compareBy(nullsLast<String>()) { m -> m.nextPaymentDate.takeIf { it.isNotBlank() } }).forEach { member ->
+                    sortedMembers.forEach { member ->
                         val chipBgColor = when {
                             member.isPendingRemoval -> Color(0xFFFFE4E6)
                             member.isPendingRegistration -> Color(0xFFDBEAFE)

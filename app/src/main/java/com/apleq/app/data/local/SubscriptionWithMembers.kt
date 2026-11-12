@@ -30,30 +30,33 @@ data class SubscriptionWithMembers(
         )
 
     val totalContributed: Double
-        get() = members.sumOf { member ->
-            val pPricing = platformPrices.find { it.platformName.equals(member.sharingPlatform, ignoreCase = true) }
-            val amount = if (member.contributionFixed || member.contributionAmount > 0.0) {
-                member.contributionAmount
-            } else if (pPricing != null && pPricing.pricePerUser > 0) {
-                pPricing.pricePerUser
-            } else {
-                0.0
-            }
-            val curr = if (member.currency.isNotBlank()) member.currency else (pPricing?.currency ?: "EUR")
-            val eurAmount = CurrencyManager.convertToEur(amount, curr)
-            if (member.paymentFrequencyUnit.isNotBlank()) {
-                val freqValue = if (member.paymentFrequencyValue > 0) member.paymentFrequencyValue else 1
-                when (member.paymentFrequencyUnit) {
-                    "months" -> eurAmount / freqValue
-                    "years" -> eurAmount / (freqValue * 12.0)
-                    "weeks" -> eurAmount * (52.0 / 12.0) / freqValue
-                    "days" -> eurAmount * (365.25 / 12.0) / freqValue
-                    else -> pPricing?.billingPeriodObj?.toMonthlyCost(eurAmount) ?: eurAmount
+        get() {
+            val prices = platformPrices
+            return members.sumOf { member ->
+                val pPricing = prices.find { it.platformName.equals(member.sharingPlatform, ignoreCase = true) }
+                val amount = if (member.contributionFixed || member.contributionAmount > 0.0) {
+                    member.contributionAmount
+                } else if (pPricing != null && pPricing.pricePerUser > 0) {
+                    pPricing.pricePerUser
+                } else {
+                    0.0
                 }
-            } else if (pPricing != null) {
-                pPricing.billingPeriodObj.toMonthlyCost(eurAmount)
-            } else {
-                eurAmount
+                val curr = if (member.currency.isNotBlank()) member.currency else (pPricing?.currency ?: "EUR")
+                val eurAmount = CurrencyManager.convertToEur(amount, curr)
+                if (member.paymentFrequencyUnit.isNotBlank()) {
+                    val freqValue = if (member.paymentFrequencyValue > 0) member.paymentFrequencyValue else 1
+                    when (member.paymentFrequencyUnit) {
+                        "months" -> eurAmount / freqValue
+                        "years" -> eurAmount / (freqValue * 12.0)
+                        "weeks" -> eurAmount * (52.0 / 12.0) / freqValue
+                        "days" -> eurAmount * (365.25 / 12.0) / freqValue
+                        else -> pPricing?.billingPeriodObj?.toMonthlyCost(eurAmount) ?: eurAmount
+                    }
+                } else if (pPricing != null) {
+                    pPricing.billingPeriodObj.toMonthlyCost(eurAmount)
+                } else {
+                    eurAmount
+                }
             }
         }
 

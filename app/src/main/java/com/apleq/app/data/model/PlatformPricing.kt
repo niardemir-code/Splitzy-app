@@ -36,8 +36,19 @@ object PlatformPricingHelper {
         "Directo / Familia"
     )
 
+    // Memoria de resultados: el mismo texto de precios se interpreta muchas veces por pantalla.
+    private val parseCache = java.util.concurrent.ConcurrentHashMap<String, List<PlatformPriceItem>>()
+
     fun parse(raw: String): List<PlatformPriceItem> {
         if (raw.isBlank()) return emptyList()
+        parseCache[raw]?.let { return it }
+        val result = parseUncached(raw)
+        if (parseCache.size > 256) parseCache.clear()
+        parseCache[raw] = result
+        return result
+    }
+
+    private fun parseUncached(raw: String): List<PlatformPriceItem> {
         return raw.split("|").mapNotNull { entry ->
             val parts = entry.split(":")
             if (parts.size >= 2) {
