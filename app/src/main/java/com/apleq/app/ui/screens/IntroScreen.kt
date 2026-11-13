@@ -1,5 +1,9 @@
 package com.apleq.app.ui.screens
 
+import android.net.Uri
+import android.view.Gravity
+import android.widget.FrameLayout
+import android.widget.VideoView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,24 +33,74 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.apleq.app.ui.components.SplitzyLogo
 import com.apleq.app.ui.theme.Quicksand
 import com.apleq.app.ui.util.I18n
 import kotlinx.coroutines.launch
 
 private data class IntroPage(
+    /** Nombre del vídeo en res/raw (sin extensión). */
+    val videoName: String,
+    /** Icono que se muestra si el vídeo todavía no existe. */
     val icon: ImageVector,
     val title: String,
     val text: String
 )
+
+/** Vídeo en bucle y sin sonido. Solo se reproduce cuando su diapositiva es la visible. */
+@Composable
+private fun IntroVideo(
+    videoRes: Int,
+    isActive: Boolean,
+    modifier: Modifier = Modifier
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { ctx ->
+            val frame = FrameLayout(ctx)
+            val video = VideoView(ctx).apply {
+                setVideoURI(Uri.parse("android.resource://${ctx.packageName}/$videoRes"))
+                setOnPreparedListener { player ->
+                    player.isLooping = true
+                    player.setVolume(0f, 0f)
+                }
+            }
+            // El VideoView mantiene la proporción del vídeo; el FrameLayout lo centra.
+            frame.addView(
+                video,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    Gravity.CENTER
+                )
+            )
+            frame
+        },
+        update = { frame ->
+            val video = frame.getChildAt(0) as VideoView
+            if (isActive) {
+                if (!video.isPlaying) video.start()
+            } else {
+                if (video.isPlaying) video.pause()
+                video.seekTo(0)
+            }
+        },
+        onRelease = { frame ->
+            (frame.getChildAt(0) as? VideoView)?.stopPlayback()
+        }
+    )
+}
 
 /** Presentación de la app, antes de la pantalla de acceso. Se muestra una sola vez. */
 @Composable
@@ -55,14 +109,15 @@ fun IntroScreen(
     modifier: Modifier = Modifier
 ) {
     val pages = listOf(
-        IntroPage(Icons.Default.Savings, I18n.introTitle1, I18n.introText1),
-        IntroPage(Icons.Default.CalendarMonth, I18n.introTitle2, I18n.introText2),
-        IntroPage(Icons.Default.Notifications, I18n.introTitle3, I18n.introText3),
-        IntroPage(Icons.Default.GroupAdd, I18n.introTitle4, I18n.introText4)
+        IntroPage("intro_1", Icons.Default.Savings, I18n.introTitle1, I18n.introText1),
+        IntroPage("intro_2", Icons.Default.CalendarMonth, I18n.introTitle2, I18n.introText2),
+        IntroPage("intro_3", Icons.Default.Notifications, I18n.introTitle3, I18n.introText3),
+        IntroPage("intro_4", Icons.Default.GroupAdd, I18n.introTitle4, I18n.introText4)
     )
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
     val isLast = pagerState.currentPage == pages.size - 1
+    val context = LocalContext.current
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -106,41 +161,61 @@ fun IntroScreen(
                     .fillMaxWidth()
             ) { index ->
                 val page = pages[index]
+                // 0 si el vídeo todavía no está en res/raw.
+                val videoRes = remember(page.videoName) {
+                    context.resources.getIdentifier(page.videoName, "raw", context.packageName)
+                }
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.size(140.dp)
+                    // Zona del vídeo: ocupa el espacio sobrante.
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 16.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = page.icon,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(64.dp)
+                        if (videoRes != 0) {
+                            IntroVideo(
+                                videoRes = videoRes,
+                                isActive = pagerState.currentPage == index,
+                                modifier = Modifier.fillMaxSize()
                             )
+                        } else {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                modifier = Modifier.size(140.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = page.icon,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(64.dp)
+                                    )
+                                }
+                            }
                         }
                     }
-                    Spacer(modifier = Modifier.height(32.dp))
                     Text(
                         text = page.title,
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = page.text,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
