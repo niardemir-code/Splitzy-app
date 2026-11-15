@@ -136,6 +136,24 @@ fun HomeScreen(
     }
 
     val allSubscriptions by viewModel.allSubscriptions.collectAsStateWithLifecycle()
+    // Precarga en segundo plano las imágenes personalizadas para que las tarjetas las tengan ya en memoria.
+    val preloadContext = androidx.compose.ui.platform.LocalContext.current
+    androidx.compose.runtime.LaunchedEffect(allSubscriptions.map { it.subscription.customImageUri }) {
+        val loader = coil.Coil.imageLoader(preloadContext)
+        allSubscriptions.forEach { sw ->
+            val uri = sw.subscription.customImageUri
+            if (uri.startsWith("http://") || uri.startsWith("https://")) {
+                loader.enqueue(
+                    coil.request.ImageRequest.Builder(preloadContext)
+                        .data(uri)
+                        .memoryCacheKey(uri)
+                        .diskCacheKey(uri)
+                        .size(256)
+                        .build()
+                )
+            }
+        }
+    }
     val filteredSubscriptions by viewModel.filteredSubscriptions.collectAsStateWithLifecycle()
     val participatingGroups by viewModel.participatingGroups.collectAsStateWithLifecycle()
     val financialOverview by viewModel.financialOverview.collectAsStateWithLifecycle()

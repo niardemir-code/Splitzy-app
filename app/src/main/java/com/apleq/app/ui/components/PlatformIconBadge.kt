@@ -137,7 +137,9 @@ fun PlatformIconBadge(
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(imageModel)
-                        .crossfade(true)
+                        .crossfade(false)
+                        .memoryCacheKey(customImageUri.takeIf { it.length < 512 })
+                        .diskCacheKey(customImageUri.takeIf { it.length < 512 })
                         .build(),
                     contentDescription = platformName,
                     contentScale = ContentScale.Crop,
