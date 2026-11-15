@@ -99,8 +99,11 @@ import com.apleq.app.ui.components.ChatListDialog
 import com.apleq.app.ui.components.FinancialSummaryCard
 import com.apleq.app.ui.components.JoinGroupDialog
 import com.apleq.app.ui.components.NotificationsDialog
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.PersonRemove
 import com.apleq.app.ui.components.ListFilterBar
+import com.apleq.app.ui.components.PendingPaymentDialog
+import com.apleq.app.ui.components.PendingPaymentItem
 import com.apleq.app.ui.components.PendingRemovalDialog
 import com.apleq.app.ui.components.PendingRemovalItem
 import com.apleq.app.ui.components.PlatformIconBadge
@@ -157,7 +160,18 @@ fun HomeScreen(
     var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
     var showJoinDialog by remember { mutableStateOf(false) }
     var showNotificationsDialog by remember { mutableStateOf(false) }
+    var showPendingPaymentDialog by remember { mutableStateOf(false) }
     var showPendingRemovalDialog by remember { mutableStateOf(false) }
+    val pendingPaymentItems = remember(allSubscriptions) {
+        allSubscriptions.flatMap { sw ->
+            val subName = sw.subscription.platformName +
+                (if (sw.subscription.customPlanName.isNotBlank() && !sw.subscription.customPlanName.equals(sw.subscription.platformName, ignoreCase = true))
+                    " · ${sw.subscription.customPlanName}" else "")
+            sw.members
+                .filter { it.isPendingPayment && !it.isPendingRemoval && !it.isPendingRegistration }
+                .map { PendingPaymentItem(subName, it) }
+        }
+    }
     // Miembros marcados «pendiente de eliminar» en TODAS mis suscripciones (no depende de los filtros).
     val pendingRemovalItems = remember(allSubscriptions) { allSubscriptions.flatMap { sw ->
         val subName = sw.subscription.platformName +
@@ -455,6 +469,42 @@ fun HomeScreen(
             // 1. Financial Overview Summary Card
             item {
                 FinancialSummaryCard(overview = financialOverview)
+            }
+
+            // 1a. Aviso de miembros pendientes de pago
+            if (pendingPaymentItems.isNotEmpty()) {
+                item {
+                    androidx.compose.material3.Surface(
+                        onClick = { showPendingPaymentDialog = true },
+                        shape = RoundedCornerShape(14.dp),
+                        color = Color(0xFFFEF3C7),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Payments,
+                                contentDescription = null,
+                                tint = Color(0xFFD97706),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = I18n.pendingPaymentBanner(pendingPaymentItems.size),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = Color(0xFF92400E),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = I18n.pendingRemovalSee,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = Color(0xFFD97706)
+                            )
+                        }
+                    }
+                }
             }
 
             // 1b. Aviso de miembros pendientes de eliminar
@@ -1310,6 +1360,15 @@ fun HomeScreen(
                     Text(I18n.cancel)
                 }
             }
+        )
+    }
+
+    if (showPendingPaymentDialog) {
+        PendingPaymentDialog(
+            items = pendingPaymentItems,
+            onSettle = { viewModel.settleMembersDebt(listOf(it)) },
+            onSettleAll = { list -> viewModel.settleMembersDebt(list) },
+            onDismiss = { showPendingPaymentDialog = false }
         )
     }
 

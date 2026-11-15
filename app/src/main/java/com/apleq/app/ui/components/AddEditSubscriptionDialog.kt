@@ -210,6 +210,9 @@ fun AddEditSubscriptionDialog(
     var freeSlotsText by remember {
         mutableStateOf(subscriptionToEdit?.freeSlots?.toString() ?: "0")
     }
+    var trackPendingPayments by remember {
+        mutableStateOf(subscriptionToEdit?.trackPendingPayments ?: false)
+    }
     var billingDayText by remember {
         mutableStateOf(
             if (subscriptionToEdit != null) {
@@ -753,6 +756,48 @@ fun AddEditSubscriptionDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // 6.3. Controlar pagos pendientes
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = I18n.trackPendingPaymentsTitle,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = I18n.trackPendingPaymentsDesc,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(
+                            checked = trackPendingPayments,
+                            onCheckedChange = { trackPendingPayments = it },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            modifier = Modifier.testTag("switch_track_pending_payments")
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 // 6.5. Alarma de aviso para el cobro de la suscripción
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -1219,6 +1264,7 @@ fun AddEditSubscriptionDialog(
                                 billingPeriod = billingPeriod.key,
                                 billingDay = billingDay,
                                 freeSlots = freeSlots,
+                                trackPendingPayments = trackPendingPayments,
                                 billingMonth = billingMonth ?: 1,
                                 currency = selectedCurrency.code,
                                 defaultContributionPerUser = defaultContribution,

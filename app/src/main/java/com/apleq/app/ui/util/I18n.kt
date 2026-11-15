@@ -303,6 +303,54 @@ object I18n {
         else -> "Remove all $count pending users?"
     }
 
+    val trackPendingPaymentsTitle: String get() = when {
+        isSpanish -> "Controlar pagos pendientes"
+        isCatalan -> "Controlar pagaments pendents"
+        else -> "Track pending payments"
+    }
+
+    val trackPendingPaymentsDesc: String get() = when {
+        isSpanish -> "Si está desactivado, al llegar la fecha de cobro los usuarios no se marcan como pendientes de pago (útil si paga la plataforma de compartición)."
+        isCatalan -> "Si està desactivat, en arribar la data de cobrament els usuaris no es marquen com a pendents de pagament (útil si paga la plataforma de compartició)."
+        else -> "When off, members are not marked as pending when the billing date arrives (useful if the sharing platform pays you automatically)."
+    }
+
+    fun pendingPaymentBanner(count: Int): String = when {
+        isSpanish -> if (count == 1) "1 pago pendiente" else "$count pagos pendientes"
+        isCatalan -> if (count == 1) "1 pagament pendent" else "$count pagaments pendents"
+        else -> if (count == 1) "1 pending payment" else "$count pending payments"
+    }
+
+    val pendingPaymentDialogTitle: String get() = when {
+        isSpanish -> "Pagos pendientes"
+        isCatalan -> "Pagaments pendents"
+        else -> "Pending payments"
+    }
+
+    val pendingPaymentDialogDesc: String get() = when {
+        isSpanish -> "Usuarios que todavía no te han pagado. Márcalos como pagados cuando hayas cobrado."
+        isCatalan -> "Usuaris que encara no t'han pagat. Marca'ls com a pagats quan hagis cobrat."
+        else -> "Users who haven't paid you yet. Mark them as paid once you've been paid."
+    }
+
+    val pendingPaymentMarkPaid: String get() = when {
+        isSpanish -> "Pagado"
+        isCatalan -> "Pagat"
+        else -> "Paid"
+    }
+
+    val pendingPaymentMarkAllPaid: String get() = when {
+        isSpanish -> "Todos pagados"
+        isCatalan -> "Tots pagats"
+        else -> "All paid"
+    }
+
+    fun pendingPaymentCycles(count: Int): String = when {
+        isSpanish -> "$count ciclos sin pagar"
+        isCatalan -> "$count cicles sense pagar"
+        else -> "$count unpaid cycles"
+    }
+
     val sortName: String get() = when {
         isSpanish -> "Nombre"
         isCatalan -> "Nom"

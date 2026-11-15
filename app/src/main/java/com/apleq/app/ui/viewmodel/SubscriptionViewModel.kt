@@ -668,6 +668,8 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                 val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
 
                 val allMembers = repository.getAllMembersDirect()
+                val trackBySub = repository.getAllSubscriptionsDirect()
+                    .associate { it.id to it.trackPendingPayments }
 
                 allMembers.forEach { member ->
                     if (member.isPendingRemoval) return@forEach
@@ -688,6 +690,13 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
                         todayMillis
                     )
                     val nuevaFecha = isoFormat.format(java.util.Date(newDateMillis))
+
+                    // Suscripción sin control de pagos pendientes: solo avanza la fecha, no marca deuda.
+                    if (trackBySub[member.subscriptionId] != true) {
+                        repository.updateMember(member.copy(nextPaymentDate = nuevaFecha))
+                        changedCount++
+                        return@forEach
+                    }
 
                     // Cuántos ciclos han vencido de golpe (si la app llevaba tiempo sin abrirse).
                     var ciclosVencidos = 0
@@ -932,6 +941,16 @@ class SubscriptionViewModel(application: Application) : AndroidViewModel(applica
             } else {
                 repository.toggleMemberPendingPayment(memberId, isPending)
             }
+            if (authState.value is AuthState.Authenticated) {
+                authService.syncToCloud()
+            }
+        }
+    }
+
+    /** El gestor ha cobrado a todos estos miembros: se salda la deuda de cada uno y se sincroniza una sola vez. */
+    fun settleMembersDebt(members: List<MemberEntity>) {
+        viewModelScope.launch {
+            members.forEach { repository.settleMemberDebt(it.id) }
             if (authState.value is AuthState.Authenticated) {
                 authService.syncToCloud()
             }

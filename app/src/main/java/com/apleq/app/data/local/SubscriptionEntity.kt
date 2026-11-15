@@ -1,5 +1,6 @@
 package com.apleq.app.data.local
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -30,5 +31,7 @@ data class SubscriptionEntity(
     val alarmValue: Int = 3, // Antelación numérica
     val alarmUnit: String = "days", // Unidad de antelación ("days", "same_day", "hours", "weeks", "months")
     val alarmDaysBefore: Int = 3, // Antelación convertida a días enteros
+    @ColumnInfo(defaultValue = "0")
+    val trackPendingPayments: Boolean = false, // true = al llegar la fecha de cobro, el miembro pasa a «pendiente de pago»
     val createdAt: Long = System.currentTimeMillis()
 )
